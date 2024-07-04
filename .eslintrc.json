@@ -1,3 +1,47 @@
 {
-  "extends": "next/core-web-vitals"
+  "env": {
+      "browser": true,
+      "es2021": true
+  },
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+      "ecmaVersion": "latest",
+      "sourceType": "module"
+  },
+  "plugins": [
+      "@typescript-eslint",
+      "import"
+  ],
+  "rules": {
+      // mark error when user use semi colon
+      "semi": [
+          "error",
+          "never"
+      ],
+      "quotes": [
+          "error",
+          "single"
+      ],
+      "no-multiple-empty-lines": [
+          "error",
+          {
+              "max": 1
+          }
+      ],
+      "import/order": [
+          "error",
+          {
+              "groups": [
+                  "builtin", // Módulos internos de Node.js
+                  "external", // Paquetes externos
+                  "internal" // Otras importaciones internas (puedes agregar más grupos si es necesario)
+              ],
+              "alphabetize": {
+                  "order": "asc",
+                  "caseInsensitive": true
+              },
+              "newlines-between": "always"
+          }
+      ]
+  }
 }
