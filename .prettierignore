@@ -1,0 +1,21 @@
+# don't skip the following
+!*.css
+!*.js
+!*.json
+!*.jsx
+!*.ts
+!*.tsx
+!*.yml
+
+# skip the following
+node_modules
+.gitignore
+.prettierignore
+.gitkeep
+*.png
+Dockerfile
+*.md
+.coverage
+coverage
+*.log
+.*

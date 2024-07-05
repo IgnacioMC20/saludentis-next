@@ -28,6 +28,7 @@ jobs:
         run: yarn lint
 
   test:
+    needs: lint
     runs-on: ubuntu-latest
 
     steps:
@@ -42,5 +43,5 @@ jobs:
       - name: Install dependencies
         run: yarn install
 
-    #   - name: Run tests
-        # run: yarn test
+      - name: Run tests
+        run: yarn test
