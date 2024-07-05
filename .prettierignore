@@ -1,21 +1,12 @@
-# don't skip the following
-!*.css
-!*.js
-!*.json
-!*.jsx
-!*.ts
-!*.tsx
-!*.yml
+# Ignore all files outside of the 'src' folder
+/*
+!/src/
 
-# skip the following
-node_modules
-.gitignore
-.prettierignore
-.gitkeep
-*.png
-Dockerfile
-*.md
-.coverage
-coverage
-*.log
-.*
+# Include specific file types inside the 'src' folder
+!/src/**/*.css
+!/src/**/*.js
+!/src/**/*.json
+!/src/**/*.jsx
+!/src/**/*.ts
+!/src/**/*.tsx
+!/src/**/*.yml
