@@ -1,8 +1,8 @@
+import { Card, Grid, Typography } from '@mui/material'
 import { Inter } from 'next/font/google'
 import Head from 'next/head'
-import Image from 'next/image'
 
-import styles from '@/styles/Home.module.css'
+import { Layout } from '@/layout'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -15,9 +15,18 @@ export default function Home() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className={`${styles.main} ${inter.className}`}>
-        Saludentis
-      </main>
+      <Layout>
+        <Card>
+          <Grid container spacing={2} >
+            <Grid item xs={6} display={'flex'} justifyContent={'center'}>
+              <Typography variant='h2'>Paciente Nuevo</Typography>
+            </Grid>
+            <Grid item xs={6} display={'flex'} justifyContent={'center'}>
+              <Typography variant='h2'>Paciente</Typography>
+            </Grid>
+          </Grid>
+        </Card>
+      </Layout>
     </>
   )
 }
