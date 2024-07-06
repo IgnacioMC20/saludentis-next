@@ -110,7 +110,7 @@ export const Navbar = () => {
               src="/image.png"
               width={40}
               height={40}
-              alt="LOGO"
+              alt="LOGOM"
             />
           </Box>
           <Typography
