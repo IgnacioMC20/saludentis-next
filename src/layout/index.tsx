@@ -12,6 +12,7 @@ export const Layout: FC<Props> = ({ children }) => {
             display: 'flex',
             flexDirection: 'column',
             minHeight: '100vh',
+            // height: '100%',
           }}>
             <nav>
                 <Navbar />
