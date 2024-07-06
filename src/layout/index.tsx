@@ -8,18 +8,25 @@ interface Props {
 
 export const Layout: FC<Props> = ({ children }) => {
     return (
-        <>
+        <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            minHeight: '100vh',
+          }}>
             <nav>
                 <Navbar />
             </nav>
 
             <main style={{
-                margin: '80px auto',
-                maxWidth: '1440px',
-                padding: '0px 30px'
+                 flex: 1,
+                 display: 'flex',
+                 flexDirection: 'column',
+                 justifyContent: 'center',
+                 alignItems: 'center',
+                 padding: '0px 30px',
             }}>
                 {children}
             </main>
-        </>
+        </div>
     )
 }
