@@ -22,4 +22,3 @@ jobs:
           if [ "$BRANCH" != "dev" ] && [ "$BRANCH" != "main" ]; then
             echo "Deleting branch $BRANCH"
             git push origin --delete $BRANCH
-         
