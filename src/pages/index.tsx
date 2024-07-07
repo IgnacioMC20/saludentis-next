@@ -1,7 +1,7 @@
 import { Card, Grid } from '@mui/material'
 import Head from 'next/head'
 
-import { PatientSelectCard, NewPatientCard } from '@/components'
+import { PatientSelect, NewPatient } from '@/components'
 import { Layout } from '@/layout'
 
 export default function Home() {
@@ -24,10 +24,10 @@ export default function Home() {
         }}>
           <Grid container flexDirection={'row'} display={'flex'}>
             <Grid item xs={12} sm={6} display={'flex'} justifyContent={'center'} alignItems={'center'} flexDirection={'column'}>
-              <NewPatientCard />
+              <NewPatient />
             </Grid>
             <Grid item xs={12} sm={6} display={'flex'} flexDirection={'column'} justifyContent={'center'} padding={0}>
-              <PatientSelectCard />
+              <PatientSelect />
             </Grid>
           </Grid>
         </Card>
