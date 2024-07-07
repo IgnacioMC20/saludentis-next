@@ -134,7 +134,7 @@ export const Navbar = () => {
               <Button
                 key={page}
                 onClick={handleCloseNavMenu}
-                sx={{ my: 2, color: 'white', display: 'block', backgroundColor: 'transparent', "&:hover":{color:'white', border:'1px solid white'} }}
+                sx={{ my: 2, color: 'white', display: 'block', backgroundColor: 'transparent', '&:hover':{color:'white', border:'1px solid white'}}}
               >
                 <Typography
                   variant='h6'
