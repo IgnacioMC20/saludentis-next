@@ -1,23 +1,23 @@
-import { render, screen } from '@testing-library/react';
-import { Navbar } from '@/components';
-import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { ThemeProvider, createTheme } from '@mui/material/styles'
+import { render, screen } from '@testing-library/react'
+
+import { Navbar } from '@/components'
 
 describe('Navbar component', () => {
     it('renders Navbar component', () => {
         
-        const theme = createTheme();
+        const theme = createTheme()
         
         render(
             <ThemeProvider theme={theme}>
                 <Navbar />
             </ThemeProvider>
-        );
+        )
         
-        const logo = screen.getByAltText('LOGO');
-        expect(logo).toBeInTheDocument();
+        const logo = screen.getByAltText('LOGO')
+        expect(logo).toBeInTheDocument()
 
-
-        const logoText = screen.getAllByText(/SALUDENTIS/i);
-        expect(logoText).toHaveLength(2);
-    });
-});
+        const logoText = screen.getAllByText(/SALUDENTIS/i)
+        expect(logoText).toHaveLength(2)
+    })
+})
