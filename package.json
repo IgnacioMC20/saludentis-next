@@ -10,7 +10,8 @@
     "start": "next start",
     "test": "jest",
     "test:cov": "jest --coverage --verbose",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "prepare": "husky"
   },
   "dependencies": {
     "@emotion/react": "^11.11.4",
