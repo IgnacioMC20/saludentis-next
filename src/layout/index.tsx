@@ -1,6 +1,7 @@
 import React, { FC } from 'react'
 
 import { Navbar } from '@/components'
+import { SideMenu } from '@/components/SideMenu'
 
 interface Props {
     children: React.ReactNode
@@ -17,6 +18,7 @@ export const Layout: FC<Props> = ({ children }) => {
             <nav>
                 <Navbar />
             </nav>
+            <SideMenu/>
 
             <main style={{
                  flex: 1,
