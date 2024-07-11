@@ -15,7 +15,6 @@ import { useContext, useState } from 'react'
 
 import { AuthContext, UIContext } from '@/context'
 const pages = ['Tratamientos', 'Enfermedades', 'Pacientes']
-// const settings = ['Profile', 'Account', 'Dashboard', 'Logout']
 
 export const Navbar = () => {
   const { toggleSideMenu } = useContext(UIContext)
@@ -39,7 +38,7 @@ export const Navbar = () => {
   return (
 
     <AppBar position="static" sx={{ backgroundColor: 'rgb(11, 192, 192)', alignItems: 'center', height: { md: '85px' }, display: 'flex', justifyContent: 'center' }}>
-      <Container maxWidth="xl">
+      <Container maxWidth='xl'>
         <Toolbar disableGutters sx={{ width: '100%', display: 'flex', justifyContent: { xs: 'space-between', md: '' } }}>
           {/* title desktop */}
           <Box sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }}>

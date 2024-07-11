@@ -38,7 +38,7 @@ export const NewPatient = () => {
                     </Grid>
                     <Grid item display={'flex'} justifyContent={'space-evenly'} alignItems={'center'} flexDirection={{ xs: 'column', md: 'row' }} width={'100%'}>
                         <Grid item my={1}>
-                            <Button variant='contained'>
+                            <Button variant='contained' endIcon={<AddCircle />}>
                                 <NextLink href={'/nuevo/nino'} passHref legacyBehavior>
                                     <Link display={'flex'} alignItems={'center'}>
                                         <Typography variant='h6' color={'white'}>Niño</Typography>
