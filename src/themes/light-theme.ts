@@ -67,7 +67,7 @@ export const lightTheme = createTheme({
           boxShadow: 'none',
           borderRadius: 10,
           padding: '1rem',
-          minWidth: '100px',
+          minWidth: '120px',
           ':hover': {
             backgroundColor: theme.robinEggBlue,
             color: theme.white,
