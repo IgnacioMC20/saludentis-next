@@ -1,4 +1,4 @@
-// import Cookies from 'js-cookie'
+import Cookies from 'js-cookie'
 import { useRouter } from 'next/router'
 // import { useSession, signOut } from 'next-auth/react'
 import { FC, useReducer, useEffect } from 'react'
@@ -19,7 +19,8 @@ const AUTH_INITIAL_STATE: AuthState = {
 }
 
 export const AuthProvider: FC<{ children: React.ReactNode }> = ({ children }) => {
-console.log('AuthProvider')
+    console.log('AuthProvider')
+    const router = useRouter()
     const [state, dispatch] = useReducer(authReducer, AUTH_INITIAL_STATE)
     // const router = useRouter()
 
@@ -52,91 +53,45 @@ console.log('AuthProvider')
     // }
 
     // //Methods
-    // const loginUser = async (email: string, password: string): Promise<boolean> => {
-    //     try {
-    //         const data = await tesloApi({
-    //             url: '/user/login',
-    //             data: { email, password },
-    //             method: 'POST'
-    //         })
-    //         const { message, token, user } = await data.json()
-    //         if (message) {
-    //             toast(message, {
-    //                 position: 'top-right',
-    //                 autoClose: 3000,
-    //                 hideProgressBar: false,
-    //                 closeOnClick: false,
-    //                 pauseOnHover: false,
-    //                 draggable: false,
-    //                 theme: 'light',
-    //                 type: 'error',
-    //                 closeButton: false
-    //             })
-    //             return false
-    //         }
-    //         Cookies.set('token', token)
-    //         dispatch({ type: '[Auth] - Login', payload: user })
-    //         return true
-    //     } catch (error) {
-    //         console.log('Error: ', error)
-    //         return false
-    //     }
-    // }
+    const loginUser = async (email: string, password: string): Promise<boolean> => {
+        try {
+            // login
+            console.log('loginUser', { email, password })
+            // promise true
+            return Promise.resolve(true)
+        } catch (error) {
 
-    // const registerUser = async (email: string, password: string, name: string): Promise<boolean> => {
-    //     try {
-    //         const data = await tesloApi({
-    //             url: '/user/register',
-    //             data: { email, password, name },
-    //             method: 'POST'
-    //         })
-    //         const { message, token, user } = await data.json()
-    //         if (message) {
-    //             toast(message, {
-    //                 position: 'top-right',
-    //                 autoClose: 3000,
-    //                 hideProgressBar: false,
-    //                 closeOnClick: false,
-    //                 pauseOnHover: false,
-    //                 draggable: false,
-    //                 theme: 'light',
-    //                 type: 'error',
-    //                 closeButton: false
-    //             })
-    //             return false
-    //         }
-    //         Cookies.set('token', token)
-    //         dispatch({ type: '[Auth] - Login', payload: user })
-    //         return true
-    //     } catch (error) {
-    //         console.log('Error: ', error)
-    //         return false
-    //     }
-    // }
+            toast('Contra o correo erroneos', {
+                position: 'top-right',
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: false,
+                pauseOnHover: false,
+                draggable: false,
+                theme: 'light',
+                type: 'error',
+                closeButton: false
+            })
+            console.log('Error: ', error)
+            return Promise.resolve(false)
+        }
+    }
 
-    // const logoutUser = () => {
-    //     Cookies.remove('cart')
-    //     Cookies.remove('department')
-    //     Cookies.remove('phone')
-    //     Cookies.remove('country')
-    //     Cookies.remove('city')
-    //     Cookies.remove('zipCode')
-    //     Cookies.remove('address')
-    //     Cookies.remove('lastName')
-    //     Cookies.remove('firstName')
-    //     signOut()
-    //     // Cookies.remove('token')
-    //     // router.reload()
-    // }
+    const logoutUser = () => {
+        Cookies.remove('lastName')
+        Cookies.remove('lastName')
+        Cookies.remove('firstName')
+        console.log('logoutUser')
+        router.push('/auth/login')
+    }
 
     return (
         <AuthContext.Provider value={{
             ...state,
 
-            // //Methods
-            // loginUser,
-            // registerUser,
-            // logoutUser
+            //Methods
+            loginUser,
+            logoutUser
         }}>
             {children}
         </AuthContext.Provider>
