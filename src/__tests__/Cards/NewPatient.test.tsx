@@ -17,9 +17,6 @@ describe('NewPatientCard', () => {
       </ThemeProvider>
     )
 
-    const headerElement = screen.getByText('Nuevo')
-    expect(headerElement).toBeInTheDocument()
-
     const niñoButton = screen.getByText('Niño')
     expect(niñoButton).toBeInTheDocument()
 

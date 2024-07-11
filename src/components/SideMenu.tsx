@@ -1,18 +1,10 @@
-import {
-    LoginOutlined,
-    LogoutOutlined,
-    EscalatorWarning,
-    Vaccines,
-    Sick
-} from '@mui/icons-material'
-import {
-    Box, Drawer,
-    List, ListItemButton, ListItemIcon, ListItemText,
-} from '@mui/material'
+import { LoginOutlined, LogoutOutlined, EscalatorWarning, Vaccines, Sick } from '@mui/icons-material'
+import { Box, Drawer, List, ListItemButton, ListItemIcon, ListItemText } from '@mui/material'
 import { useRouter } from 'next/router'
 import { useContext } from 'react'
 
-import { UIContext } from '@/context'
+import { AuthContext, UIContext } from '@/context'
+
 const pages = [
     {
         title: 'Pacientes',
@@ -30,15 +22,13 @@ const pages = [
 
 export const SideMenu = () => {
     const { isMenuOpen, toggleSideMenu } = useContext(UIContext)
+    const { logoutUser } = useContext(AuthContext)
     const isLoggedIn = true
     const router = useRouter()
+
     const navigateTo = (url: string) => {
         toggleSideMenu()
         router.push(url)
-    }
-
-    function logoutUser(): void {
-        throw new Error('Function not implemented.')
     }
 
     return (

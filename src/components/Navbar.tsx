@@ -1,24 +1,25 @@
-import MenuIcon from '@mui/icons-material/Menu'
-import AppBar from '@mui/material/AppBar'
-import Avatar from '@mui/material/Avatar'
-import Box from '@mui/material/Box'
-import Button from '@mui/material/Button'
-import Container from '@mui/material/Container'
-import IconButton from '@mui/material/IconButton'
-import Menu from '@mui/material/Menu'
-import MenuItem from '@mui/material/MenuItem'
-import Toolbar from '@mui/material/Toolbar'
-import Tooltip from '@mui/material/Tooltip'
-import Typography from '@mui/material/Typography'
+import { Logout, Menu as MenuIcon } from '@mui/icons-material'
+import {
+  AppBar,
+  Box,
+  Button,
+  Container,
+  IconButton,
+  Menu,
+  MenuItem,
+  Toolbar,
+  Typography,
+} from '@mui/material'
 import Image from 'next/image'
 import { useContext, useState } from 'react'
 
-import { UIContext } from '@/context'
+import { AuthContext, UIContext } from '@/context'
 const pages = ['Tratamientos', 'Enfermedades', 'Pacientes']
-const settings = ['Profile', 'Account', 'Dashboard', 'Logout']
+// const settings = ['Profile', 'Account', 'Dashboard', 'Logout']
 
 export const Navbar = () => {
   const { toggleSideMenu } = useContext(UIContext)
+  const { logoutUser } = useContext(AuthContext)
 
   const [anchorElNav, setAnchorElNav] = useState<null | HTMLElement>(null)
   const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null)
@@ -131,13 +132,14 @@ export const Navbar = () => {
             ))}
           </Box>
           <Box marginLeft={2}>
-            <Tooltip title="Open settings" sx={{ display: { xs: 'none', md: 'block' } }}>
-              <IconButton onClick={handleOpenUserMenu} sx={{ p: 0, display: { xs: 'none', md: 'block' } }}>
-                <Avatar alt="Remy Sharp" sx={{ width: 70, height: 70 }}>
-                  IM
-                </Avatar>
-              </IconButton>
-            </Tooltip>
+            <IconButton
+              sx={{ display: { xs: 'none', md: 'block' } }}
+              size="large"
+              onClick={handleOpenUserMenu}
+              color='info'
+            >
+              <MenuIcon />
+            </IconButton>
             <Box sx={{ display: { xs: 'flex', md: 'none' } }}>
               <Image
                 src="/saludentis.webp"
@@ -162,11 +164,10 @@ export const Navbar = () => {
               open={Boolean(anchorElUser)}
               onClose={handleCloseUserMenu}
             >
-              {settings.map((setting) => (
-                <MenuItem key={setting} onClick={handleCloseUserMenu}>
-                  <Typography textAlign="center">{setting}</Typography>
-                </MenuItem>
-              ))}
+              <MenuItem onClick={logoutUser}>
+                <Logout sx={{ mr: 1 }} />
+                <Typography textAlign="center">Salir</Typography>
+              </MenuItem>
             </Menu>
           </Box>
         </Toolbar>

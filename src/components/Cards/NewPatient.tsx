@@ -1,12 +1,24 @@
-import { Button, Card, CardContent, CardHeader, Grid, Link, Typography } from '@mui/material'
+import { AddCircle } from '@mui/icons-material'
+import { Button, Card, CardContent, Grid, Link, Typography } from '@mui/material'
+import dynamic from 'next/dynamic'
 import NextLink from 'next/link'
+
+const Chart = dynamic(() => import('../Chart'), {
+    ssr: false // Opcional: Desactiva la renderización en el servidor si es necesario
+})
+
+const data = [
+    { id: 0, value: 10, label: 'Niños' },
+    { id: 1, value: 15, label: 'Adultos' },
+]
 
 export const NewPatient = () => {
     return (
         <Card sx={{
             boxShadow: 'none',
             height: '100%',
-            width: '100%'
+            width: '100%',
+            padding: 0
         }}>
             <CardContent sx={{
                 display: 'flex',
@@ -14,41 +26,37 @@ export const NewPatient = () => {
                 justifyContent: 'center',
                 alignItems: 'center',
                 height: '100%',
-                width: '100%'
-
+                width: '100%',
+                padding: 0,
             }}>
-                <CardHeader title='Nuevo' titleTypographyProps={{
-                    variant: 'h4',
-                    textAlign: 'center',
-                    mb: 5
-                }} />
-                <Grid container display={'flex'} justifyContent={'space-evenly'} alignItems={'center'} flexDirection={'row'} sx={{
+                <Grid container display={'flex'} justifyContent={'space-evenly'} alignItems={'center'} flexDirection={'column'} sx={{
                     height: '100%',
+                    padding: 0,
                 }}>
-                    <Grid item my={1}>
-                        <Button variant='contained' sx={{
-                            padding: '1rem',
-                            minWidth: '100px',
-                        }}>
-                            <NextLink href={'/nuevo/nino'} passHref legacyBehavior>
-                                <Link display={'flex'} alignItems={'center'}>
-                                    <Typography variant='h6' color={'white'}>Niño</Typography>
-                                </Link>
-                            </NextLink>
-                        </Button>
+                    <Grid item my={1} width={'100%'} display={'flex'} justifyContent={'space-evenly'} alignItems={'center'}>
+                        <Chart data={data} />
                     </Grid>
-                    <Grid item my={1}>
-                        <Button variant='contained' sx={{
-                            padding: '1rem',
-                            minWidth: '100px',
-                        }}>
-                            <NextLink href={'/nuevo/adulto'} passHref legacyBehavior>
-                                <Link display={'flex'} alignItems={'center'}>
-                                    <Typography variant='h6' color={'white'}>Adulto</Typography>
-                                </Link>
-                            </NextLink>
-                        </Button>
+                    <Grid item display={'flex'} justifyContent={'space-evenly'} alignItems={'center'} flexDirection={{ xs: 'column', md: 'row' }} width={'100%'}>
+                        <Grid item my={1}>
+                            <Button variant='contained'>
+                                <NextLink href={'/nuevo/nino'} passHref legacyBehavior>
+                                    <Link display={'flex'} alignItems={'center'}>
+                                        <Typography variant='h6' color={'white'}>Niño</Typography>
+                                    </Link>
+                                </NextLink>
+                            </Button>
+                        </Grid>
+                        <Grid item mt={{ xs: 3, md: 0 }} >
+                            <Button variant='contained' endIcon={<AddCircle />}>
+                                <NextLink href={'/nuevo/adulto'} passHref legacyBehavior>
+                                    <Link display={'flex'} alignItems={'center'}>
+                                        <Typography variant='h6' color={'white'}>Adulto</Typography>
+                                    </Link>
+                                </NextLink>
+                            </Button>
+                        </Grid>
                     </Grid>
+
                 </Grid>
             </CardContent>
         </Card>
