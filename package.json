@@ -19,12 +19,9 @@
     "@fontsource/roboto": "^5.0.13",
     "@mui/icons-material": "^5.16.0",
     "@mui/material": "^5.15.21",
-    "@mui/x-charts": "^7.9.0",
-    "js-cookie": "^3.0.5",
     "next": "14.2.4",
     "react": "^18",
     "react-dom": "^18",
-    "react-hook-form": "^7.52.1",
     "react-toastify": "^10.0.5"
   },
   "devDependencies": {
@@ -35,7 +32,6 @@
     "@testing-library/react": "^16.0.0",
     "@testing-library/user-event": "^14.5.2",
     "@types/jest": "^29.5.12",
-    "@types/js-cookie": "^3.0.6",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",

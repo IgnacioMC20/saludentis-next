@@ -16,10 +16,11 @@ export default function Home() {
       <Layout>
         <Card sx={{
           padding: 5,
+          marginBottom: '2rem',
           width: {
             xs: '100%',
             sm: '80%',
-          },
+          }
         }}>
           <Grid container flexDirection={'row'} display={'flex'}>
             <Grid item xs={12} sm={6} display={'flex'} justifyContent={'center'} alignItems={'center'} flexDirection={'column'}>

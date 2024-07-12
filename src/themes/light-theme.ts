@@ -1,7 +1,7 @@
 import { createTheme } from '@mui/material/styles'
 
 export const theme = {
-  lightSeaGreen: '#0bc0c0',
+  lightSeaGreen: '#07beb8',
   robinEggBlue: '#3dccc7',
   tiffanyBlue: '#68d8d6',
   celeste: '#9ceaef',
@@ -66,8 +66,6 @@ export const lightTheme = createTheme({
           textTransform: 'none',
           boxShadow: 'none',
           borderRadius: 10,
-          padding: '1rem',
-          minWidth: '120px',
           ':hover': {
             backgroundColor: theme.robinEggBlue,
             color: theme.white,
