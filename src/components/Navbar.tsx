@@ -1,29 +1,28 @@
-import MenuIcon from '@mui/icons-material/Menu'
-import AppBar from '@mui/material/AppBar'
-import Avatar from '@mui/material/Avatar'
-import Box from '@mui/material/Box'
-import Button from '@mui/material/Button'
-import Container from '@mui/material/Container'
-import IconButton from '@mui/material/IconButton'
-import Menu from '@mui/material/Menu'
-import MenuItem from '@mui/material/MenuItem'
-import Toolbar from '@mui/material/Toolbar'
-import Tooltip from '@mui/material/Tooltip'
-import Typography from '@mui/material/Typography'
+import { Logout, Menu as MenuIcon } from '@mui/icons-material'
+import {
+  AppBar,
+  Box,
+  Button,
+  Container,
+  IconButton,
+  Menu,
+  MenuItem,
+  Toolbar,
+  Typography,
+} from '@mui/material'
 import Image from 'next/image'
-import * as React from 'react'
+import { useContext, useState } from 'react'
 
+import { AuthContext, UIContext } from '@/context'
 const pages = ['Tratamientos', 'Enfermedades', 'Pacientes']
-const settings = ['Profile', 'Account', 'Dashboard', 'Logout']
 
 export const Navbar = () => {
+  const { toggleSideMenu } = useContext(UIContext)
+  const { logoutUser } = useContext(AuthContext)
 
-  const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null)
-  const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null)
+  const [anchorElNav, setAnchorElNav] = useState<null | HTMLElement>(null)
+  const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null)
 
-  const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorElNav(event.currentTarget)
-  }
   const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElUser(event.currentTarget)
   }
@@ -38,43 +37,37 @@ export const Navbar = () => {
 
   return (
 
-    <AppBar position="static" sx={{ backgroundColor: 'rgb(11, 192, 192)', alignItems: 'center', height: { md: '70px' } }} >
-      <Container maxWidth="xl">
-        <Toolbar disableGutters>
+    <AppBar position="static" sx={{ backgroundColor: 'rgb(11, 192, 192)', alignItems: 'center', height: { md: '85px' }, display: 'flex', justifyContent: 'center' }}>
+      <Container maxWidth='xl'>
+        <Toolbar disableGutters sx={{ width: '100%', display: 'flex', justifyContent: { xs: 'space-between', md: '' } }}>
+          {/* title desktop */}
           <Box sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }}>
             <Image
-              src="/image.png"
-              width={50}
-              height={50}
-              alt="LOGO"
+              src="/saludentis.webp"
+              width={70}
+              height={70}
+              alt="Saludentis logo"
             />
+            <Typography
+              variant="h6"
+              sx={{
+                mr: 2,
+                display: { xs: 'none', md: 'flex' },
+                color: 'white',
+              }}
+            >
+              {/* Saludentis */}
+            </Typography>
           </Box>
-          <Typography
-            variant="h6"
-            noWrap
-            component="a"
-            href="#app-bar-with-responsive-menu"
-            sx={{
-              mr: 2,
-              display: { xs: 'none', md: 'flex' },
-              fontFamily: 'monospace',
-              fontWeight: 700,
-              letterSpacing: '.3rem',
-              color: 'white',
-              textDecoration: 'none',
-            }}
-          >
-            Saludentis
-          </Typography>
-
-          <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
+          {/* menu */}
+          <Box sx={{ display: { xs: 'flex', md: 'none' } }}>
             <IconButton
               size="large"
               aria-label="account of current user"
               aria-controls="menu-appbar"
               aria-haspopup="true"
-              onClick={handleOpenNavMenu}
-              color="inherit"
+              onClick={toggleSideMenu}
+              color='info'
             >
               <MenuIcon />
             </IconButton>
@@ -103,55 +96,57 @@ export const Navbar = () => {
               ))}
             </Menu>
           </Box>
-
-          <Box sx={{ display: { xs: 'flex', md: 'none' }, mr: 1 }}>
-            <Image
-              src="/image.png"
-              width={40}
-              height={40}
-              alt="LOGOM"
-            />
+          {/* mobile title */}
+          <Box display={{ xs: 'flex', md: 'none' }}>
+            <Typography
+              variant="h6"
+              textAlign={'center'}
+              sx={{
+                fontFamily: 'monospace',
+                fontWeight: 400,
+                color: 'white',
+                textDecoration: 'none',
+              }}
+            >
+              Saludentis
+            </Typography>
           </Box>
-          <Typography
-            variant="h6"
-            noWrap
-            component="a"
-            href="#app-bar-with-responsive-menu"
-            sx={{
-              mr: 2,
-              display: { xs: 'flex', md: 'none' },
-              flexGrow: 1,
-              fontFamily: 'monospace',
-              fontWeight: 400,
-              color: 'inherit',
-              textDecoration: 'none',
-            }}
-          >
-            Saludentis
-          </Typography>
-          <Box sx={{ justifyContent: 'right', flexGrow: 1, gap: '5px', display: { xs: 'none', md: 'flex' } }}>
+          {/* links desktop */}
+          <Box sx={{ justifyContent: 'end', width: { md: '100%' }, display: { xs: 'none', md: 'flex' } }}>
             {pages.map((page) => (
               <Button
                 key={page}
                 onClick={handleCloseNavMenu}
-                sx={{ my: 2, color: 'white', display: 'block', backgroundColor: 'transparent', '&:hover':{color:'white', border:'1px solid white'}}}
+                color={'primary'}
+                sx={{
+                  padding: '1rem',
+                }}
               >
                 <Typography
                   variant='h6'
-                  fontSize={18}
                 >
                   {page}
                 </Typography>
               </Button>
             ))}
           </Box>
-
-          <Box sx={{ flexGrow: 0, ml: '30px' }}>
-            <Tooltip title="Open settings">
-              <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
-              </IconButton>
-            </Tooltip>
+          <Box marginLeft={2}>
+            <IconButton
+              sx={{ display: { xs: 'none', md: 'block' } }}
+              size="large"
+              onClick={handleOpenUserMenu}
+              color='info'
+            >
+              <MenuIcon />
+            </IconButton>
+            <Box sx={{ display: { xs: 'flex', md: 'none' } }}>
+              <Image
+                src="/saludentis.webp"
+                width={50}
+                height={50}
+                alt="saludentis logo"
+              />
+            </Box>
             <Menu
               sx={{ mt: '45px' }}
               id="menu-appbar"
@@ -168,16 +163,15 @@ export const Navbar = () => {
               open={Boolean(anchorElUser)}
               onClose={handleCloseUserMenu}
             >
-              {settings.map((setting) => (
-                <MenuItem key={setting} onClick={handleCloseUserMenu}>
-                  <Typography textAlign="center">{setting}</Typography>
-                </MenuItem>
-              ))}
+              <MenuItem onClick={logoutUser}>
+                <Logout sx={{ mr: 1 }} />
+                <Typography textAlign="center">Salir</Typography>
+              </MenuItem>
             </Menu>
           </Box>
         </Toolbar>
       </Container>
-    </AppBar>
+    </AppBar >
   )
 
 }
