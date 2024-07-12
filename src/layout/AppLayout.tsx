@@ -13,7 +13,7 @@ export const Layout: FC<Props> = ({ children }) => {
             display: 'flex',
             flexDirection: 'column',
             minHeight: '100vh',
-            overflow: 'scroll',
+            overflow: 'hidden',
             marginBottom: { xs: '2rem', md: '0' },
         }}>
             <nav style={{
