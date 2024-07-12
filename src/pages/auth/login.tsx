@@ -1,11 +1,12 @@
+'use client'
 import { Button, Card, Grid, TextField, Typography } from '@mui/material'
-import { NextPage } from 'next'
+import { GetServerSideProps, NextPage } from 'next'
 import Image from 'next/image'
-import { useRouter } from 'next/router'
-import React, { useContext } from 'react'
+// import { getServerSession } from 'next-auth'
+import { getSession, signIn } from 'next-auth/react'
 import { useForm } from 'react-hook-form'
 
-import { AuthContext } from '@/context'
+// import { authOptions } from '../api/auth/[...nextauth]'
 import { AuthLayout } from '@/layout'
 import { validations } from '@/utils'
 
@@ -17,12 +18,9 @@ type FormData = {
 const LoginPage: NextPage = () => {
 
     const { register, handleSubmit, formState: { errors } } = useForm<FormData>()
-    const { loginUser } = useContext(AuthContext)
-    const router = useRouter()
 
     const onLoginUser = async ({ email, password }: FormData) => {
-        const isValidLogin = await loginUser(email, password)
-        if (isValidLogin) return router.replace('/')
+        signIn('credentials', { email, password })
     }
 
     return (
@@ -33,7 +31,6 @@ const LoginPage: NextPage = () => {
                         <form onSubmit={handleSubmit(onLoginUser)} noValidate>
                             <Grid container spacing={4}>
                                 <Grid item xs={12} marginY={2} display='flex' flexDirection={'column'} alignItems={'center'} justifyContent='center'>
-                                    {/* <Typography color='primary' variant='h3' component='h4'>Saludentis</Typography> */}
                                     <Image
                                         src="/saludentis.webp"
                                         width={150}
@@ -53,7 +50,9 @@ const LoginPage: NextPage = () => {
                                         })}
                                         error={!!errors.email}
                                         helperText={errors.email?.message}
-                                        autoComplete='false' />
+                                        autoComplete='false'
+                                        autoCorrect='false'
+                                    />
                                 </Grid>
                                 <Grid item xs={12}>
                                     <TextField
@@ -67,7 +66,9 @@ const LoginPage: NextPage = () => {
                                         })}
                                         error={!!errors.password}
                                         helperText={errors.password?.message}
-                                        autoComplete='false' />
+                                        autoComplete='false'
+                                        autoCorrect='false'
+                                    />
                                 </Grid>
                                 <Grid item xs={12} marginBottom={2}>
                                     <Button type='submit' fullWidth>
@@ -83,15 +84,17 @@ const LoginPage: NextPage = () => {
     )
 }
 
-// export const getServerSideProps: GetServerSideProps = async ({ req, query }) => {
-//     const session = await getSession({ req })
-//     console.log('session: ', session)
-//     const { p = '/' } = query
+// eslint-disable-next-line
+// export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
+//     const session = await getSession({ req }) ?? false
+//     console.log('===', session)
+//     // const { p = '/' } = query
 
 //     if (session) {
 //         return {
 //             redirect: {
-//                 destination: p.toString(),
+//                 // destination: p.toString(),
+//                 destination: '/',
 //                 permanent: false
 //             }
 //         }
