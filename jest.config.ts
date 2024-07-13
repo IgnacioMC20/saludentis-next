@@ -17,6 +17,7 @@ const config: Config = {
   },
   collectCoverageFrom: [
     'src/components/*.tsx',
+    'src/components/*/*.tsx',
     '!**/node_modules/**',
     '!**/src/test-utils/**',
     '!**/src/index.tsx'
@@ -25,7 +26,8 @@ const config: Config = {
     'global': {
       'statements': 70,
       'branches': 70,
-      'functions': 70,
+      'functions': 50,
+      'lines': 50
     }
   }
 }

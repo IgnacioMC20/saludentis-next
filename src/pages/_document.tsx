@@ -4,10 +4,18 @@ export default function Document() {
   return (
     <Html lang="en">
       <Head />
-      <body>
+      <body style={{
+        alignContent: 'center',
+        background: 'url("https://previews.123rf.com/images/seamartini/seamartini1904/seamartini190400771/121700804-dental-medicine-seamless-patter-vector-background-of-dentistry-line-icons-dentist-doctor-with-tooth-.jpg")',
+        backgroundRepeat: 'repeat',
+        backgroundSize: '200px 200px',
+        minHeight: '100vh',
+        margin: 0,
+        padding: 0
+      }}>
         <Main />
         <NextScript />
       </body>
-    </Html>
+    </Html >
   )
 }
