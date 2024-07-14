@@ -5,11 +5,9 @@ export async function middleware(request: NextRequest) {
   // const session = true
   const session = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET })
   const { pathname } = request.nextUrl
-  // console.log('===middleware', pathname)
 
   // Allow access to login page if there's no session
   if (!session && pathname === '/auth/login') {
-    console.log('===middleware', 'next')
     return NextResponse.next()
   }
 

@@ -2,7 +2,6 @@
 
 import NextAuth, { NextAuthOptions } from 'next-auth'
 import Credentials from 'next-auth/providers/credentials'
-import { toast } from 'react-toastify'
 
 import { dbUsers } from '@/database'
 
@@ -23,7 +22,6 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials: any) {
         const user = await dbUsers.checkUserEmailPassword(credentials!.email, credentials!.password)
-        console.log('===authorize', user)
         if (user) {
           return {
             ...user,

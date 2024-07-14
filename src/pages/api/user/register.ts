@@ -28,7 +28,6 @@ export default function (req: NextApiRequest, res: NextApiResponse<Data>) {
 // Todo: hacer mas validaciones
 const registerUser = async (req: NextApiRequest, res: NextApiResponse<Data>) => {
     const { email = '', password = '', name = '', lastName = '' } = req.body
-    console.log('===registerUser', { email, password, name, lastName })
 
     if (password.length < 6) {
         return res.status(400).json({
@@ -79,7 +78,6 @@ const registerUser = async (req: NextApiRequest, res: NextApiResponse<Data>) => 
     try {
         await newUser.save({ validateBeforeSave: true })
     } catch (error) {
-        console.log(error)
         return res.status(500).json({
             ok: false,
             message: 'Revisar logs del servidor'
