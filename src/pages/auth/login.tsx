@@ -1,12 +1,12 @@
 'use client'
 import { Button, Card, Grid, TextField, Typography } from '@mui/material'
-import { GetServerSideProps, NextPage } from 'next'
+import { NextPage } from 'next'
 import Image from 'next/image'
-// import { getServerSession } from 'next-auth'
-import { getSession, signIn } from 'next-auth/react'
+import { useRouter } from 'next/router'
+import { signIn } from 'next-auth/react'
 import { useForm } from 'react-hook-form'
+import { toast } from 'react-toastify'
 
-// import { authOptions } from '../api/auth/[...nextauth]'
 import { AuthLayout } from '@/layout'
 import { validations } from '@/utils'
 
@@ -17,10 +17,35 @@ type FormData = {
 
 const LoginPage: NextPage = () => {
 
+    const router = useRouter()
     const { register, handleSubmit, formState: { errors } } = useForm<FormData>()
 
     const onLoginUser = async ({ email, password }: FormData) => {
-        signIn('credentials', { email, password })
+        try {
+            const res = await signIn('credentials', {
+                redirect: false,
+                email,
+                password,
+            })
+
+            if (res?.ok) {
+                router.push('/')
+            } else {
+                toast(res?.error, {
+                    position: 'top-right',
+                    autoClose: 2000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: false,
+                    draggable: false,
+                    theme: 'light',
+                    type: 'error',
+                    closeButton: false,
+                })
+            }
+        } catch (error) {
+            toast(`Error desconocido, ${error}`, { type: 'error' })
+        }
     }
 
     return (
@@ -32,10 +57,11 @@ const LoginPage: NextPage = () => {
                             <Grid container spacing={4}>
                                 <Grid item xs={12} marginY={2} display='flex' flexDirection={'column'} alignItems={'center'} justifyContent='center'>
                                     <Image
-                                        src="/saludentis.webp"
+                                        src='/saludentis.webp'
                                         width={150}
                                         height={150}
-                                        alt="Saludentis logo"
+                                        alt='Saludentis logo'
+                                        priority
                                     />
                                 </Grid>
                                 <Grid item xs={12}>
@@ -83,26 +109,5 @@ const LoginPage: NextPage = () => {
         </AuthLayout >
     )
 }
-
-// eslint-disable-next-line
-// export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
-//     const session = await getSession({ req }) ?? false
-//     console.log('===', session)
-//     // const { p = '/' } = query
-
-//     if (session) {
-//         return {
-//             redirect: {
-//                 // destination: p.toString(),
-//                 destination: '/',
-//                 permanent: false
-//             }
-//         }
-//     }
-
-//     return {
-//         props: {}
-//     }
-// }
 
 export default LoginPage

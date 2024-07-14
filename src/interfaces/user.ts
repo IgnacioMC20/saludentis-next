@@ -6,7 +6,8 @@ export interface IUser {
     password?: string
 }
 
-// export interface IUserApi {
-//     email: string
-//     name: string
-// }
+export interface IUserApi {
+    email: string
+    name: string
+    lastName: string
+}
