@@ -1,11 +1,12 @@
+'use client'
 import { Button, Card, Grid, TextField, Typography } from '@mui/material'
 import { NextPage } from 'next'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
-import React, { useContext } from 'react'
+import { signIn } from 'next-auth/react'
 import { useForm } from 'react-hook-form'
+import { toast } from 'react-toastify'
 
-import { AuthContext } from '@/context'
 import { AuthLayout } from '@/layout'
 import { validations } from '@/utils'
 
@@ -16,13 +17,35 @@ type FormData = {
 
 const LoginPage: NextPage = () => {
 
-    const { register, handleSubmit, formState: { errors } } = useForm<FormData>()
-    const { loginUser } = useContext(AuthContext)
     const router = useRouter()
+    const { register, handleSubmit, formState: { errors } } = useForm<FormData>()
 
     const onLoginUser = async ({ email, password }: FormData) => {
-        const isValidLogin = await loginUser(email, password)
-        if (isValidLogin) return router.replace('/')
+        try {
+            const res = await signIn('credentials', {
+                redirect: false,
+                email,
+                password,
+            })
+
+            if (res?.ok) {
+                router.push('/')
+            } else {
+                toast(res?.error, {
+                    position: 'top-right',
+                    autoClose: 2000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: false,
+                    draggable: false,
+                    theme: 'light',
+                    type: 'error',
+                    closeButton: false,
+                })
+            }
+        } catch (error) {
+            toast(`Error desconocido, ${error}`, { type: 'error' })
+        }
     }
 
     return (
@@ -33,12 +56,12 @@ const LoginPage: NextPage = () => {
                         <form onSubmit={handleSubmit(onLoginUser)} noValidate>
                             <Grid container spacing={4}>
                                 <Grid item xs={12} marginY={2} display='flex' flexDirection={'column'} alignItems={'center'} justifyContent='center'>
-                                    {/* <Typography color='primary' variant='h3' component='h4'>Saludentis</Typography> */}
                                     <Image
-                                        src="/saludentis.webp"
+                                        src='/saludentis.webp'
                                         width={150}
                                         height={150}
-                                        alt="Saludentis logo"
+                                        alt='Saludentis logo'
+                                        priority
                                     />
                                 </Grid>
                                 <Grid item xs={12}>
@@ -53,7 +76,9 @@ const LoginPage: NextPage = () => {
                                         })}
                                         error={!!errors.email}
                                         helperText={errors.email?.message}
-                                        autoComplete='false' />
+                                        autoComplete='false'
+                                        autoCorrect='false'
+                                    />
                                 </Grid>
                                 <Grid item xs={12}>
                                     <TextField
@@ -67,7 +92,9 @@ const LoginPage: NextPage = () => {
                                         })}
                                         error={!!errors.password}
                                         helperText={errors.password?.message}
-                                        autoComplete='false' />
+                                        autoComplete='false'
+                                        autoCorrect='false'
+                                    />
                                 </Grid>
                                 <Grid item xs={12} marginBottom={2}>
                                     <Button type='submit' fullWidth>
@@ -82,24 +109,5 @@ const LoginPage: NextPage = () => {
         </AuthLayout >
     )
 }
-
-// export const getServerSideProps: GetServerSideProps = async ({ req, query }) => {
-//     const session = await getSession({ req })
-//     console.log('session: ', session)
-//     const { p = '/' } = query
-
-//     if (session) {
-//         return {
-//             redirect: {
-//                 destination: p.toString(),
-//                 permanent: false
-//             }
-//         }
-//     }
-
-//     return {
-//         props: {}
-//     }
-// }
 
 export default LoginPage

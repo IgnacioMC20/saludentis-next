@@ -9,7 +9,6 @@ interface ContextPros {
 
     //Methods
     // eslint-disable-next-line no-unused-vars
-    loginUser: (email: string, password: string) => Promise<boolean>
     logoutUser: () => void
     // registerUser: (email: string, password: string, name: string) => Promise<boolean>
 }
