@@ -1,4 +1,4 @@
-import { LoginOutlined, LogoutOutlined, EscalatorWarning, Vaccines, Sick } from '@mui/icons-material'
+import { LoginOutlined, LogoutOutlined, EscalatorWarning, Vaccines, Sick, Home } from '@mui/icons-material'
 import { Box, Drawer, List, ListItemButton, ListItemIcon, ListItemText } from '@mui/material'
 import { useRouter } from 'next/router'
 import { useContext } from 'react'
@@ -6,6 +6,10 @@ import { useContext } from 'react'
 import { AuthContext, UIContext } from '@/context'
 
 const pages = [
+    {
+        title: 'Inicio',
+        icon: <Home />
+    },
     {
         title: 'Pacientes',
         icon: <EscalatorWarning />
@@ -43,7 +47,9 @@ export const SideMenu = () => {
                 <List>
                     {
                         pages.map(({ title, icon }, index) => (
-                            <ListItemButton key={index} onClick={() => navigateTo(`/${title.toLowerCase()}`)}>
+                            <ListItemButton key={index} onClick={() => navigateTo(title === 'Inicio' ? '/' : `/${title[0].toLowerCase()}${title.slice(1)}`)} sx={{
+                                display: (router.pathname === '/' && title === 'Inicio' ? 'none' : 'flex'),
+                            }}>
                                 <ListItemIcon>
                                     {icon}
                                 </ListItemIcon>
