@@ -9,6 +9,8 @@ export const theme = {
   purple: '#7600bc',
   white: '#fff',
   black: '#000',
+  gray: '#f5f5f5',
+  skyBlue: '#87ceeb',
 }
 
 export const lightTheme = createTheme({

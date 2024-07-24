@@ -13,27 +13,31 @@ export const Layout: FC<Props> = ({ children }) => {
             display: 'flex',
             flexDirection: 'column',
             minHeight: '100vh',
-            overflow: 'hidden',
-            marginBottom: { xs: '2rem', md: '0' },
+            width: '100vw',
+            padding: '0',
         }}>
-            <nav style={{
-                marginBottom: '2rem',
-            }}>
+            <nav>
                 <Navbar />
             </nav>
             <SideMenu />
 
-            <main style={{
-                flex: 1,
+            <Box sx={{
+                // margin: '1rem 0 0 0',
+                overflow: 'auto',
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'center',
                 alignItems: 'center',
                 padding: '0px 30px',
-                height: '100%'
+                height: {
+                    xs: 'calc(100vh - 65px)',
+
+                    md: 'calc(100vh - 85px)',
+
+                }
             }}>
                 {children}
-            </main>
+            </Box>
         </Box>
     )
 }
