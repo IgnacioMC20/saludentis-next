@@ -1,7 +1,10 @@
 import { Box, Button, Grid, InputAdornment, OutlinedInput, Typography } from '@mui/material'
 import Image from 'next/image'
+import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
+
+import { showToast } from '@/utils'
 
 type FormData = {
     amount: string,
@@ -14,6 +17,10 @@ export const PatientBalanceModalContent = () => {
     const onPay = async ({ amount }: FormData) => {
         toast(`amount ${amount}`, { type: 'success' })
     }
+
+    useEffect(() => {
+        if (errors.amount) showToast(errors.amount.message || 'Error, vuelve a intentarlo', 'error')
+    }, [errors])
 
     return (
         <>
@@ -39,6 +46,7 @@ export const PatientBalanceModalContent = () => {
                                 required: 'Este campo es requerido',
                                 validate: (value) => Number(value) > 0 || 'La cantidad debe ser mayor a 0'
                             })}
+
                         />
                     </Grid>
                     <Grid item xs={12} marginBottom={2} justifyContent={'center'} display={'flex'}>
