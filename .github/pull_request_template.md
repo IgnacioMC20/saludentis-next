@@ -15,7 +15,7 @@
 
 # Types of changes
 <!--- Indicate what types of changes your code introduces -->
-- Bug fix
-- New feature
-- Breaking change
-- Refactor
+- [] Bug fix
+- [] New feature
+- [] Breaking change
+- [] Refactor

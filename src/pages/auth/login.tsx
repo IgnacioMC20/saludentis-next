@@ -8,7 +8,7 @@ import { useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
 
 import { AuthLayout } from '@/layout'
-import { validations } from '@/utils'
+import { showToast, validations } from '@/utils'
 
 type FormData = {
     email: string,
@@ -31,17 +31,7 @@ const LoginPage: NextPage = () => {
             if (res?.ok) {
                 router.push('/')
             } else {
-                toast(res?.error, {
-                    position: 'top-right',
-                    autoClose: 2000,
-                    hideProgressBar: false,
-                    closeOnClick: true,
-                    pauseOnHover: false,
-                    draggable: false,
-                    theme: 'light',
-                    type: 'error',
-                    closeButton: false,
-                })
+                showToast(res?.error || 'Error al iniciar sesión, verifica tus credenciales', 'error')
             }
         } catch (error) {
             toast(`Error desconocido, ${error}`, { type: 'error' })
