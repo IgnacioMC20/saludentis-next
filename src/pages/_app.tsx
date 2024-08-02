@@ -24,7 +24,7 @@ export default function App({
             <ThemeProvider theme={lightTheme}>
               <CssBaseline />
               <Component {...pageProps} />
-              <ToastContainer />
+              <ToastContainer stacked />
             </ThemeProvider>
           </AuthProvider >
         </UIProvider>

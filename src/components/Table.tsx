@@ -39,12 +39,21 @@ type DataPatients = {
 
 }
 
-type Props = {
-    data: DataIllnesses[] | DataTreatments[] | DataPatients[]
-    progress?: boolean
+type DataBalance = {
+    id: string
+    consulta: string
+    fecha: string
+    total: number
+    pagado: number
 }
 
-export const Table = ({ data, progress = false }: Props) => {
+type Props = {
+    data: DataIllnesses[] | DataTreatments[] | DataPatients[] | DataBalance[]
+    progress?: boolean
+    customRowsPerPage?: number
+}
+
+export const Table = ({ data, progress = false, customRowsPerPage = 10 }: Props) => {
 
     const rows = data.map((item) => {
         return {
@@ -62,7 +71,7 @@ export const Table = ({ data, progress = false }: Props) => {
     })
     const [page, setPage] = useState(0)
     const [loading, setLoading] = useState(progress)
-    const [rowsPerPage, setRowsPerPage] = useState(10)
+    const [rowsPerPage, setRowsPerPage] = useState(customRowsPerPage)
 
     useEffect(() => {
         // if (progress) {
@@ -83,7 +92,7 @@ export const Table = ({ data, progress = false }: Props) => {
     }
 
     return (
-        <Paper sx={{ width: '100%', minHeight: '500px', overflow: 'hidden', boxShadow: 'none' }}>
+        <Paper sx={{ width: '100%', overflow: 'hidden', boxShadow: 'none' }}>
             {
                 loading ? (
                     <Loading />
@@ -165,10 +174,10 @@ export const Table = ({ data, progress = false }: Props) => {
                                 </MaterialTable>
                             </TableContainer>
                             <TablePagination
-                                rowsPerPageOptions={[10, 25, 100]}
+                                rowsPerPageOptions={[customRowsPerPage, 25, 100]}
                                 component="div"
                                 count={rows.length}
-                                rowsPerPage={rowsPerPage}
+                                rowsPerPage={customRowsPerPage ? customRowsPerPage : rowsPerPage}
                                 page={page}
                                 onPageChange={handleChangePage}
                                 onRowsPerPageChange={handleChangeRowsPerPage}
