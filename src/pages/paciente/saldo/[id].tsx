@@ -180,9 +180,6 @@ const PatientBalance = () => {
                         onClick={handleOpen}>
                         <Typography variant='h6'>Realizar pago</Typography>
                     </Button>
-
-                    {/* </Link> */}
-                    {/* </NextLink> */}
                     <Typography variant={'h6'} textAlign={'center'}>Saldo actual: Q. 1500</Typography>
                 </Box>
             </Card>

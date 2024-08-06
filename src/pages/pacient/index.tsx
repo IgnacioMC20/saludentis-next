@@ -1,8 +1,8 @@
-import { Box, Grid, TextField, Typography, Button } from '@mui/material'
+import { Box } from '@mui/material'
 
-import ClinicHistory from '@/components/PacientComponents/ClinicHistory'
-import PacientInfo from '@/components/PacientComponents/PacientInfo'
-import SearchAppBar from '@/components/PacientComponents/SearchBar'
+import ClinicHistory from '@/components/PatientComponents/ClinicHistory'
+import PacientInfo from '@/components/PatientComponents/PacientInfo'
+import SearchAppBar from '@/components/PatientComponents/SearchBar'
 import { Layout } from '@/layout'
 
 export default function PacientPage() {
@@ -17,15 +17,15 @@ export default function PacientPage() {
         backgroundColor: 'white',
         height: '600px',
         overflow: 'scroll',
-      '&::-webkit-scrollbar': {
-        display: 'none',
-      },
-      '-ms-overflow-style': 'none', // for Internet Explorer and Edge
-      'scrollbar-width': 'none', // for Firefox
-    }}>
+        '&::-webkit-scrollbar': {
+          display: 'none',
+        },
+        '-ms-overflow-style': 'none',
+        'scrollbar-width': 'none',
+      }}>
         <SearchAppBar />
-        <PacientInfo/>
-        {/* <ClinicHistory/> */}
+        <PacientInfo />
+        <ClinicHistory />
       </Box>
     </Layout>
 

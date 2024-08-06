@@ -5,13 +5,18 @@ import { Patient } from '@/interfaces'
 
 interface Props {
   patients: Patient[]
+  // eslint-disable-next-line no-unused-vars
+  setPatientId: (id: number | null) => void
 }
 
-export const Select: React.FC<Props> = ({ patients }) => {
+// TODO: pasar funcion a comppnente padre o usar context API
+export const Select: React.FC<Props> = ({ patients, setPatientId }) => {
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null)
 
   const handleChange = (event: any, value: Patient | null) => {
     setSelectedPatient(value)
+    console.log('Selected Patient:', value)
+    setPatientId(value?.id ?? null)
   }
 
   return (
