@@ -9,7 +9,6 @@ interface Props {
   setPatientId: (id: number | null) => void
 }
 
-// TODO: pasar funcion a comppnente padre o usar context API
 export const Select: React.FC<Props> = ({ patients, setPatientId }) => {
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null)
 

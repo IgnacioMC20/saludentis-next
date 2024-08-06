@@ -111,7 +111,6 @@ const data = [
 
 const Pacientes = () => {
 
-    // TODO: formatear datos reales
     const formatedData = data.map((item) => ({
         ...item,
         edad: '24 años',

@@ -1,4 +1,4 @@
-import { Button, Checkbox, FormControlLabel, FormGroup, Grid, TextField, Typography } from '@mui/material'
+import { Box, Button, Checkbox, FormControlLabel, FormGroup, Grid, TextField, Typography } from '@mui/material'
 import Image from 'next/image'
 import React from 'react'
 
@@ -21,8 +21,22 @@ const Diet = () => {
         </FormGroup>
       </Grid>
       <Grid item xs={12} md={6} textAlign={'center'} marginTop={2} padding={0}>
-        {/* TODO: create mobile img */}
-        <Image priority src="/odontologia_neurofocal.png" alt="odontologia_neurofocal" width={350} height={200} />
+        <Box
+          // display={{
+          //   xs: 'none',
+          //   sm: 'block'
+          // }}
+          overflow={{
+            xs: 'auto',
+            sm: ''
+          }}
+        >
+          <Image priority src="/odontologia_neurofocal.png" alt="odontologia_neurofocal" width={400} height={230} />
+        </Box>
+        {/* <Box display={ }
+        >
+          <Image priority src="/odontologia_neurofocal_mobile.png" alt="odontologia_neurofocal" width={400} height={230} />
+        </Box> */}
       </Grid>
       <Grid container>
         <Grid item xs={12} md={4} paddingX={1} marginTop={2}>
