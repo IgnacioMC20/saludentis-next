@@ -4,7 +4,6 @@ import { useRouter } from 'next/router'
 
 import { PatientSelect } from '@/components'
 
-// Mocking next/router
 jest.mock('next/router', () => ({
   useRouter: jest.fn(),
 }))

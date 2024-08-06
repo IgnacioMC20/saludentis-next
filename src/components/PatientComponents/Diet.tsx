@@ -22,10 +22,6 @@ const Diet = () => {
       </Grid>
       <Grid item xs={12} md={6} textAlign={'center'} marginTop={2} padding={0}>
         <Box
-          // display={{
-          //   xs: 'none',
-          //   sm: 'block'
-          // }}
           overflow={{
             xs: 'auto',
             sm: ''
@@ -33,10 +29,6 @@ const Diet = () => {
         >
           <Image priority src="/odontologia_neurofocal.png" alt="odontologia_neurofocal" width={400} height={230} />
         </Box>
-        {/* <Box display={ }
-        >
-          <Image priority src="/odontologia_neurofocal_mobile.png" alt="odontologia_neurofocal" width={400} height={230} />
-        </Box> */}
       </Grid>
       <Grid container>
         <Grid item xs={12} md={4} paddingX={1} marginTop={2}>

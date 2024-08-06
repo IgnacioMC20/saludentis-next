@@ -16,7 +16,6 @@ const mockedUseRouter = useRouter as jest.MockedFunction<typeof useRouter>
 
 describe('Navbar component', () => {
     beforeEach(() => {
-        // Configura el mock de useRouter antes de cada prueba
         return mockedUseRouter.mockReturnValue({
             route: '/',
             pathname: '',
@@ -52,7 +51,6 @@ describe('Navbar component', () => {
         isLoggedIn: false,
         // eslint-disable-next-line
         loginUser: async (email: string, password: string) => {
-            // Implement your login logic here
             return true
         },
         logoutUser: mockLogoutUser,

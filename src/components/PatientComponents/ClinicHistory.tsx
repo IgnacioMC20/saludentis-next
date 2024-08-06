@@ -81,6 +81,5 @@ export default function ClinicHistory() {
       </Grid>
 
     </Grid>
-    // </Box>
   )
 }

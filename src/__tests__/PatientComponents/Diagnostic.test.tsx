@@ -19,6 +19,5 @@ describe('Diagnostic Component', () => {
         render(<Diagnostic />)
         const button = screen.getByRole('button', { name: /guardar/i })
         fireEvent.click(button)
-        // Aquí podrías verificar cualquier comportamiento adicional después del clic, si existiera
     })
 })

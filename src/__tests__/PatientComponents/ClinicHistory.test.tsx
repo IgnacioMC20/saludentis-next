@@ -21,6 +21,5 @@ describe('ClinicHistory Component', () => {
         render(<ClinicHistory />)
         const button = screen.getByRole('button', { name: /guardar/i })
         fireEvent.click(button)
-        // Aquí podrías verificar cualquier comportamiento adicional después del envío del formulario, si existiera
     })
 })

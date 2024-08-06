@@ -28,7 +28,6 @@ export const Layout: FC<Props> = ({ children }) => {
             <SideMenu />
 
             <Box sx={{
-                // margin: '1rem 0 0 0',
                 overflow: 'auto',
                 display: 'flex',
                 flexDirection: 'column',
