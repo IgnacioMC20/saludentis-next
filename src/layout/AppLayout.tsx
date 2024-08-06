@@ -1,5 +1,6 @@
 import { Box } from '@mui/material'
-import React, { FC } from 'react'
+import Head from 'next/head'
+import { FC } from 'react'
 
 import { Navbar, SideMenu } from '@/components'
 
@@ -16,6 +17,11 @@ export const Layout: FC<Props> = ({ children }) => {
             width: '100vw',
             padding: '0',
         }}>
+            <Head>
+                <title>Saludentis App</title>
+                <meta name='description' content='Saludentis App' />
+                <meta name='viewport' content='width=device-width, initial-scale=1' />
+            </Head>
             <nav>
                 <Navbar />
             </nav>

@@ -4,9 +4,7 @@ export default function Document() {
   return (
     <Html lang="en">
       <Head>
-        <title>Saludentis App</title>
-        <meta name='description' content='Saludentis App' />
-        <meta name='viewport' content='width=device-width, initial-scale=1' />
+        
         <link rel='icon' href='/saludentis.ico' />
       </Head>
       <body style={{
