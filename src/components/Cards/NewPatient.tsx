@@ -4,7 +4,7 @@ import dynamic from 'next/dynamic'
 import NextLink from 'next/link'
 
 const Chart = dynamic(() => import('../Chart'), {
-    ssr: false // Opcional: Desactiva la renderización en el servidor si es necesario
+    ssr: false
 })
 
 const data = [

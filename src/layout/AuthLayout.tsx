@@ -11,7 +11,6 @@ export const AuthLayout: FC<Props> = ({ children }) => {
             display: 'flex',
             flexDirection: 'column',
             minHeight: '100vh',
-            // height: '100%',
         }}>
             <main style={{
                 flex: 1,

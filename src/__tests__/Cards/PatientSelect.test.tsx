@@ -1,7 +1,12 @@
 import { ThemeProvider, createTheme } from '@mui/material/styles'
 import { render, screen } from '@testing-library/react'
+import { useRouter } from 'next/router'
 
 import { PatientSelect } from '@/components'
+
+jest.mock('next/router', () => ({
+  useRouter: jest.fn(),
+}))
 
 jest.mock('@mui/icons-material', () => ({
   ArrowCircleRightOutlined: () => <svg data-testid="ArrowCircleRightOutlined" />,
@@ -10,6 +15,13 @@ jest.mock('@mui/icons-material', () => ({
 const theme = createTheme()
 
 describe('PatientSelect', () => {
+  const push = jest.fn()
+
+  beforeEach(() => {
+    (useRouter as jest.Mock).mockReturnValue({
+      push,
+    })
+  })
 
   it('renders the PatientSelect component', () => {
     render(

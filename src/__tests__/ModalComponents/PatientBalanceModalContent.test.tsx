@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react'
 
-import { PatientBalanceModalContent } from '@/components' // Asegúrate de que la ruta sea correcta
+import { PatientBalanceModalContent } from '@/components'
 
 jest.mock('react-toastify', () => ({
     toast: jest.fn(),

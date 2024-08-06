@@ -6,7 +6,6 @@ describe('Loading component', () => {
     it('renders the loading spinner correctly', () => {
         render(<Loading />)
 
-        // Verifica que el Box está presente
         const box = screen.getByTestId('loading-box')
         expect(box).toBeInTheDocument()
         expect(box).toHaveStyle({
@@ -21,7 +20,6 @@ describe('Loading component', () => {
             zIndex: 1300,
         })
 
-        // Verifica que el CircularProgress está presente
         const spinner = screen.getByRole('progressbar')
         expect(spinner).toBeInTheDocument()
     })

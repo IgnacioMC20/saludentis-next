@@ -1,6 +1,8 @@
 import { ArrowCircleRightOutlined } from '@mui/icons-material'
 import { Card, CardContent, CardHeader, Box, Button, Typography, Link } from '@mui/material'
 import NextLink from 'next/link'
+import { useRouter } from 'next/router'
+import { useState } from 'react'
 
 import { Select } from '..'
 
@@ -20,9 +22,13 @@ const patients = [
 ]
 
 export const PatientSelect = () => {
+    const router = useRouter()
+    const [patientId, setPatientId] = useState<number | null>(null)
 
     function handlePatientSubmit(): void {
-        throw new Error('Function not implemented.')
+        if (patientId) {
+            router.push(`/paciente/${patientId}`)
+        }
     }
 
     return (
@@ -45,7 +51,8 @@ export const PatientSelect = () => {
                     textAlign: 'center',
                     mb: 5
                 }} />
-                <Select patients={patients} />
+                {/* <form> */}
+                <Select patients={patients} setPatientId={setPatientId} />
                 <Box display={'flex'} flexDirection={'column'} alignItems={'center'}>
                     <Box my={4}>
                         <Button
@@ -66,7 +73,8 @@ export const PatientSelect = () => {
                         </Link>
                     </NextLink>
                 </Box>
+                {/* </form> */}
             </CardContent>
-        </Card>
+        </Card >
     )
 }
