@@ -9,7 +9,7 @@ const ClinicHistory = dynamic(() => import('@/components/PatientComponents/Clini
 const PacientInfo = dynamic(() => import('@/components/PatientComponents/PacientInfo'))
 const Diagnostic = dynamic(() => import('@/components/PatientComponents/Diagnostic'))
 const Diet = dynamic(() => import('@/components/PatientComponents/Diet'))
-const Odontogramalol = dynamic(() => import('@/components/PatientComponents/Odontogramalol'))
+const Odontogram = dynamic(() => import('@/components/PatientComponents/Odontogram'))
 
 interface TabPanelProps {
     children?: React.ReactNode
@@ -33,7 +33,7 @@ const Forms = [
     },
     {
         title: 'Odontograma',
-        component: <Odontogramalol />,
+        component: <Odontogram />,
     },
     {
         title: 'Diagnosticos',
@@ -54,7 +54,7 @@ function TabPanel(props: TabPanelProps) {
         >
             {value === index && (
                 <>
-                    <Typography variant={'h4'} color={'black'} marginY={2}>{title}</Typography>
+                    <Typography variant={'h4'} color={'black'} marginY={2}>{title !== 'Odontograma' && title}</Typography>
                     <Box sx={{
                         p: 3,
                     }}>
