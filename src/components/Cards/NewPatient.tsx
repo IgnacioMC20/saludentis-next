@@ -1,5 +1,5 @@
 import { AddCircle } from '@mui/icons-material'
-import { Button, Card, CardContent, Grid, Link, Typography } from '@mui/material'
+import { Button, Card, CardContent, Grid, Typography } from '@mui/material'
 import dynamic from 'next/dynamic'
 import NextLink from 'next/link'
 
@@ -38,22 +38,18 @@ export const NewPatient = () => {
                     </Grid>
                     <Grid item display={'flex'} justifyContent={'space-evenly'} alignItems={'center'} flexDirection={{ xs: 'column', md: 'row' }} width={'100%'}>
                         <Grid item my={1}>
-                            <Button variant='contained' endIcon={<AddCircle />}>
-                                <NextLink href={'/nuevo/nino'} passHref legacyBehavior>
-                                    <Link display={'flex'} alignItems={'center'}>
-                                        <Typography variant='h6' color={'white'}>Niño</Typography>
-                                    </Link>
-                                </NextLink>
-                            </Button>
+                            <NextLink href={'/paciente/nuevo'} passHref legacyBehavior>
+                                <Button variant='contained' endIcon={<AddCircle />}>
+                                    <Typography variant='h6' color={'white'}>Niño</Typography>
+                                </Button>
+                            </NextLink>
                         </Grid>
                         <Grid item mt={{ xs: 3, md: 0 }} >
-                            <Button variant='contained' endIcon={<AddCircle />}>
-                                <NextLink href={'/nuevo/adulto'} passHref legacyBehavior>
-                                    <Link display={'flex'} alignItems={'center'}>
-                                        <Typography variant='h6' color={'white'}>Adulto</Typography>
-                                    </Link>
-                                </NextLink>
-                            </Button>
+                            <NextLink href={'/paciente/nuevo?tipo=adulto'} passHref legacyBehavior>
+                                <Button variant='contained' endIcon={<AddCircle />}>
+                                    <Typography variant='h6' color={'white'}>Adulto</Typography>
+                                </Button>
+                            </NextLink>
                         </Grid>
                     </Grid>
 

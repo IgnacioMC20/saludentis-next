@@ -11,7 +11,7 @@ export default function PatientPage() {
                 paddingX: { xs: 2, md: 0 },
                 width: {
                     xs: '100%',
-                },
+                }, 
                 height: '670px',
                 boxShadow: 'none',
                 display: 'flex',
