@@ -8,6 +8,7 @@ import { useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
 
 import { AuthLayout } from '@/layout'
+import { icon } from '@/themes'
 import { showToast, validations } from '@/utils'
 
 type FormData = {
@@ -47,7 +48,7 @@ const LoginPage: NextPage = () => {
                             <Grid container spacing={4}>
                                 <Grid item xs={12} marginY={2} display='flex' flexDirection={'column'} alignItems={'center'} justifyContent='center'>
                                     <Image
-                                        src='/saludentis.webp'
+                                        src={icon.cake}
                                         width={150}
                                         height={150}
                                         alt='Saludentis logo'
@@ -87,7 +88,7 @@ const LoginPage: NextPage = () => {
                                     />
                                 </Grid>
                                 <Grid item xs={12} marginBottom={2}>
-                                    <Button type='submit' fullWidth>
+                                    <Button type='submit' fullWidth color='secondary'>
                                         <Typography color='white' variant='h6'>Iniciar Sesión</Typography>
                                     </Button>
                                 </Grid>

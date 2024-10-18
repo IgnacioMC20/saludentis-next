@@ -2,6 +2,7 @@ import { Box, Grid, TextField, Button, Typography, Radio, FormControlLabel, Radi
 import { useRouter } from 'next/router'
 import { useForm } from 'react-hook-form'
 
+import { Patient } from '../../interfaces'
 import { validations } from '@/utils'
 
 type PatientFormData = {
@@ -30,11 +31,8 @@ export default function PacientInfo() {
   const { register, handleSubmit, formState: { errors } } = useForm<PatientFormData>()
 
   const onSubmitForm = (data: PatientFormData) => {
-  
+
     console.log(data)
-    if (errors) {
-      console.log(errors)
-    }
   }
 
   return (
@@ -47,6 +45,7 @@ export default function PacientInfo() {
               fullWidth
               label='Nombres'
               variant='outlined'
+              value={isNewPatient ? '' : 'Ign'}
               placeholder='Ingrese los nombres del paciente'
               {...register('firstName', {
                 required: 'Este campo es requerido',
@@ -242,13 +241,14 @@ export default function PacientInfo() {
           </Grid>
 
           {/* Botón de Enviar */}
-          <Grid item xs={12} textAlign={'center'}>
+          <Grid item xs={12} textAlign={'center'} marginBottom={2}>
             <Button variant='contained' type='submit' color='primary'>
               <Typography variant='h6'>Guardar</Typography>
             </Button>
           </Grid>
         </Grid>
       </form>
+
     </Box>
   )
 }

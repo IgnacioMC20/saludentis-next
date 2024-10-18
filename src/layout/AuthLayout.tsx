@@ -1,16 +1,23 @@
+import { Box } from '@mui/material'
 import { FC } from 'react'
+
+import { background } from '@/themes'
 
 interface Props {
     children: React.ReactNode
-
 }
 
 export const AuthLayout: FC<Props> = ({ children }) => {
     return (
-        <div style={{
+        <Box sx={{
             display: 'flex',
             flexDirection: 'column',
             minHeight: '100vh',
+            width: '100vw',
+            padding: '0',
+            backgroundImage: `url(${background.cake.src})`,
+            backgroundRepeat: 'repeat',
+            backgroundSize: '400px 400px',
         }}>
             <main style={{
                 flex: 1,
@@ -22,6 +29,6 @@ export const AuthLayout: FC<Props> = ({ children }) => {
             }}>
                 {children}
             </main>
-        </div>
+        </Box>
     )
 }

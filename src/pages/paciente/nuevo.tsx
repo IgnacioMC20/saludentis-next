@@ -15,12 +15,14 @@ export default function PatientPage() {
                 minHeight: '500px',
                 height: '700px',
                 boxShadow: 'none',
-                overflow: 'auto',
             }}>
                 <Typography variant='h4' mb={3} align='center'>Nuevo Paciente</Typography>
                 <Box sx={{
                     paddingTop: 3,
+                    overflow: 'auto',
                     width: '100%',
+                    height: '90%',
+                    paddingX: { xs: 1, md: 4 },
                 }}>
                     <PacientInfo />
                 </Box>
