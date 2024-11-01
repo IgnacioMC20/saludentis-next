@@ -2,7 +2,7 @@ import { Box, Grid, TextField, Button, Typography, Radio, FormControlLabel, Radi
 import { useRouter } from 'next/router'
 import { useForm } from 'react-hook-form'
 
-import { Patient } from '../../interfaces'
+// import { Patient } from '../../interfaces'
 import { validations } from '@/utils'
 
 type PatientFormData = {

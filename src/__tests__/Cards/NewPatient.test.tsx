@@ -32,9 +32,9 @@ describe('NewPatientCard', () => {
     )
 
     const niñoLink = screen.getByText('Niño').closest('a')
-    expect(niñoLink).toHaveAttribute('href', '/nuevo/nino')
+    expect(niñoLink).toHaveAttribute('href', '/paciente/nuevo')
 
     const adultoLink = screen.getByText('Adulto').closest('a')
-    expect(adultoLink).toHaveAttribute('href', '/nuevo/adulto')
+    expect(adultoLink).toHaveAttribute('href', '/paciente/nuevo?tipo=adulto')
   })
 })
