@@ -15,7 +15,7 @@ export const AuthLayout: FC<Props> = ({ children }) => {
             minHeight: '100vh',
             width: '100vw',
             padding: '0',
-            backgroundImage: `url(${background.cake.src})`,
+            backgroundImage: `url(${background.default.src})`,
             backgroundRepeat: 'repeat',
             backgroundSize: '400px 400px',
         }}>

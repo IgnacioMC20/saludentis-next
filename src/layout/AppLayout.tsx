@@ -16,7 +16,7 @@ export const Layout: FC<Props> = ({ children }) => {
             flexDirection: 'column',
             minHeight: '100vh',
             width: '100vw',
-            background: `url(${background.cake.src})`,
+            background: `url(${background.default.src})`,
             backgroundRepeat: 'repeat',
             backgroundSize: '200px 200px',
             padding: '0',

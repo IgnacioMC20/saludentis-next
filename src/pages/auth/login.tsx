@@ -48,7 +48,7 @@ const LoginPage: NextPage = () => {
                             <Grid container spacing={4}>
                                 <Grid item xs={12} marginY={2} display='flex' flexDirection={'column'} alignItems={'center'} justifyContent='center'>
                                     <Image
-                                        src={icon.cake}
+                                        src={icon.default}
                                         width={150}
                                         height={150}
                                         alt='Saludentis logo'
@@ -88,7 +88,7 @@ const LoginPage: NextPage = () => {
                                     />
                                 </Grid>
                                 <Grid item xs={12} marginBottom={2}>
-                                    <Button type='submit' fullWidth color='secondary'>
+                                    <Button type='submit' fullWidth color='primary'>
                                         <Typography color='white' variant='h6'>Iniciar Sesión</Typography>
                                     </Button>
                                 </Grid>

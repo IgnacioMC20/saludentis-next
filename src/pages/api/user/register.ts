@@ -18,6 +18,9 @@ export default function (req: NextApiRequest, res: NextApiResponse<Data>) {
         case 'POST':
             return registerUser(req, res)
 
+        case 'GET':
+            return seedUser(req, res)
+
         default:
             return res.status(400).json({
                 ok: false,
@@ -25,6 +28,36 @@ export default function (req: NextApiRequest, res: NextApiResponse<Data>) {
             })
     }
 }
+
+const seedUser = async (req: NextApiRequest, res: NextApiResponse<Data>) => {
+    await db.connect()
+    const user = await User.findOne({ email: 'jm10cuyun@gmail.com' })
+    await db.disconnect()
+
+    if (user) {
+        return res.status(400).json({
+            ok: false,
+            message: 'El usuario ya existe'
+        })
+    }
+
+    const newUser = new User({
+        name: 'Ignacio',
+        lastName: 'Cuyun',
+        email: 'jm10cuyun@gmail.com',
+        password: bcrypt.hashSync('123456')
+    })
+
+    await db.connect()
+    await newUser.save({ validateBeforeSave: true })
+    await db.disconnect()
+
+    return res.status(200).json({
+        ok: true,
+        message: 'Usuario creado'
+    })
+}
+
 // Todo: hacer mas validaciones
 const registerUser = async (req: NextApiRequest, res: NextApiResponse<Data>) => {
     const { email = '', password = '', name = '', lastName = '' } = req.body
