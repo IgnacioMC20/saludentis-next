@@ -7,8 +7,7 @@ import { useForm } from 'react-hook-form'
 import PatientFormSkeleton from './PatientInfo.Skeleton'
 import { saludentisApi } from '@/api'
 import { usePatient } from '@/hooks'
-import { getAge, showToast, validations } from '@/utils'
-import { formatPatientData } from '@/utils/formatPatientData'
+import { getAge, showToast, validations, formatPatientData } from '@/utils'
 
 type PatientFormData = {
   firstName: string
