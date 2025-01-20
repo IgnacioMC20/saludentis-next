@@ -1,9 +1,11 @@
 import { Box, Grid, TextField, Button, Typography, Radio, FormControlLabel, RadioGroup, FormLabel, FormControl } from '@mui/material'
 import { useRouter } from 'next/router'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 
 // import { Patient } from '../../interfaces'
-import { validations } from '@/utils'
+import PatientFormSkeleton from './PatientInfo.Skeleton'
+import { getAge, validations } from '@/utils'
 
 type PatientFormData = {
   firstName: string
@@ -27,15 +29,28 @@ export default function PacientInfo() {
 
   const router = useRouter()
   const isNewPatient = router.pathname.includes('nuevo')
-  console.log(isNewPatient)
-  const { register, handleSubmit, formState: { errors } } = useForm<PatientFormData>()
+  const { register, handleSubmit, formState: { errors }, watch } = useForm<PatientFormData>()
+  const guardianName = watch('guardianName')
+  const birthDate = watch('birthDate')
+  const [age, setAge] = useState<string | null>(getAge(birthDate))
+
+  // TODO: use tanstack to load patient
+  const [isLoading, setIsLoading] = useState(true)
+
+  // TODO: borrar - Simular carga de datos
+  useEffect(() => {
+    setTimeout(() => setIsLoading(false), 2000)
+  }, [])
+
+  useEffect(() => {
+    setAge(getAge(birthDate))
+  }, [birthDate])
 
   const onSubmitForm = (data: PatientFormData) => {
-
     console.log(data)
   }
 
-  return (
+  return (isLoading ? <PatientFormSkeleton /> : (
     <Box sx={{ flexGrow: 1, p: 0 }}>
       <form onSubmit={handleSubmit(onSubmitForm)} noValidate>
         <Grid container spacing={2}>
@@ -110,16 +125,16 @@ export default function PacientInfo() {
             />
           </Grid>
 
-          {/* Dirección */}
+          {/* Edad */}
           <Grid item xs={12} sm={6}>
             <TextField
               fullWidth
-              label='Dirección'
+              label='Edad'
+              hiddenLabel
               variant='outlined'
-              placeholder='Ingrese la dirección del paciente'
-              {...register('address')}
-              error={!!errors.address}
-              helperText={errors.address?.message}
+              value={age ?? ''}
+              InputLabelProps={{ shrink: true }}
+              disabled
             />
           </Grid>
 
@@ -149,6 +164,19 @@ export default function PacientInfo() {
               {...register('phone')}
               error={!!errors.phone}
               helperText={errors.phone?.message}
+            />
+          </Grid>
+
+          {/* Dirección */}
+          <Grid item xs={12}>
+            <TextField
+              fullWidth
+              label='Dirección'
+              variant='outlined'
+              placeholder='Ingrese la dirección del paciente'
+              {...register('address')}
+              error={!!errors.address}
+              helperText={errors.address?.message}
             />
           </Grid>
 
@@ -189,18 +217,21 @@ export default function PacientInfo() {
           </Grid>
 
           {/* Relación del Encargado */}
-          <Grid item xs={12}>
-            <FormControl component='fieldset'>
-              <FormLabel component='legend'>Relación del Encargado</FormLabel>
-              <RadioGroup row defaultValue='2' {...register('guardianRelationship')}>
-                <FormControlLabel value='2' control={<Radio />} label='Papá' />
-                <FormControlLabel value='1' control={<Radio />} label='Mamá' />
-                <FormControlLabel value='3' control={<Radio />} label='Encargado' />
-              </RadioGroup>
-            </FormControl>
-          </Grid>
+          {
+            guardianName && guardianName.length > 0 &&
+            (<Grid item xs={12}>
+              <FormControl component='fieldset'>
+                <FormLabel component='legend'>Relación del Encargado</FormLabel>
+                <RadioGroup row defaultValue='2' {...register('guardianRelationship')}>
+                  <FormControlLabel value='2' control={<Radio />} label='Papá' />
+                  <FormControlLabel value='1' control={<Radio />} label='Mamá' />
+                  <FormControlLabel value='3' control={<Radio />} label='Encargado' />
+                </RadioGroup>
+              </FormControl>
+            </Grid>)
+          }
 
-          {/* Última Visita */}
+          {/* Última visita */}
           <Grid item xs={12} sm={6}>
             <TextField
               fullWidth
@@ -210,7 +241,11 @@ export default function PacientInfo() {
               InputLabelProps={{
                 shrink: true,
               }}
-              {...register('lastVisit')}
+              {...register('lastVisit', {
+                required: 'Este campo es requerido',
+              })}
+              error={!!errors.birthDate}
+              helperText={errors.birthDate?.message}
             />
           </Grid>
 
@@ -250,5 +285,6 @@ export default function PacientInfo() {
       </form>
 
     </Box>
+  )
   )
 }
