@@ -1,26 +1,45 @@
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { render, screen } from '@testing-library/react'
 import { useRouter } from 'next/router'
-import React from 'react'
 
+import { usePatient } from '../../hooks'
 import PacientInfo from '@/components/PatientComponents/PacientInfo'
 import '@testing-library/jest-dom'
 
-// Mock del módulo 'next/router'
+// Mock 'next/router'
 jest.mock('next/router', () => ({
   useRouter: jest.fn(),
 }))
 
+jest.mock('../../hooks', () => ({
+  usePatient: jest.fn(),
+}))
+
 describe('PatientInfo component', () => {
   beforeEach(() => {
-    // Definimos el mock de useRouter para especificar el pathname
     (useRouter as jest.Mock).mockReturnValue({
-      pathname: '/pacientes/nuevo', // o cualquier ruta que necesites
+      pathname: '/pacientes/nuevo',
+      query: { id: '123' }
     })
+
+      // Mock de la respuesta de usePatient
+      ; (usePatient as jest.Mock).mockReturnValue({
+        data: { ok: true, data: [] },
+        isLoading: false,
+      })
   })
-  // TODO: Fix the test
-  it('should render the PacientInfo component', () => {
-    render(<PacientInfo />)
-    expect(screen.getByLabelText('Nombres')).toBeInTheDocument()
+
+  it('should render the PacientInfo component', async () => {
+    const queryClient = new QueryClient()
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <PacientInfo />
+      </QueryClientProvider>
+    )
+
+    expect(screen.getByLabelText('Nombre')).toBeInTheDocument()
+    expect(screen.getByLabelText('Segundo Nombre')).toBeInTheDocument()
     expect(screen.getByLabelText('Fecha de Nacimiento')).toBeInTheDocument()
     expect(screen.getByLabelText('CUI/DPI')).toBeInTheDocument()
     expect(screen.getByLabelText('Edad')).toBeInTheDocument()
@@ -32,7 +51,24 @@ describe('PatientInfo component', () => {
     expect(screen.getByLabelText('Ocupación')).toBeInTheDocument()
     expect(screen.getByLabelText('Última visita')).toBeInTheDocument()
     expect(screen.getByLabelText('Último tratamiento')).toBeInTheDocument()
-
     expect(screen.getByRole('button', { name: 'Guardar' })).toBeInTheDocument()
+  })
+
+  it('should not render the PacientInfo component', async () => {
+    ; (usePatient as jest.Mock).mockReturnValue({
+      data: { ok: true, data: [] },
+      isLoading: true,
+    })
+
+    const queryClient = new QueryClient()
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <PacientInfo />
+      </QueryClientProvider>
+    )
+
+    expect(screen.queryByLabelText('Nombre')).not.toBeInTheDocument()
+
   })
 })

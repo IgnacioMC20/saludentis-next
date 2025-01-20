@@ -1,25 +1,29 @@
 import { Box, Grid, TextField, Button, Typography, Radio, FormControlLabel, RadioGroup, FormLabel, FormControl } from '@mui/material'
 import { useRouter } from 'next/router'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 
 // import { Patient } from '../../interfaces'
 import PatientFormSkeleton from './PatientInfo.Skeleton'
-import { getAge, validations } from '@/utils'
+import { saludentisApi } from '@/api'
+import { usePatient } from '@/hooks'
+import { getAge, showToast, validations } from '@/utils'
+import { formatPatientData } from '@/utils/formatPatientData'
 
 type PatientFormData = {
   firstName: string
+  middleName: string
   lastName: string
-  dpi: string // DPI or CUI
-  gender: 'Male' | 'Female'
+  nationalId: string // DPI or CUI
+  gender: string
   birthDate: string // Birth date in ISO format (YYYY-MM-DD)
   address: string
   email: string
   phone: string
-  maritalStatus: 'Single' | 'Married' | 'Divorced' | 'Separated' | 'Partnered'
+  maritalStatus: string,
   occupation: string
   guardianName: string
-  guardianRelationship: 'Father' | 'Mother' | 'Guardian'
+  guardianPhone: string
   lastVisit: string // Last visit date in ISO format (YYYY-MM-DD)
   lastTreatment: string
   consultationReason: string
@@ -28,45 +32,102 @@ type PatientFormData = {
 export default function PacientInfo() {
 
   const router = useRouter()
+  const { id } = router.query
   const isNewPatient = router.pathname.includes('nuevo')
-  const { register, handleSubmit, formState: { errors }, watch } = useForm<PatientFormData>()
+  const { edit } = router.query
+  const isEditEnabled = edit === 'true'
+
+  const { data: response, isLoading } = usePatient(id as string)
+  // Formatear los datos del paciente solo cuando sea necesario
+  const patientData = useMemo(() => {
+    return response?.ok ? formatPatientData(response.data) : null
+  }, [response])
+
+  const { register, handleSubmit, watch, reset, formState: { errors } } = useForm<PatientFormData>({
+    defaultValues: {
+      firstName: '',
+      middleName: '',
+      lastName: '',
+      nationalId: '',
+      gender: 'Femenino',
+      birthDate: '',
+      address: '',
+      email: '',
+      phone: '',
+      maritalStatus: 'Soltero',
+      occupation: '',
+      guardianName: '',
+      guardianPhone: '',
+      lastVisit: '',
+      lastTreatment: '',
+      consultationReason: '',
+    },
+  })
+
   const guardianName = watch('guardianName')
   const birthDate = watch('birthDate')
   const [age, setAge] = useState<string | null>(getAge(birthDate))
 
-  // TODO: use tanstack to load patient
-  const [isLoading, setIsLoading] = useState(true)
-
-  // TODO: borrar - Simular carga de datos
   useEffect(() => {
-    setTimeout(() => setIsLoading(false), 2000)
-  }, [])
+    if (patientData) {
+      console.log('reset')
+      reset(patientData)
+    }
+  }, [patientData, reset])
 
   useEffect(() => {
     setAge(getAge(birthDate))
   }, [birthDate])
 
-  const onSubmitForm = (data: PatientFormData) => {
-    console.log(data)
+  const onSubmitForm = async (patientData: PatientFormData) => {
+    const response = await saludentisApi({
+      url: '/patient',
+      method: 'POST',
+      data: patientData
+    })
+    const { ok, message, data } = await response.json()
+
+    console.log({ ok, message, data })
+
+    if (!ok) showToast(message, 'error')
+    else {
+      showToast(message, 'success')
+      router.push(`/paciente/${data._id}`)
+    }
   }
 
   return (isLoading ? <PatientFormSkeleton /> : (
     <Box sx={{ flexGrow: 1, p: 0 }}>
       <form onSubmit={handleSubmit(onSubmitForm)} noValidate>
         <Grid container spacing={2}>
-          {/* Nombres */}
+          {/* Nombre */}
           <Grid item xs={12} sm={6}>
             <TextField
               fullWidth
-              label='Nombres'
+              label='Nombre'
               variant='outlined'
-              value={isNewPatient ? '' : 'Ign'}
+              defaultValue={isNewPatient ? '' : 'Ign'}
               placeholder='Ingrese los nombres del paciente'
               {...register('firstName', {
                 required: 'Este campo es requerido',
               })}
               error={!!errors.firstName}
               helperText={errors.firstName?.message}
+            />
+          </Grid>
+          {/* Segundo Nombre */}
+          <Grid item xs={12} sm={6}>
+            <TextField
+              fullWidth
+              label='Segundo Nombre'
+              variant='outlined'
+              defaultValue={isNewPatient ? '' : 'Ign Segundo'}
+              placeholder='Ingrese el segundo nombre del paciente'
+              {...register('middleName', {
+                required: 'Este campo es requerido',
+              })}
+              error={!!errors.middleName}
+              helperText={errors.middleName?.message}
             />
           </Grid>
 
@@ -92,7 +153,15 @@ export default function PacientInfo() {
               label='CUI/DPI'
               variant='outlined'
               placeholder='Ingrese el CUI/DPI del paciente'
-              {...register('dpi')}
+              {...register('nationalId', {
+                required: 'Este campo es requerido',
+                pattern: {
+                  value: /^[0-9]+$/,
+                  message: 'Solo se permiten números del 0 al 9',
+                },
+              })}
+              error={!!errors.nationalId}
+              helperText={errors.nationalId?.message}
             />
           </Grid>
 
@@ -168,7 +237,7 @@ export default function PacientInfo() {
           </Grid>
 
           {/* Dirección */}
-          <Grid item xs={12}>
+          <Grid item xs={12} sm={6}>
             <TextField
               fullWidth
               label='Dirección'
@@ -216,18 +285,32 @@ export default function PacientInfo() {
             />
           </Grid>
 
-          {/* Relación del Encargado */}
+          {/* Numero del Encargado */}
           {
             guardianName && guardianName.length > 0 &&
             (<Grid item xs={12}>
-              <FormControl component='fieldset'>
+              {/* <FormControl component='fieldset'>
                 <FormLabel component='legend'>Relación del Encargado</FormLabel>
-                <RadioGroup row defaultValue='2' {...register('guardianRelationship')}>
+                <RadioGroup row defaultValue='2' {...register('guardianPhone')}>
                   <FormControlLabel value='2' control={<Radio />} label='Papá' />
                   <FormControlLabel value='1' control={<Radio />} label='Mamá' />
                   <FormControlLabel value='3' control={<Radio />} label='Encargado' />
                 </RadioGroup>
-              </FormControl>
+              </FormControl> */}
+              <TextField
+                fullWidth
+                label='Número del Encargado'
+                variant='outlined'
+                placeholder='Ingrese el número de teléfono del encargado'
+                {...register('guardianPhone', {
+                  pattern: {
+                    value: /^[0-9]+$/,
+                    message: 'Solo se permiten números del 0 al 9',
+                  }
+                })}
+                error={!!errors.guardianPhone}
+                helperText={errors.guardianPhone?.message}
+              />
             </Grid>)
           }
 
@@ -241,11 +324,9 @@ export default function PacientInfo() {
               InputLabelProps={{
                 shrink: true,
               }}
-              {...register('lastVisit', {
-                required: 'Este campo es requerido',
-              })}
-              error={!!errors.birthDate}
-              helperText={errors.birthDate?.message}
+              {...register('lastVisit')}
+              error={!!errors.lastVisit}
+              helperText={errors.lastVisit?.message}
             />
           </Grid>
 
@@ -277,7 +358,7 @@ export default function PacientInfo() {
 
           {/* Botón de Enviar */}
           <Grid item xs={12} textAlign={'center'} marginBottom={2}>
-            <Button variant='contained' type='submit' color='primary'>
+            <Button disabled={!isEditEnabled && !isNewPatient} variant='contained' type='submit' color='primary'>
               <Typography variant='h6'>Guardar</Typography>
             </Button>
           </Grid>
