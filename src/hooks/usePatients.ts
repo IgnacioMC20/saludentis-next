@@ -1,18 +1,17 @@
 import { useQuery } from '@tanstack/react-query'
 
 import { saludentisApi } from '@/api'
-import { ApiResponse } from '@/pages/api/patient/[id]'
+import { ApiResponse } from '@/pages/api/patient'
 
-export const usePatient = (id: string = '') => {
+export const usePatients = () => {
 
     const patient = useQuery<ApiResponse, Error>(
         {
-            queryKey: ['patient', `${id}`],
-            staleTime: 5 * 60 * 1000, // Cache data for 5 minutes
+            queryKey: ['patients'],
+            staleTime: 12 * 5 * 60 * 1000, // Cache data for 60 minutes
             retry: 2, // Retry fetching the data twice on failure
-            enabled: !!id, // Only fetch if ID exists
             queryFn: async () => {
-                const response = await saludentisApi({ url: `/patient/${id}` })
+                const response = await saludentisApi({ url: '/patient' })
                 const data = await response.json()
                 return data
             },
