@@ -1,12 +1,8 @@
 import mongoose, { Schema, model, Model } from 'mongoose'
 
+import { ITreatment } from '@/interfaces'
+
 // Interface for Treatment
-export interface ITreatment {
-    description?: string;
-    price?: number;
-    createdAt?: Date;
-    updatedAt?: Date;
-}
 
 // Schema for Treatment
 const treatmentSchema = new Schema<ITreatment>({

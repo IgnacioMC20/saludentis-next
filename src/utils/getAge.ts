@@ -22,3 +22,14 @@ export const getAge = (birthDate: string): string | null => {
 
     return age
 }
+
+export function formatDateToDDMMYYYY(dateString: string): string {
+    const date = new Date(dateString) // Convertir la cadena a un objeto Date
+
+    // Extraer día, mes y año
+    const day = String(date.getUTCDate()).padStart(2, '0') // Asegura dos dígitos
+    const month = String(date.getUTCMonth() + 1).padStart(2, '0') // Meses comienzan en 0
+    const year = date.getUTCFullYear()
+
+    return `${day}/${month}/${year}` // Retorna la fecha en formato dd/mm/yyyy
+}

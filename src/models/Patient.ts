@@ -1,35 +1,6 @@
-import mongoose, { Schema, model, Model, Types } from 'mongoose'
+import mongoose, { Schema, model, Model } from 'mongoose'
 
-// Interface for Patient
-export interface IPatient {
-    _id?: Types.ObjectId;
-    __v?: number;
-    firstName?: string;
-    middleName?: string;
-    lastName?: string;
-    address?: string;
-    maritalStatus?: string;
-    occupation?: string;
-    guardianId?: mongoose.Types.ObjectId; // Refers to Guardian collection
-    guardianName?: string;
-    guardianPhone?: string;
-    email?: string;
-    lastVisit?: Date;
-    birthDate?: Date;
-    phone?: number;
-    gender?: string;
-    nationalId?: string;
-    diet?: string;
-    lastMedicalCheckup?: string;
-    medications?: string;
-    reasonForVisit?: string;
-    emotionalState?: string;
-    physicalActivity?: string;
-    createdAt?: Date;
-    updatedAt?: Date;
-    lastTreatment?: string;
-    consultationReason?: string;
-}
+import { IPatient } from '@/interfaces'
 
 // Schema for Patient
 const patientSchema = new Schema<IPatient>({
@@ -47,14 +18,15 @@ const patientSchema = new Schema<IPatient>({
     birthDate: { type: Date },
     phone: { type: Number },
     gender: { type: String },
+    physicalActivity: { type: String },
+    lastTreatment: { type: String },
     // DPI/CUI unico
     nationalId: { type: String, unique: true, required: true, dropDups: true },
     diet: { type: String },
     lastMedicalCheckup: { type: String },
     medications: { type: String },
-    reasonForVisit: { type: String },
+    consultationReason: { type: String },
     emotionalState: { type: String },
-    physicalActivity: { type: String },
 }, {
     timestamps: true // Automatically adds `createdAt` and `updatedAt`
 })
