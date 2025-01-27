@@ -1,29 +1,17 @@
 import { ArrowCircleRightOutlined } from '@mui/icons-material'
-import { Card, CardContent, CardHeader, Box, Button, Typography, Link } from '@mui/material'
+import { Card, CardContent, CardHeader, Box, Button, Typography, Link, CircularProgress } from '@mui/material'
 import NextLink from 'next/link'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
 
 import { Select } from '..'
-
-const patients = [
-    {
-        id: 1,
-        name: 'Juan Perez',
-    },
-    {
-        id: 2,
-        name: 'Maria Lopez',
-    },
-    {
-        id: 3,
-        name: 'Carlos Rodriguez',
-    },
-]
+import { usePatients } from '@/hooks'
 
 export const PatientSelect = () => {
     const router = useRouter()
-    const [patientId, setPatientId] = useState<number | null>(null)
+    const [patientId, setPatientId] = useState<string | null>(null)
+
+    const { data: patients, isLoading } = usePatients()
 
     function handlePatientSubmit(): void {
         if (patientId) {
@@ -51,29 +39,37 @@ export const PatientSelect = () => {
                     textAlign: 'center',
                     mb: 5
                 }} />
-                {/* <form> */}
-                <Select patients={patients} setPatientId={setPatientId} />
+                {
+                    isLoading ? (
+                        <CircularProgress />
+                    ) :
+                        patients?.data.length > 0 && patients && (<Select patients={patients.data} setPatientId={setPatientId} />)
+                }
                 <Box display={'flex'} flexDirection={'column'} alignItems={'center'}>
-                    <Box my={4}>
-                        <Button
-                            variant='contained'
-                            color='primary'
-                            endIcon={<ArrowCircleRightOutlined />}
-                            sx={{
-                                padding: '1rem'
-                            }}
-                            onClick={handlePatientSubmit}
-                        >
-                            <Typography variant='h6' color={'white'}>Ingresar</Typography>
-                        </Button>
-                    </Box>
+                    {
+                        patients?.data.length > 0 && (
+                            <Box my={4}>
+                                <Button
+                                    variant='contained'
+                                    color='primary'
+                                    endIcon={<ArrowCircleRightOutlined />}
+                                    sx={{
+                                        padding: '1rem'
+                                    }}
+                                    onClick={handlePatientSubmit}
+                                >
+                                    <Typography variant='h6' color={'white'}>Ingresar</Typography>
+                                </Button>
+                            </Box>
+                        )
+                    }
+
                     <NextLink href={'https://calendar.google.com/calendar'} passHref legacyBehavior>
                         <Link display={'flex'} alignItems={'center'}>
                             <Typography variant='h6'>Calendario</Typography>
                         </Link>
                     </NextLink>
                 </Box>
-                {/* </form> */}
             </CardContent>
         </Card >
     )

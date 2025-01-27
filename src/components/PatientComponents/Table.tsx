@@ -9,13 +9,15 @@ import {
     TableRow,
     Table as MaterialTable,
     IconButton,
+    Link,
+    Typography,
 } from '@mui/material'
 import NextLink from 'next/link'
 import { ChangeEvent, useEffect, useState } from 'react'
 
-import { Loading } from './Loading'
+import { Loading } from '../Loading'
 import { theme } from '@/themes'
-import { getProperName } from '@/utils'
+import { formatDateToDDMMYYYY, getFullName, getProperName } from '@/utils'
 
 type DataIllnesses = {
     id: string
@@ -36,7 +38,6 @@ type DataPatients = {
     numeroTelefonico: string
     whatsapp?: boolean
     edad: string
-
 }
 
 type DataBalance = {
@@ -54,6 +55,7 @@ type Props = {
 }
 
 export const Table = ({ data, progress = false, customRowsPerPage = 10 }: Props) => {
+    if (!data.length) return null
 
     const rows = data.map((item) => {
         return {
@@ -114,7 +116,16 @@ export const Table = ({ data, progress = false, customRowsPerPage = 10 }: Props)
                                                             style={{ minWidth: column.minWidth }}
                                                             sx={{ backgroundColor: theme.gray }}
                                                         >
-                                                            #
+                                                            <Typography
+                                                                width={'100%'}
+                                                                sx={{
+                                                                    fontWeight: 700,
+                                                                    textDecoration: 'none',
+                                                                }}
+                                                                textAlign={'center'}
+                                                            >
+                                                                #
+                                                            </Typography>
                                                         </TableCell>
                                                     )
                                                 }
@@ -125,7 +136,7 @@ export const Table = ({ data, progress = false, customRowsPerPage = 10 }: Props)
                                                         style={{ minWidth: column.minWidth }}
                                                         sx={{ backgroundColor: theme.gray }}
                                                     >
-                                                        {getProperName(column.label)}
+                                                        {getFullName(column.label)}
                                                     </TableCell>
                                                 )
                                             }
@@ -140,16 +151,40 @@ export const Table = ({ data, progress = false, customRowsPerPage = 10 }: Props)
                                                     <TableRow hover role="checkbox" tabIndex={-1} key={row.id}>
                                                         {columns.map((column) => {
                                                             const value = (row as { [key: string]: any })[column.id]
+                                                            const phone = (row as { [key: string]: any })['Numero de Telefono']
+                                                            const rowIndex = rows.indexOf(row) + 1
 
                                                             if (!value) {
                                                                 return (
                                                                     <TableCell key={column.id} align={column.align} />
                                                                 )
                                                             }
+                                                            // Render a link
+                                                            if (column.id === 'id') {
+                                                                return (
+                                                                    <TableCell key={column.id} align={column.align}>
+                                                                        <NextLink href={`/paciente/${value}`} passHref legacyBehavior>
+                                                                            <Link display={'flex'} alignItems={'center'}>
+                                                                                <Typography
+                                                                                    width={'100%'}
+                                                                                    sx={{
+                                                                                        fontWeight: 700,
+                                                                                        textDecoration: 'none',
+                                                                                    }}
+                                                                                    textAlign={'center'}
+                                                                                    color={'black'}
+                                                                                >
+                                                                                    {rowIndex}
+                                                                                </Typography>
+                                                                            </Link>
+                                                                        </NextLink>
+                                                                    </TableCell>
+                                                                )
+                                                            }
                                                             if (typeof value === 'boolean') {
                                                                 return (
                                                                     <TableCell key={column.id} align={column.align}>
-                                                                        <NextLink href={'https://api.whatsapp.com/send?phone=502'} target='_blank'>
+                                                                        <NextLink href={`https://api.whatsapp.com/send?phone=502${phone}`} target='_blank'>
                                                                             <IconButton>
                                                                                 <WhatsApp />
                                                                             </IconButton>
@@ -162,7 +197,7 @@ export const Table = ({ data, progress = false, customRowsPerPage = 10 }: Props)
                                                                     {
                                                                         column.format(value) && typeof value === 'number'
                                                                             ? column.format(value)
-                                                                            : getProperName(value)
+                                                                            : (column.id === 'Fecha de Nacimiento' ? formatDateToDDMMYYYY(value) : getProperName(value))
                                                                     }
                                                                 </TableCell>
                                                             )

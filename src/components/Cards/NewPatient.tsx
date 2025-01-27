@@ -3,16 +3,17 @@ import { Button, Card, CardContent, Grid, Typography } from '@mui/material'
 import dynamic from 'next/dynamic'
 import NextLink from 'next/link'
 
+import { usePatients } from '@/hooks'
+import { getAgeGroupData } from '@/utils'
+
 const Chart = dynamic(() => import('../Chart'), {
     ssr: false
 })
 
-const data = [
-    { id: 0, value: 10, label: 'Niños' },
-    { id: 1, value: 15, label: 'Adultos' },
-]
-
 export const NewPatient = () => {
+
+    const { data: patientsData } = usePatients()
+    const patientsChartData = patientsData ? getAgeGroupData(patientsData.data) : []
     return (
         <Card sx={{
             boxShadow: 'none',
@@ -34,7 +35,7 @@ export const NewPatient = () => {
                     padding: 0,
                 }}>
                     <Grid item my={1} width={'100%'} display={'flex'} justifyContent={'space-evenly'} alignItems={'center'}>
-                        <Chart data={data} />
+                        <Chart data={patientsChartData} />
                     </Grid>
                     <Grid item display={'flex'} justifyContent={'space-evenly'} alignItems={'center'} flexDirection={{ xs: 'column', md: 'row' }} width={'100%'}>
                         <Grid item my={1}>
@@ -52,7 +53,6 @@ export const NewPatient = () => {
                             </NextLink>
                         </Grid>
                     </Grid>
-
                 </Grid>
             </CardContent>
         </Card>

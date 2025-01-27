@@ -7,7 +7,7 @@ import { useForm } from 'react-hook-form'
 import PatientFormSkeleton from './PatientInfo.Skeleton'
 import { saludentisApi } from '@/api'
 import { usePatient } from '@/hooks'
-import { getAge, showToast, validations, formatPatientData } from '@/utils'
+import { getAge, showToast, validations } from '@/utils'
 
 type PatientFormData = {
   firstName: string
@@ -31,16 +31,15 @@ type PatientFormData = {
 export default function PacientInfo() {
 
   const router = useRouter()
-  const { id } = router.query
+  const { id, edit } = router.query
   const isNewPatient = router.pathname.includes('nuevo')
-  const { edit } = router.query
   const isEditEnabled = edit === 'true'
 
   const { data: response, isLoading } = usePatient(id as string)
-  // Formatear los datos del paciente solo cuando sea necesario
+
   const patientData = useMemo(() => {
-    return response?.ok ? formatPatientData(response.data) : null
-  }, [response])
+    return response?.ok ? response.data : null
+  }, [response, isLoading])
 
   const { register, handleSubmit, watch, reset, formState: { errors } } = useForm<PatientFormData>({
     defaultValues: {
@@ -48,7 +47,6 @@ export default function PacientInfo() {
       middleName: '',
       lastName: '',
       nationalId: '',
-      gender: 'Femenino',
       birthDate: '',
       address: '',
       email: '',
@@ -69,7 +67,6 @@ export default function PacientInfo() {
 
   useEffect(() => {
     if (patientData) {
-      console.log('reset')
       reset(patientData)
     }
   }, [patientData, reset])
@@ -79,14 +76,14 @@ export default function PacientInfo() {
   }, [birthDate])
 
   const onSubmitForm = async (patientData: PatientFormData) => {
+
     const response = await saludentisApi({
       url: '/patient',
-      method: 'POST',
+      method: isEditEnabled ? 'PUT' : 'POST',
       data: patientData
     })
-    const { ok, message, data } = await response.json()
 
-    console.log({ ok, message, data })
+    const { ok, message, data } = await response.json()
 
     if (!ok) showToast(message, 'error')
     else {
@@ -105,7 +102,6 @@ export default function PacientInfo() {
               fullWidth
               label='Nombre'
               variant='outlined'
-              defaultValue={isNewPatient ? '' : 'Ign'}
               placeholder='Ingrese los nombres del paciente'
               {...register('firstName', {
                 required: 'Este campo es requerido',
@@ -120,7 +116,6 @@ export default function PacientInfo() {
               fullWidth
               label='Segundo Nombre'
               variant='outlined'
-              defaultValue={isNewPatient ? '' : 'Ign Segundo'}
               placeholder='Ingrese el segundo nombre del paciente'
               {...register('middleName', {
                 required: 'Este campo es requerido',
@@ -168,7 +163,7 @@ export default function PacientInfo() {
           <Grid item xs={12} sm={6}>
             <FormControl component='fieldset'>
               <FormLabel component='legend'>Sexo</FormLabel>
-              <RadioGroup row defaultValue='Masculino' {...register('gender')}>
+              <RadioGroup row {...register('gender')}>
                 <FormControlLabel value='Masculino' control={<Radio />} label='Masculino' />
                 <FormControlLabel value='Femenino' control={<Radio />} label='Femenino' />
               </RadioGroup>
@@ -252,7 +247,7 @@ export default function PacientInfo() {
           <Grid item xs={12}>
             <FormControl component='fieldset'>
               <FormLabel component='legend'>Estado Civil</FormLabel>
-              <RadioGroup row defaultValue='Soltero' {...register('maritalStatus')}>
+              <RadioGroup row {...register('maritalStatus')}>
                 <FormControlLabel value='Soltero' control={<Radio />} label='Soltero' />
                 <FormControlLabel value='Casado' control={<Radio />} label='Casado' />
                 <FormControlLabel value='Divorciado' control={<Radio />} label='Divorciado' />
