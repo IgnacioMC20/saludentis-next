@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 
+import { cleanResponse } from '@/api'
 import { db } from '@/database'
 import Patient from '@/models/Patient'
 
@@ -34,7 +35,7 @@ async function getPatientById(req: NextApiRequest, res: NextApiResponse<ApiRespo
     await db.connect()
 
     try {
-        const patient = await Patient.findById(id)
+        const patient = await Patient.findById(id).lean()
 
         if (!patient) {
             await db.disconnect()
@@ -47,7 +48,7 @@ async function getPatientById(req: NextApiRequest, res: NextApiResponse<ApiRespo
         await db.disconnect()
         return res.status(200).json({
             ok: true,
-            data: patient,
+            data: cleanResponse(patient, true),
             message: 'Paciente encontrado exitosamente',
         })
     } catch (error: any) {
@@ -62,3 +63,4 @@ async function getPatientById(req: NextApiRequest, res: NextApiResponse<ApiRespo
         })
     }
 }
+

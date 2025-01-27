@@ -1,9 +1,11 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 
+import { cleanResponse } from '@/api'
 import { db } from '@/database'
-import Patient, { IPatient } from '@/models/Patient'
+import { IPatient } from '@/interfaces'
+import Patient from '@/models/Patient'
 
-interface ApiResponse<T = any> {
+export interface ApiResponse<T = any> {
     ok: boolean
     data?: T
     message?: string
@@ -16,6 +18,9 @@ export default function (req: NextApiRequest, res: NextApiResponse<ApiResponse>)
     switch (req.method) {
         case 'POST':
             return createPatient(req, res)
+
+        case 'PUT':
+            return updatePatient(req, res)
         case 'GET':
             return getPatients(req, res)
         default:
@@ -25,7 +30,6 @@ export default function (req: NextApiRequest, res: NextApiResponse<ApiResponse>)
     async function createPatient(req: NextApiRequest, res: NextApiResponse<ApiResponse>) {
         const patientData = req.body as IPatient
 
-        console.log(patientData)
         await db.connect()
 
         try {
@@ -37,9 +41,15 @@ export default function (req: NextApiRequest, res: NextApiResponse<ApiResponse>)
                 })
             }
 
+            await Patient.collection.dropIndexes()
+            await Patient.syncIndexes()
             const newPatient = new Patient(patientData)
 
+            newPatient.consultationReason = patientData.consultationReason
+            newPatient.lastTreatment = patientData.lastTreatment
+
             await newPatient.save()
+
             await db.disconnect()
 
             return res.status(201).json({
@@ -59,12 +69,51 @@ export default function (req: NextApiRequest, res: NextApiResponse<ApiResponse>)
             })
         }
     }
+
     async function getPatients(req: NextApiRequest, res: NextApiResponse<ApiResponse>) {
         await db.connect()
-        const patients = await Patient.find()
+        const patients = await Patient.find().lean()
         await db.disconnect()
         if (!patients || patients.length === 0)
             return res.status(404).json({ ok: false, data: [], message: 'No se encontraron pacientes' })
-        return res.status(200).json({ data: patients, ok: true })
+        return res.status(200).json({ data: cleanResponse(patients, true), ok: true })
+    }
+
+    async function updatePatient(req: NextApiRequest, res: NextApiResponse<ApiResponse<any>>) {
+        const patientData = req.body as IPatient
+
+        await db.connect()
+
+        try {
+            const updatedPatient = await Patient.findOneAndUpdate(
+                { nationalId: patientData.nationalId },
+                { $set: patientData },
+                { new: true, runValidators: true }
+            )
+
+            if (updatedPatient) {
+                return res.status(200).json({
+                    ok: true,
+                    data: updatedPatient,
+                    message: 'Paciente actualizado exitosamente',
+                })
+            }
+            await db.disconnect()
+
+            return res.status(401).json({
+                ok: false,
+                message: 'No existe un paciente con ese DPI/CUI',
+            })
+        } catch (error: any) {
+            console.error(error)
+
+            await db.disconnect()
+
+            return res.status(500).json({
+                ok: false,
+                message: error.message || 'Error interno del servidor',
+                errors: error.errors || null,
+            })
+        }
     }
 }
