@@ -4,6 +4,7 @@ import { saludentisApi } from '@/api'
 import { ApiResponse } from '@/pages/api/patient/[id]'
 
 export const usePatient = (id: string = '') => {
+    console.log('usePatient id:', id)
 
     const patient = useQuery<ApiResponse, Error>(
         {
