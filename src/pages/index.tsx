@@ -1,13 +1,12 @@
-import { Card, CircularProgress, Box, Grid } from '@mui/material'
+import { Card, Grid } from '@mui/material'
 
-import { PatientSelect, NewPatient } from '@/components'
-import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
+import { PatientSelect, NewPatient, LoadingSpinner } from '@/components'
 import { usePatients } from '@/hooks'
 import { Layout } from '@/layout'
 
 export default function Home() {
-  const { data: patients, isLoading } = usePatients()
-  console.group('patients', { data: patients, isLoading })
+  const { isLoading } = usePatients()
+
   return (
     <Layout>
       <Card sx={{
@@ -37,6 +36,8 @@ export default function Home() {
             </Grid>
           )
         }
+        {/* <button onClick={() => toggleModal()}>lol</button> */}
+        {/* <Modal open={isModalOpen} handleClose={toggleModal} /> */}
       </Card >
     </Layout >
   )

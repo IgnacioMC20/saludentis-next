@@ -10,6 +10,9 @@ interface Props {
     treatments: any[]
 }
 const Tratamientos = ({ treatments }: Props) => {
+    const fetchTreatment = async (url: string, id: string) => {
+
+    }
     return (
         <Layout>
             <Card sx={{
@@ -22,7 +25,7 @@ const Tratamientos = ({ treatments }: Props) => {
                 boxShadow: 'none',
             }}>
                 <Typography variant='h4' mb={3} align='center'>Tratamientos</Typography>
-                <Table data={treatments} />
+                <Table data={treatments} fetchFunc={fetchTreatment} />
             </Card>
         </Layout >
     )

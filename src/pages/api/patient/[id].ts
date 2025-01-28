@@ -20,7 +20,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse<ApiRes
     }
 }
 
-async function getPatientById(req: NextApiRequest, res: NextApiResponse<ApiResponse>) {
+export async function getPatientById(req: NextApiRequest, res: NextApiResponse<ApiResponse>) {
     const {
         query: { id },
     } = req
