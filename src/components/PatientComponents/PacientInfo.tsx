@@ -9,7 +9,7 @@ import { saludentisApi } from '@/api'
 import { usePatient } from '@/hooks'
 import { getAge, showToast, validations } from '@/utils'
 
-type PatientFormData = {
+export type PatientFormData = {
   firstName: string
   middleName: string
   lastName: string

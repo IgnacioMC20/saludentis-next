@@ -7,14 +7,12 @@ import {
     TablePagination,
     TableRow,
     Table as MaterialTable,
-    Link,
     Typography,
+    Button,
 } from '@mui/material'
-import NextLink from 'next/link'
-import { useRouter } from 'next/router'
-import { ChangeEvent, useEffect, useState } from 'react'
+// import { useRouter } from 'next/router'
+import { ChangeEvent, useState } from 'react'
 
-import { Loading } from '../Loading'
 import { theme } from '@/themes'
 import { getFullName } from '@/utils'
 
@@ -42,14 +40,18 @@ type Props = {
     data: DataIllnesses[] | DataTreatments[] | DataBalance[]
     progress?: boolean
     customRowsPerPage?: number
+
+    // eslint-disable-next-line no-unused-vars
+    fetchFunc: (id: string) => void
 }
 
-export const Table = ({ data, progress = false, customRowsPerPage = 10 }: Props) => {
+// eslint-disable-next-line no-unused-vars
+export const Table = ({ data, progress = false, customRowsPerPage = 10, fetchFunc }: Props) => {
     if (!data.length) return null
 
-    const router = useRouter()
+    // const router = useRouter()
     // get the last param from the url
-    const url = router.asPath.split('/').pop()
+    // const url = router.asPath.split('/').pop()
 
     const rows = data.map((item) => {
         return {
@@ -66,17 +68,7 @@ export const Table = ({ data, progress = false, customRowsPerPage = 10 }: Props)
         }
     })
     const [page, setPage] = useState(0)
-    const [loading, setLoading] = useState(progress)
     const [rowsPerPage, setRowsPerPage] = useState(customRowsPerPage)
-
-    useEffect(() => {
-        // if (progress) {
-        setTimeout(() => {
-
-            setLoading(false)
-        }, 2000)
-        // }
-    }, [])
 
     const handleChangePage = (event: unknown, newPage: number) => {
         setPage(newPage)
@@ -90,39 +82,16 @@ export const Table = ({ data, progress = false, customRowsPerPage = 10 }: Props)
     return (
         <Paper sx={{ width: '100%', overflow: 'hidden', boxShadow: 'none' }}>
             {
-                loading ? (
-                    <Loading />
-                ) :
-                    (
-                        <>
+                (
+                    <>
 
-                            <TableContainer sx={{ maxHeight: 500 }}>
-                                <MaterialTable stickyHeader aria-label="sticky table">
-                                    <TableHead>
-                                        <TableRow>
-                                            {columns.map((column) => {
+                        <TableContainer sx={{ maxHeight: 500 }}>
+                            <MaterialTable stickyHeader aria-label="sticky table">
+                                <TableHead>
+                                    <TableRow>
+                                        {columns.map((column) => {
 
-                                                if (column.label === 'id') {
-                                                    return (
-                                                        <TableCell
-                                                            key={column.id}
-                                                            align={column.align}
-                                                            style={{ minWidth: column.minWidth }}
-                                                            sx={{ backgroundColor: theme.gray }}
-                                                        >
-                                                            <Typography
-                                                                width={'100%'}
-                                                                sx={{
-                                                                    fontWeight: 700,
-                                                                    textDecoration: 'none',
-                                                                }}
-                                                                textAlign={'center'}
-                                                            >
-                                                                #
-                                                            </Typography>
-                                                        </TableCell>
-                                                    )
-                                                }
+                                            if (column.label === 'id') {
                                                 return (
                                                     <TableCell
                                                         key={column.id}
@@ -130,77 +99,110 @@ export const Table = ({ data, progress = false, customRowsPerPage = 10 }: Props)
                                                         style={{ minWidth: column.minWidth }}
                                                         sx={{ backgroundColor: theme.gray }}
                                                     >
-                                                        {getFullName(column.label)}
+                                                        <Typography
+                                                            width={'100%'}
+                                                            sx={{
+                                                                fontWeight: 700,
+                                                                textDecoration: 'none',
+                                                            }}
+                                                            textAlign={'center'}
+                                                        >
+                                                            #
+                                                        </Typography>
                                                     </TableCell>
                                                 )
                                             }
-                                            )}
-                                        </TableRow>
-                                    </TableHead>
-                                    <TableBody>
-                                        {rows
-                                            .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                                            .map((row) => {
-                                                return (
-                                                    <TableRow hover role="checkbox" tabIndex={-1} key={row.id}>
-                                                        {columns.map((column) => {
-                                                            const value = (row as { [key: string]: any })[column.id]
-                                                            const rowIndex = rows.indexOf(row) + 1
+                                            return (
+                                                <TableCell
+                                                    key={column.id}
+                                                    align={column.align}
+                                                    style={{ minWidth: column.minWidth }}
+                                                    sx={{ backgroundColor: theme.gray }}
+                                                >
+                                                    {getFullName(column.label)}
+                                                </TableCell>
+                                            )
+                                        }
+                                        )}
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {rows
+                                        .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                                        .map((row) => {
+                                            return (
+                                                <TableRow hover role="checkbox" tabIndex={-1} key={row.id}>
+                                                    {columns.map((column) => {
+                                                        const value = (row as { [key: string]: any })[column.id]
+                                                        const rowIndex = rows.indexOf(row) + 1
 
-                                                            if (!value) {
-                                                                return (
-                                                                    <TableCell key={column.id} align={column.align} />
-                                                                )
-                                                            }
-                                                            // Render a link
-                                                            if (column.id === 'id') {
-                                                                return (
-                                                                    <TableCell key={column.id} align={column.align}>
-                                                                        <NextLink href={`/${url}/${value}`} passHref legacyBehavior>
-                                                                            <Link display={'flex'} alignItems={'center'}>
-                                                                                <Typography
-                                                                                    width={'100%'}
-                                                                                    sx={{
-                                                                                        fontWeight: 700,
-                                                                                        textDecoration: 'none',
-                                                                                    }}
-                                                                                    textAlign={'center'}
-                                                                                    color={'black'}
-                                                                                >
-                                                                                    {rowIndex}
-                                                                                </Typography>
-                                                                            </Link>
-                                                                        </NextLink>
-                                                                    </TableCell>
-                                                                )
-                                                            }
+                                                        if (!value) {
                                                             return (
+                                                                <TableCell key={column.id} align={column.align} />
+                                                            )
+                                                        }
+                                                        // Render a link
+                                                        if (column.id === 'id') {
+                                                            return (
+                                                                //     <NextLink href={`/${url}/${value}`} passHref legacyBehavior>
+                                                                //         <Link display={'flex'} alignItems={'center'}>
+                                                                //             <Typography
+                                                                //                 width={'100%'}
+                                                                //                 sx={{
+                                                                //                     fontWeight: 700,
+                                                                //                     textDecoration: 'none',
+                                                                //                 }}
+                                                                //                 textAlign={'center'}
+                                                                //                 color={'black'}
+                                                                //             >
+                                                                //                 {rowIndex}
+                                                                //             </Typography>
+                                                                //         </Link>
+                                                                //     </NextLink>
                                                                 <TableCell key={column.id} align={column.align}>
-                                                                    {
-                                                                        column.format(value) && typeof value === 'number'
-                                                                            ? column.format(value)
-                                                                            : getFullName(value)
-                                                                    }
+                                                                    <Button onClick={() => fetchFunc(value)} variant='outlined' color='info'>
+                                                                        <Typography
+                                                                            width={'100%'}
+                                                                            sx={{
+                                                                                fontWeight: 700,
+                                                                                textDecoration: 'none',
+                                                                            }}
+                                                                            textAlign={'center'}
+                                                                            color={'black'}
+                                                                        >
+                                                                            {rowIndex}
+                                                                        </Typography>
+                                                                    </Button>
                                                                 </TableCell>
                                                             )
-                                                        })}
-                                                    </TableRow>
-                                                )
-                                            })}
-                                    </TableBody>
-                                </MaterialTable>
-                            </TableContainer>
-                            <TablePagination
-                                rowsPerPageOptions={[customRowsPerPage, 25, 100]}
-                                component="div"
-                                count={rows.length}
-                                rowsPerPage={customRowsPerPage ? customRowsPerPage : rowsPerPage}
-                                page={page}
-                                onPageChange={handleChangePage}
-                                onRowsPerPageChange={handleChangeRowsPerPage}
-                            />
-                        </>
-                    )
+                                                        }
+                                                        return (
+                                                            <TableCell key={column.id} align={column.align}>
+                                                                {
+                                                                    column.format(value) && typeof value === 'number'
+                                                                        ? column.format(value)
+                                                                        : getFullName(value)
+                                                                }
+                                                            </TableCell>
+                                                        )
+                                                    })}
+                                                </TableRow>
+                                            )
+                                        })}
+                                </TableBody>
+                            </MaterialTable>
+                        </TableContainer>
+                        <TablePagination
+                            rowsPerPageOptions={[customRowsPerPage, 25, 100]}
+                            component="div"
+                            count={rows.length}
+                            rowsPerPage={customRowsPerPage ? customRowsPerPage : rowsPerPage}
+                            page={page}
+                            onPageChange={handleChangePage}
+                            onRowsPerPageChange={handleChangeRowsPerPage}
+                        />
+                    </>
+                )
             }
         </Paper>
     )

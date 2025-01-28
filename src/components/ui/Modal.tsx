@@ -21,7 +21,6 @@ export const Modal = ({ open, handleClose, children }: Props) => {
         width: { xs: '90%', sm: '50%' },
         bgcolor: 'white',
         border: 'none',
-        boxShadow: 24,
         p: 5,
         borderRadius: 5,
     }

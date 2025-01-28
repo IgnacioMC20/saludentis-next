@@ -15,7 +15,7 @@ import {
 import NextLink from 'next/link'
 import { ChangeEvent, useEffect, useState } from 'react'
 
-import { Loading } from '../Loading'
+import { Loading } from '../ui/Loading'
 import { theme } from '@/themes'
 import { formatDateToDDMMYYYY, getFullName, getProperName } from '@/utils'
 
