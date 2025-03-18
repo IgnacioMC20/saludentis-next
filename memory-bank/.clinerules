@@ -1,0 +1,89 @@
+# Saludentis Project Intelligence
+
+This file captures important patterns, preferences, and project intelligence that will help me work more effectively with the Saludentis project.
+
+## Project Structure Patterns
+
+### Component Organization
+- Patient-related components are in `src/components/PatientComponents/`
+- UI components are in `src/components/ui/`
+- Card components are in `src/components/Cards/`
+- Form components are in `src/components/FormComponents/`
+- Modal components are in `src/components/ModalComponents/`
+- Odontogram (dental chart) components are in `src/components/Odontogram/`
+
+### Data Management
+- Database access is handled through modules in `src/database/`
+- Custom hooks for data access are in `src/hooks/`
+- Data models are defined in `src/models/`
+- Interfaces are defined in `src/interfaces/`
+- API routes are in `src/pages/api/`
+
+### State Management
+- Context providers are in `src/context/`
+- Authentication context is in `src/context/auth/`
+- UI state context is in `src/context/ui/`
+
+### Routing
+- Page components are in `src/pages/`
+- Layout components are in `src/layout/`
+
+## Naming Conventions
+
+- Component files use PascalCase (e.g., `PatientTabs.tsx`)
+- Utility functions use camelCase (e.g., `getAge.ts`)
+- Context files use PascalCase with "Context" suffix (e.g., `AuthContext.tsx`)
+- Database access files use camelCase with "db" prefix (e.g., `dbPatient.ts`)
+- Hook files use camelCase with "use" prefix (e.g., `usePatient.ts`)
+
+## Code Style Preferences
+
+- TypeScript is used throughout the project
+- Functional components with hooks are preferred over class components
+- Material UI is used for UI components
+- Context API is used for state management
+- Custom hooks are used for reusable logic
+- Async/await is used for asynchronous operations
+- Try/catch blocks are used for error handling
+
+## Testing Approach
+
+- Jest is used as the testing framework
+- React Testing Library is used for component testing
+- Test files are co-located with the components they test in `src/__tests__/`
+- Test files use the same name as the component with `.test.tsx` suffix
+
+## Critical Implementation Paths
+
+### Patient Management Flow
+1. Patient selection or creation
+2. Patient information display
+3. Access to patient tabs (info, clinic history, diagnostic, diet, odontogram)
+4. Updates to patient records
+
+### Authentication Flow
+1. User login through NextAuth
+2. JWT token generation and validation
+3. Protected route access control
+4. User context management
+
+### Data Fetching Pattern
+1. Custom hooks access database functions
+2. Database functions make API calls
+3. API routes handle database operations
+4. Results are returned to components
+
+## Known Challenges
+
+- Odontogram implementation is complex with interactive elements
+- Patient data has many related entities that need to be managed together
+- Authentication needs to handle different user roles and permissions
+- Financial tracking needs to maintain accurate balance information
+
+## Evolution of Project Decisions
+
+- The project started with a simpler structure and has evolved to include more specialized components
+- State management has been refined to use Context API effectively
+- Database access has been abstracted through custom hooks for better separation of concerns
+
+This file will be updated as new patterns and preferences are discovered during development.
