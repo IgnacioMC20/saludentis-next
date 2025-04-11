@@ -37,7 +37,7 @@ export const PatientBalanceModalContent = () => {
                         <OutlinedInput
                             id="amount-to-pay"
                             type='number'
-
+                            inputProps={{ min: 0 }}
                             startAdornment={<InputAdornment position="start">Q.</InputAdornment>}
                             error={!!errors.amount}
                             autoComplete='false'

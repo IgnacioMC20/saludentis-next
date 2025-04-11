@@ -18,7 +18,7 @@ import { useContext, useState } from 'react'
 
 import { AuthContext, UIContext } from '@/context'
 import { theme } from '@/themes'
-const pages = ['Inicio', 'Pacientes', 'Tratamientos', 'Enfermedades']
+const pages = ['Inicio', 'Pacientes', 'Tratamientos', 'Enfermedades', 'Reportes']
 
 export const Navbar = () => {
   const { toggleSideMenu } = useContext(UIContext)

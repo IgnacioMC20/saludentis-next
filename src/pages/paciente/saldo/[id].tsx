@@ -1,10 +1,15 @@
 import { Box, Button, Card, Typography, Link } from '@mui/material'
 import NextLink from 'next/link'
-import { useState } from 'react'
+import { useRouter } from 'next/router'
+import { useEffect, useState } from 'react'
 
-import { Modal, PatientBalanceModalContent, Table, } from '@/components'
+import { getFullName } from '../../../utils/getFullName'
+import { ConsultationDetails, LoadingSpinner, Modal, PatientBalanceModalContent, Table, } from '@/components'
+import { usePatient, useConsultation, useBalance } from '@/hooks'
+import { IPatient } from '@/interfaces'
 import { Layout } from '@/layout'
 import { theme } from '@/themes'
+import { showToast } from '@/utils'
 
 const linkStyles = {
     textDecoration: 'none',
@@ -16,119 +21,55 @@ const linkStyles = {
     },
 }
 
-const data = [
-    {
-        id: '1',
-        consulta: 'Consulta 1',
-        fecha: '2021-10-10',
-        total: 100,
-        pagado: 50,
-    },
-    {
-        id: '2',
-        consulta: 'Consulta 2',
-        fecha: '2021-10-10',
-        total: 100,
-        pagado: 50,
-    },
-    {
-        id: '3',
-        consulta: 'Consulta 3',
-        fecha: '2021-10-10',
-        total: 100,
-        pagado: 50,
-    },
-    {
-        id: '4',
-        consulta: 'Consulta 4',
-        fecha: '2021-10-10',
-        total: 100,
-        pagado: 50,
-    },
-    {
-        id: '5',
-        consulta: 'Consulta 5',
-        fecha: '2021-10-10',
-        total: 100,
-        pagado: 50,
-    },
-    {
-        id: '6',
-        consulta: 'Consulta 6',
-        fecha: '2021-10-10',
-        total: 100,
-        pagado: 50,
-    },
-    {
-        id: '7',
-        consulta: 'Consulta 7',
-        fecha: '2021-10-10',
-        total: 100,
-        pagado: 50,
-    },
-    {
-        id: '8',
-        consulta: 'Consulta 8',
-        fecha: '2021-10-10',
-        total: 100,
-        pagado: 50,
-    },
-    {
-        id: '9',
-        consulta: 'Consulta 9',
-        fecha: '2021-10-10',
-        total: 100,
-        pagado: 50,
-    },
-    {
-        id: '10',
-        consulta: 'Consulta 10',
-        fecha: '2021-10-10',
-        total: 100,
-        pagado: 50,
-    },
-    {
-        id: '11',
-        consulta: 'Consulta 11',
-        fecha: '2021-10-10',
-        total: 100,
-        pagado: 50,
-    },
-    {
-        id: '12',
-        consulta: 'Consulta 12',
-        fecha: '2021-10-10',
-        total: 100,
-        pagado: 50,
-    },
-    {
-        id: '13',
-        consulta: 'Consulta 13',
-        fecha: '2021-10-10',
-        total: 100,
-        pagado: 50,
-    },
-    {
-        id: '14',
-        consulta: 'Consulta 14',
-        fecha: '2021-10-10',
-        total: 100,
-        pagado: 50,
-    },
-    {
-        id: '15',
-        consulta: 'Consulta 15',
-        fecha: '2021-10-10',
-        total: 100,
-        pagado: 50,
-    }
-]
-
 const PatientBalance = () => {
 
     const [open, setOpen] = useState(false)
     const handleOpen = () => setOpen(true)
-    const handleClose = () => setOpen(false)
+    const handleClose = () => {
+        setOpen(false)
+        setIsConsultationNotPayment(false)
+        setSelectedConsultationId('') // Reset the selected consultation ID
+    }
+    const [isConsultationNotPayment, setIsConsultationNotPayment] = useState(false)
+    const [selectedConsultationId, setSelectedConsultationId] = useState<string>('')
+    const router = useRouter()
+    const { id } = router.query
+
+    const { data: response, isLoading, isFetching } = usePatient(id as string)
+    const {
+        data: balanceResponse,
+        isLoading: isBalanceLoading
+    } = useBalance(id as string)
+    const {
+        data: consultationResponse,
+        isLoading: isConsultationLoading
+    } = useConsultation(selectedConsultationId)
+
+    const handleOpenConsultationModal = (id: string) => {
+        setIsConsultationNotPayment(true)
+        setSelectedConsultationId(id) // Set the selected consultation ID
+        handleOpen()
+    }
+
+    useEffect(() => {
+
+        if (response && !response.ok) {
+            showToast(response.message || 'Error al cargar el paciente', 'error')
+            router.push(`/paciente/${id}`)
+        }
+
+    }, [response, router, id])
+
+    if (isLoading || isFetching || isBalanceLoading || !response?.ok || !response?.data) {
+        return (
+            <Layout>
+                <LoadingSpinner />
+            </Layout>
+        )
+    }
+
+    const { data } = response!
+    const { firstName, middleName, lastName } = data as IPatient
 
     return (
         <Layout>
@@ -145,10 +86,11 @@ const PatientBalance = () => {
                 alignItems: 'space-between',
                 flexDirection: 'column',
             }}>
+
                 <Box>
-                    <NextLink href={'/'} passHref legacyBehavior>
+                    <NextLink href={`/paciente/${id}`} passHref legacyBehavior>
                         <Link display={'flex'} alignItems={'center'} width={{ sm: '100%', md: '75%' }}>
-                            <Typography variant={'h4'} color={'black'}>Adrian Bachicha Adrian Bachicha</Typography>
+                            <Typography variant={'h4'} color={'black'}>{getFullName(firstName, middleName, lastName)}</Typography>
                         </Link>
                     </NextLink>
 
@@ -158,7 +100,23 @@ const PatientBalance = () => {
                     height: '80%',
                     overflow: 'auto'
                 }}>
-                    <Table data={data} customRowsPerPage={5} />
+                    {balanceResponse?.balance?.balanceDetails && balanceResponse.balance.balanceDetails.length > 0 ? (
+                        <Table
+                            data={balanceResponse.balance.balanceDetails.map(detail => ({
+                                id: detail.consultationId ? detail.consultationId.toString() : '',
+                                consulta: 'Consulta',
+                                fecha: detail.createdAt ? new Date(detail.createdAt).toISOString().split('T')[0] : '',
+                                total: detail.total || 0,
+                                pagado: detail.amount || 0,
+                            }))}
+                            handleOpenConsultationModal={handleOpenConsultationModal}
+                            customRowsPerPage={5}
+                        />
+                    ) : (
+                        <Typography variant="body1" textAlign="center" sx={{ my: 4 }}>
+                            No hay historial de pagos disponible
+                        </Typography>
+                    )}
                 </Box>
 
                 <Box marginTop={3} display={'flex'} justifyContent={'space-between'}>
@@ -180,11 +138,22 @@ const PatientBalance = () => {
                         onClick={handleOpen}>
                         <Typography variant='h6'>Realizar pago</Typography>
                     </Button>
-                    <Typography variant={'h6'} textAlign={'center'}>Saldo actual: Q. 1500</Typography>
+                    <Typography variant={'h6'} textAlign={'center'}>
+                        Saldo actual: Q. {balanceResponse?.balance?.balance?.toLocaleString('es-GT') || '0'}
+                    </Typography>
                 </Box>
             </Card>
+
             <Modal open={open} handleClose={handleClose}>
-                <PatientBalanceModalContent />
+                {
+                    isConsultationNotPayment ?
+                        <ConsultationDetails
+                            consultation={consultationResponse?.consultation}
+                            isLoading={isConsultationLoading}
+                        />
+                        :
+                        <PatientBalanceModalContent />
+                }
             </Modal>
         </Layout >
     )

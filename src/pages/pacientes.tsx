@@ -21,6 +21,7 @@ const Pacientes = ({ patients }: Props) => {
                 width: {
                     xs: '100%',
                 },
+                // height: '700px',
                 minHeight: '500px',
                 boxShadow: 'none',
             }}>

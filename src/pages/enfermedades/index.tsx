@@ -1,10 +1,11 @@
+import { Add } from '@mui/icons-material'
 import { Card, Typography, Box, TextField, Grid, Button } from '@mui/material'
 import { GetServerSideProps } from 'next'
 import { useContext, useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 
 import { saludentisApi } from '@/api'
-import { LoadingSpinner, Modal } from '@/components'
+import { LoadingSpinner, Modal, FloatingActionButton } from '@/components'
 import { Table } from '@/components/ui/Table'
 import { UIContext } from '@/context'
 import { dbDisease } from '@/database'
@@ -13,7 +14,7 @@ import { IDisease } from '@/interfaces'
 import { Layout } from '@/layout'
 import { showToast } from '@/utils'
 
-interface FormValues {
+export interface FormValues {
     detail: string
 }
 
@@ -22,18 +23,19 @@ const Enfermedades = () => {
     const [selectedId, setSelectedId] = useState<string | null>(null)
 
     const { data: diseasesData, isLoading: isDiseasesLoading, refetch } = useDiseases()
+    const { data: diseaseData, isLoading: isDiseaseLoading, isFetching } = useDisease(selectedId || '')
 
     const formattedData = diseasesData?.data?.map((disease: IDisease) => {
         return {
             id: disease._id,
             ['Descripción']: disease.detail,
+            ['Editar']: disease._id,
         }
     })
 
-    const { data: diseaseData, isLoading: isDiseaseLoading } = useDisease(selectedId || '')
     const { register, handleSubmit, reset, formState: { errors } } = useForm<FormValues>({
         defaultValues: {
-            detail: diseaseData?.data.detail,
+            detail: diseaseData?.data.detail
         },
     })
 
@@ -52,10 +54,14 @@ const Enfermedades = () => {
     }
 
     const onSubmitForm = async (diseaseData: FormValues) => {
+        console.log('diseaseData:', diseaseData)
+
+        const url = selectedId ? `/disease/${selectedId}` : '/disease'
+        const method = selectedId ? 'PUT' : 'POST'
 
         const response = await saludentisApi({
-            url: '/disease/' + selectedId,
-            method: 'PUT',
+            url,
+            method,
             data: diseaseData
         })
 
@@ -68,6 +74,7 @@ const Enfermedades = () => {
         }
 
     }
+
     return (
         <Layout>
             <Card
@@ -75,6 +82,7 @@ const Enfermedades = () => {
                     paddingY: { xs: 3, md: 5 },
                     paddingX: { xs: 2, md: 5 },
                     width: { xs: '100%' },
+                    height: '700px',
                     minHeight: '500px',
                     boxShadow: 'none',
                 }}
@@ -97,10 +105,10 @@ const Enfermedades = () => {
                         sx={{ minHeight: '500px', textAlign: 'center' }}
                     >
                         <Typography variant="h4" mb={3}>
-                            Editar Enfermedad
+                            {selectedId ? 'Editar Enfermedad' : 'Agregar Enfermedad'}
                         </Typography>
 
-                        {isDiseasesLoading ? (
+                        {isDiseasesLoading || isFetching ? (
                             <LoadingSpinner />
                         ) : (
                             <Box
@@ -110,7 +118,7 @@ const Enfermedades = () => {
                                     textAlign: 'left',
                                 }}
                             >
-                                <form onSubmit={handleSubmit(onSubmitForm)} noValidate>
+                                <form onSubmit={handleSubmit(onSubmitForm)} noValidate style={{ width: '100%' }}>
                                     <Grid container spacing={2}>
                                         {/* Detalles */}
                                         <Grid item xs={12}>
@@ -137,6 +145,11 @@ const Enfermedades = () => {
                     </Grid>
                 </Modal>
             </Card>
+            <FloatingActionButton func={() => {
+                setSelectedId(null)
+                reset({ detail: '' })
+                toggleModal()
+            }} icon={<Add color='info' />} />
         </Layout>
     )
 }
@@ -150,6 +163,7 @@ export const getServerSideProps: GetServerSideProps = async () => {
         return {
             id: disease._id,
             ['Descripción']: disease.detail,
+            ['Editar']: disease._id,
         }
     })
 

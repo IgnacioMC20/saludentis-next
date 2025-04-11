@@ -9,11 +9,8 @@ export default function handler(req: NextApiRequest, res: NextApiResponse<ApiRes
     switch (req.method) {
         case 'GET':
             return getTreatmentById(req, res)
-        // TODO: Implement POST method
         case 'PUT':
             return updateTreatmentById(req, res)
-        case 'POST':
-            return res.status(405).json({ ok: false, message: 'Method not allowed' })
 
         default:
             return res.status(400).json({ ok: false, message: 'Bad request' })
@@ -62,6 +59,7 @@ async function getTreatmentById(req: NextApiRequest, res: NextApiResponse<ApiRes
         })
     }
 }
+
 async function updateTreatmentById(req: NextApiRequest, res: NextApiResponse<ApiResponse<any>>) {
     const {
         query: { id },

@@ -30,7 +30,7 @@ export const useTreatments = () => {
             retry: 2, // Retry fetching the data twice on failure
 
             queryFn: async () => {
-                const response = await saludentisApi({ url: '/treatments' })
+                const response = await saludentisApi({ url: '/treatment' })
                 await delay(500)
                 const data = await response.json()
                 return data

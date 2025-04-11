@@ -1,3 +1,4 @@
+import { EditOutlined } from '@mui/icons-material'
 import {
     Paper,
     TableBody,
@@ -9,6 +10,7 @@ import {
     Table as MaterialTable,
     Typography,
     Button,
+    Link,
 } from '@mui/material'
 // import { useRouter } from 'next/router'
 import { ChangeEvent, useState } from 'react'
@@ -47,7 +49,7 @@ type Props = {
 
 // eslint-disable-next-line no-unused-vars
 export const Table = ({ data, progress = false, customRowsPerPage = 10, fetchFunc }: Props) => {
-    if (!data.length) return null
+    if (!data?.length) return null
 
     // const router = useRouter()
     // get the last param from the url
@@ -141,38 +143,47 @@ export const Table = ({ data, progress = false, customRowsPerPage = 10, fetchFun
                                                                 <TableCell key={column.id} align={column.align} />
                                                             )
                                                         }
-                                                        // Render a link
+                                                        if (column.id === 'Editar') {
+                                                            return (
+                                                                <TableCell key={column.id} align={column.align}>
+                                                                    <Button onClick={() => fetchFunc(value)} variant='contained' color='info' sx={{
+                                                                        ':hover': {
+                                                                            backgroundColor: theme.gray,
+                                                                            color: theme.white,
+                                                                            transition: 'all 0.3s ease-in-out',
+                                                                        }
+                                                                    }}>
+                                                                        <Link display={'flex'} alignItems={'center'}>
+                                                                            <Typography
+                                                                                width={'100%'}
+                                                                                sx={{
+                                                                                    fontWeight: 700,
+                                                                                    textDecoration: 'none',
+                                                                                }}
+                                                                                textAlign={'center'}
+                                                                                color={'black'}
+                                                                            >
+                                                                                <EditOutlined />
+                                                                            </Typography>
+                                                                        </Link>
+                                                                    </Button>
+                                                                </TableCell>
+                                                            )
+                                                        }
                                                         if (column.id === 'id') {
                                                             return (
-                                                                //     <NextLink href={`/${url}/${value}`} passHref legacyBehavior>
-                                                                //         <Link display={'flex'} alignItems={'center'}>
-                                                                //             <Typography
-                                                                //                 width={'100%'}
-                                                                //                 sx={{
-                                                                //                     fontWeight: 700,
-                                                                //                     textDecoration: 'none',
-                                                                //                 }}
-                                                                //                 textAlign={'center'}
-                                                                //                 color={'black'}
-                                                                //             >
-                                                                //                 {rowIndex}
-                                                                //             </Typography>
-                                                                //         </Link>
-                                                                //     </NextLink>
                                                                 <TableCell key={column.id} align={column.align}>
-                                                                    <Button onClick={() => fetchFunc(value)} variant='outlined' color='info'>
-                                                                        <Typography
-                                                                            width={'100%'}
-                                                                            sx={{
-                                                                                fontWeight: 700,
-                                                                                textDecoration: 'none',
-                                                                            }}
-                                                                            textAlign={'center'}
-                                                                            color={'black'}
-                                                                        >
-                                                                            {rowIndex}
-                                                                        </Typography>
-                                                                    </Button>
+                                                                    <Typography
+                                                                        width={'100%'}
+                                                                        sx={{
+                                                                            fontWeight: 700,
+                                                                            textDecoration: 'none',
+                                                                        }}
+                                                                        textAlign={'center'}
+                                                                        color={'black'}
+                                                                    >
+                                                                        {rowIndex}
+                                                                    </Typography>
                                                                 </TableCell>
                                                             )
                                                         }
@@ -193,7 +204,7 @@ export const Table = ({ data, progress = false, customRowsPerPage = 10, fetchFun
                             </MaterialTable>
                         </TableContainer>
                         <TablePagination
-                            rowsPerPageOptions={[customRowsPerPage, 25, 100]}
+                            rowsPerPageOptions={[]}
                             component="div"
                             count={rows.length}
                             rowsPerPage={customRowsPerPage ? customRowsPerPage : rowsPerPage}

@@ -1,3 +1,4 @@
+import { Edit } from '@mui/icons-material'
 import { Card } from '@mui/material'
 import { useRouter } from 'next/router'
 
@@ -31,7 +32,7 @@ export default function PatientPage() {
             </Card>
             {
                 edit !== 'true' &&
-                (<FloatingActionButton func={editFunction} />)
+                (<FloatingActionButton icon={<Edit color='info' />} func={editFunction} />)
             }
         </Layout>
 

@@ -3,6 +3,7 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import { cleanResponse } from '@/api'
 import { db } from '@/database'
 import { IPatient } from '@/interfaces'
+import Balance from '@/models/Balance'
 import Patient from '@/models/Patient'
 
 export interface ApiResponse<T = any> {
@@ -18,7 +19,6 @@ export default function (req: NextApiRequest, res: NextApiResponse<ApiResponse>)
     switch (req.method) {
         case 'POST':
             return createPatient(req, res)
-
         case 'PUT':
             return updatePatient(req, res)
         case 'GET':
@@ -49,6 +49,15 @@ export default function (req: NextApiRequest, res: NextApiResponse<ApiResponse>)
             newPatient.lastTreatment = patientData.lastTreatment
 
             await newPatient.save()
+
+            // Create a balance record for the new patient
+            const newBalance = new Balance({
+                patientId: newPatient._id,
+                balance: 0,
+                balanceDetails: []
+            })
+
+            await newBalance.save()
 
             await db.disconnect()
 

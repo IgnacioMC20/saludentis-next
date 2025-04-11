@@ -1,4 +1,4 @@
-import { ArrowCircleRightOutlined } from '@mui/icons-material'
+import { ArrowCircleRightOutlined, PlusOne } from '@mui/icons-material'
 import { Card, CardContent, CardHeader, Box, Button, Typography, Link, CircularProgress } from '@mui/material'
 import NextLink from 'next/link'
 import { useRouter } from 'next/router'
@@ -16,6 +16,12 @@ export const PatientSelect = () => {
     function handlePatientSubmit(): void {
         if (patientId) {
             router.push(`/paciente/${patientId}`)
+        }
+    }
+
+    const handleNewConsultation = () => {
+        if (patientId) {
+            router.push(`/paciente/saldo/${patientId}?nueva-cita=1`)
         }
     }
 
@@ -54,12 +60,26 @@ export const PatientSelect = () => {
                                     color='primary'
                                     endIcon={<ArrowCircleRightOutlined />}
                                     sx={{
-                                        padding: '1rem'
+                                        padding: '1rem',
+                                        marginX: '1rem'
                                     }}
                                     onClick={handlePatientSubmit}
                                 >
                                     <Typography variant='h6' color={'white'}>Ingresar</Typography>
                                 </Button>
+                                {/* <Button
+                                    variant='contained'
+                                    color='primary'
+                                    endIcon={<PlusOne />}
+                                    sx={{
+                                        padding: '1rem',
+                                        marginX: '1rem'
+                                    }}
+                                    onClick={handleNewConsultation}
+                                >
+                                    <Typography variant='h6' color={'white'}>Cita</Typography>
+                                </Button> */}
+
                             </Box>
                         )
                     }
