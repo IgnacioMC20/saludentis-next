@@ -21,7 +21,6 @@ const Chart: React.FC<ChartProps> = ({ data }) => {
                         faded: { innerRadius: 30, additionalRadius: -30, color: 'gray' },
                     },
                 ]}
-
                 height={200}
                 width={400}
             />

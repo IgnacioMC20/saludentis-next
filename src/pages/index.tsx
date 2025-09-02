@@ -13,24 +13,24 @@ export default function Home() {
         padding: { xs: 1, sm: 5 },
         width: {
           xs: '100%',
-          sm: '80%',
+          sm: '90%',
         },
         maxHeight: {
           xs: '90%',
           sm: '700px',
         },
-        height: '500px',
+        height: 'auto',
         overflow: 'auto',
       }}>
         {
           isLoading ? (
             <LoadingSpinner />
           ) : (
-            <Grid container flexDirection={'row'} display={'flex'}>
-              <Grid item xs={12} sm={6} display={'flex'} justifyContent={'center'} alignItems={'center'} flexDirection={'column'}>
+            <Grid container flexDirection={'row'} display={'flex'} >
+              <Grid item xs={12} sm={6} display={'flex'} justifyContent={'center'} alignItems={'center'} padding={0} flexDirection={'column'} >
                 <NewPatient />
               </Grid>
-              <Grid item xs={12} sm={6} display={'flex'} flexDirection={'column'} justifyContent={'center'} padding={0}>
+              <Grid item xs={12} sm={6} display={'flex'} justifyContent={'center'} alignItems={'center'} padding={0} flexDirection={'column'} >
                 <PatientSelect />
               </Grid>
             </Grid>

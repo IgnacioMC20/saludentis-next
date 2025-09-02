@@ -1,5 +1,5 @@
-import { AddCircle } from '@mui/icons-material'
-import { Button, Card, CardContent, Grid, Typography } from '@mui/material'
+import { AddCircle, ChildCare, Face, Face3 } from '@mui/icons-material'
+import { Box, Button, Card, CardContent, CardHeader, Grid, IconButton, Typography } from '@mui/material'
 import dynamic from 'next/dynamic'
 import NextLink from 'next/link'
 
@@ -21,6 +21,11 @@ export const NewPatient = () => {
             width: '100%',
             padding: 0
         }}>
+            <CardHeader title='Nuevo' titleTypographyProps={{
+                variant: 'h4',
+                textAlign: 'center',
+                // mb: 5
+            }} />
             <CardContent sx={{
                 display: 'flex',
                 flexDirection: 'column',
@@ -28,33 +33,46 @@ export const NewPatient = () => {
                 alignItems: 'center',
                 height: '100%',
                 width: '100%',
-                padding: 0,
             }}>
-                <Grid container display={'flex'} justifyContent={'space-evenly'} alignItems={'center'} flexDirection={'column'} sx={{
+                <Grid container display={'flex'} alignItems={'center'} flexDirection={'column'} sx={{
                     height: '100%',
                     padding: 0,
                 }}>
-                    <Grid item my={1} width={'100%'} display={'flex'} justifyContent={'space-evenly'} alignItems={'center'}>
+                    <Grid item width={'100%'} display={'flex'} justifyContent={'space-evenly'} alignItems={'center'}>
                         <Chart data={patientsChartData} />
                     </Grid>
-                    <Grid item display={'flex'} justifyContent={'space-evenly'} alignItems={'center'} flexDirection={{ xs: 'column', md: 'row' }} width={'100%'}>
-                        <Grid item my={1}>
+                    <Grid mt={5} item display={'flex'} justifyContent={'space-evenly'} alignItems={'center'} flexDirection={{ xs: 'column', md: 'row' }} width={'100%'}>
+                        <Box display={'flex'} flexDirection={'row'} justifyContent={'center'}>
                             <NextLink href={'/paciente/nuevo'} passHref legacyBehavior>
-                                <Button variant='contained' endIcon={<AddCircle />}>
+                                {/* <IconButton size="large" color='primary'>
+                                    <ChildCare />
+                                </IconButton> */}
+                                <Button variant='contained' endIcon={<ChildCare />} sx={{
+                                    padding: '1rem',
+                                    marginX: '1rem'
+                                }}>
                                     <Typography variant='h6' color={'white'}>Niño</Typography>
+
                                 </Button>
                             </NextLink>
-                        </Grid>
-                        <Grid item mt={{ xs: 3, md: 0 }} >
+
                             <NextLink href={'/paciente/nuevo?tipo=adulto'} passHref legacyBehavior>
-                                <Button variant='contained' endIcon={<AddCircle />}>
+                                <Button variant='contained' endIcon={<Face />} sx={{
+                                    padding: '1rem',
+                                    marginX: '1rem',
+                                    // borderRadius: '50%'
+                                }}>
                                     <Typography variant='h6' color={'white'}>Adulto</Typography>
                                 </Button>
+                                {/* <IconButton size="large" color='primary'>
+                                    <Face3 />
+                                </IconButton> */}
                             </NextLink>
-                        </Grid>
+                        </Box>
                     </Grid>
+
                 </Grid>
             </CardContent>
-        </Card>
+        </Card >
     )
 }

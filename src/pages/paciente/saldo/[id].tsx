@@ -63,7 +63,21 @@ const PatientBalance = () => {
     if (isLoading || isFetching || isBalanceLoading || !response?.ok || !response?.data) {
         return (
             <Layout>
-                <LoadingSpinner />
+                <Card sx={{
+                    paddingY: { xs: 3, md: 5 },
+                    paddingX: { xs: 2, md: 5 },
+                    width: {
+                        xs: '100%',
+                    },
+                    minHeight: '500px',
+                    maxHeight: '700px',
+                    boxShadow: 'none',
+                    display: 'flex',
+                    alignItems: 'space-between',
+                    flexDirection: 'column',
+                }}>
+                    <LoadingSpinner />
+                </Card>
             </Layout>
         )
     }
@@ -94,7 +108,7 @@ const PatientBalance = () => {
                         </Link>
                     </NextLink>
 
-                    <Typography variant={'h6'} my={3} align='center'>Historial de pagos</Typography>
+                    <Typography variant={'h6'} my={3} align='center'>Historial de Citas</Typography>
                 </Box>
                 <Box sx={{
                     height: '80%',
@@ -114,30 +128,51 @@ const PatientBalance = () => {
                         />
                     ) : (
                         <Typography variant="body1" textAlign="center" sx={{ my: 4 }}>
-                            No hay historial de pagos disponible
+                            No hay historial de citas disponible
                         </Typography>
                     )}
                 </Box>
 
                 <Box marginTop={3} display={'flex'} justifyContent={'space-between'}>
-                    <Button sx={{
-                        ...linkStyles,
-                        variant: 'text',
-                        size: 'medium',
-                        textTransform: 'none',
-                        padding: 0,
-                        minWidth: 'auto',
-                        boxShadow: 'none',
-                        borderRadius: 0,
-                        '&:hover': {
-                            ...linkStyles['&:hover'],
-                            color: theme.lightSeaGreen,
-                            backgroundColor: 'transparent',
-                        },
-                    }}
-                        onClick={handleOpen}>
-                        <Typography variant='h6'>Realizar pago</Typography>
-                    </Button>
+                    <Box>
+
+                        <Button sx={{
+                            ...linkStyles,
+                            variant: 'text',
+                            size: 'medium',
+                            textTransform: 'none',
+                            padding: 0,
+                            minWidth: 'auto',
+                            boxShadow: 'none',
+                            borderRadius: 0,
+                            '&:hover': {
+                                ...linkStyles['&:hover'],
+                                color: theme.lightSeaGreen,
+                                backgroundColor: 'transparent',
+                            },
+                        }}
+                            onClick={handleOpen}>
+                            <Typography variant='h6'>Realizar pago</Typography>
+                        </Button>
+                        <Button sx={{
+                            ...linkStyles,
+                            variant: 'text',
+                            size: 'medium',
+                            textTransform: 'none',
+                            padding: 0,
+                            minWidth: 'auto',
+                            boxShadow: 'none',
+                            borderRadius: 0,
+                            '&:hover': {
+                                ...linkStyles['&:hover'],
+                                color: theme.lightSeaGreen,
+                                backgroundColor: 'transparent',
+                            },
+                        }}
+                            onClick={handleOpen}>
+                            <Typography variant='h6'>Cita nueva</Typography>
+                        </Button>
+                    </Box>
                     <Typography variant={'h6'} textAlign={'center'}>
                         Saldo actual: Q. {balanceResponse?.balance?.balance?.toLocaleString('es-GT') || '0'}
                     </Typography>
@@ -146,7 +181,7 @@ const PatientBalance = () => {
 
             <Modal open={open} handleClose={handleClose}>
                 {
-                    isConsultationNotPayment ?
+                    true ?
                         <ConsultationDetails
                             consultation={consultationResponse?.consultation}
                             isLoading={isConsultationLoading}
