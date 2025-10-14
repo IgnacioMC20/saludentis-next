@@ -1,0 +1,31 @@
+name: Cleanup Branch
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - dev
+      - main
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Git user
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+
+      - name: Delete branch if PR was merged
+        if: ${{ github.event.pull_request.merged }}
+        run: |
+          BRANCH=${{ github.event.pull_request.head.ref }}
+          if [ "$BRANCH" != "dev" ] && [ "$BRANCH" != "main" ]; then
+            echo "Deleting branch $BRANCH"
+            git push origin --delete $BRANCH
+        env:
+          GITHUB_TOKEN: ${{ secrets.SALUDENTIS_TOKEN }}

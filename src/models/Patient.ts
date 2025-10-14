@@ -1,0 +1,37 @@
+import mongoose, { Schema, model, Model } from 'mongoose'
+
+import { IPatient } from '@/interfaces'
+
+// Schema for Patient
+const patientSchema = new Schema<IPatient>({
+    firstName: { type: String },
+    middleName: { type: String },
+    lastName: { type: String },
+    address: { type: String },
+    maritalStatus: { type: String },
+    occupation: { type: String },
+    guardianId: { type: mongoose.Types.ObjectId, ref: 'Guardian' },  // Reference to Guardian collection
+    guardianName: { type: String },
+    guardianPhone: { type: String },
+    email: { type: String },
+    lastVisit: { type: Date },
+    birthDate: { type: Date },
+    phone: { type: Number },
+    gender: { type: String },
+    physicalActivity: { type: String },
+    lastTreatment: { type: String },
+    // DPI/CUI unico
+    nationalId: { type: String, unique: true, required: true, dropDups: true },
+    diet: { type: String },
+    lastMedicalCheckup: { type: String },
+    medications: { type: String },
+    consultationReason: { type: String },
+    emotionalState: { type: String },
+}, {
+    timestamps: true // Automatically adds `createdAt` and `updatedAt`
+})
+
+// Model for Patient
+const Patient: Model<IPatient> = mongoose.models.Patient || model('Patient', patientSchema)
+
+export default Patient
