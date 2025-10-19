@@ -25,8 +25,8 @@ describe('SideMenu', () => {
 
     const renderWithProviders = () => {
         return render(
-            <UIContext.Provider value={{ isMenuOpen: true, toggleSideMenu }}>
-                <AuthContext.Provider value={{ isLoggedIn: false, loginUser: async () => true, logoutUser }}>
+            <UIContext.Provider value={{ isMenuOpen: true, toggleSideMenu, isModalOpen: false, toggleModal: jest.fn() }}>
+                <AuthContext.Provider value={{ isLoggedIn: false, logoutUser }}>
                     <SideMenu />
                 </AuthContext.Provider>
             </UIContext.Provider>

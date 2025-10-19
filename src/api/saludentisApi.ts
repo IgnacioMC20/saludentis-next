@@ -1,4 +1,4 @@
-import { IPatient } from '@/models/Patient'
+import { IPatient } from '@/interfaces'
 
 interface Props {
     url: string

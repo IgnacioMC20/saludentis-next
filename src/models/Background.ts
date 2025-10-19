@@ -1,25 +1,33 @@
 import mongoose, { Schema, model, Model } from 'mongoose'
 
-// Interface for Antecedentes
+// Interface for history sections
+export interface IHistorySection {
+    conditions: string[];
+    notes: string;
+}
+
+// Interface for Antecedentes (Background/Clinic History)
 export interface IBackground {
-    typeId?: mongoose.Types.ObjectId;
-    hmaId?: mongoose.Types.ObjectId;
-    hoaId?: mongoose.Types.ObjectId;
-    neuroId?: mongoose.Types.ObjectId;
-    patientId?: mongoose.Types.ObjectId;
+    patientId: mongoose.Types.ObjectId;
+    medicalHistory: IHistorySection;
+    familyHistory: IHistorySection;
+    dentalHistory: IHistorySection;
     createdAt?: Date;
     updatedAt?: Date;
 }
 
+// Sub-schema for history sections
+const historySectionSchema = new Schema<IHistorySection>({
+    conditions: { type: [String], default: [] },
+    notes: { type: String, default: '' }
+}, { _id: false })
+
 // Schema for Antecedentes
 const backgroundSchema = new Schema<IBackground>({
-    typeId: { type: mongoose.Types.ObjectId, ref: 'Type' },   // Reference to Type collection
-    hmaId: { type: mongoose.Types.ObjectId, ref: 'Hma' },     // Reference to Hma collection
-    hoaId: { type: mongoose.Types.ObjectId, ref: 'Hoa' },     // Reference to Hoa collection
-    neuroId: { type: mongoose.Types.ObjectId, ref: 'Neuro' }, // Reference to Neurofocal collection
-    patientId: { type: mongoose.Types.ObjectId, ref: 'Patient' }, // Reference to Patient collection
-    createdAt: { type: Date },
-    updatedAt: { type: Date }
+    patientId: { type: Schema.Types.ObjectId, ref: 'Patient', required: true, unique: true },
+    medicalHistory: { type: historySectionSchema, default: () => ({ conditions: [], notes: '' }) },
+    familyHistory: { type: historySectionSchema, default: () => ({ conditions: [], notes: '' }) },
+    dentalHistory: { type: historySectionSchema, default: () => ({ conditions: [], notes: '' }) }
 }, {
     timestamps: true
 })
