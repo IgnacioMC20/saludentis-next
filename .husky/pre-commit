@@ -1,2 +1,2 @@
-yarn lint:fix && yarn test:cov
+npm run lint:fix
 
