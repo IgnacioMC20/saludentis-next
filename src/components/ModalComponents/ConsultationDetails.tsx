@@ -46,6 +46,22 @@ export const ConsultationDetails: React.FC<ConsultationDetailsProps> = ({ consul
         )
     }
 
+    console.log('=== ConsultationDetails Component ===')
+    console.log('Full consultation object:', consultation)
+    console.log('Consultation details array:', consultation?.consultationDetails)
+    console.log('Number of details:', consultation?.consultationDetails?.length)
+    
+    // Log each detail individually
+    consultation?.consultationDetails?.forEach((detail: IConsultationDetail, index: number) => {
+        console.log(`Detail ${index}:`, {
+            tooth: detail.tooth,
+            treatmentId: detail.treatmentId,
+            diseaseId: detail.diseaseId,
+            createdAt: detail.createdAt,
+            fullDetail: detail
+        })
+    })
+
     return (
         <Box sx={{ p: 2 }}>
             {/* Header Section */}
@@ -58,7 +74,7 @@ export const ConsultationDetails: React.FC<ConsultationDetailsProps> = ({ consul
             <Grid container spacing={2} sx={{ mb: 3 }}>
                 <Grid item xs={12} md={6}>
                     <Typography variant="subtitle1" color="text.secondary">
-                        ID del Paciente
+                        Paciente
                     </Typography>
                     <Typography variant="body1" gutterBottom>
                         {consultation?.patientId?.toString() || 'N/A'}
