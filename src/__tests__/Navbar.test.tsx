@@ -45,6 +45,8 @@ describe('Navbar component', () => {
     const uiContextValue = {
         toggleSideMenu: mockToggleSideMenu,
         isMenuOpen: false,
+        isModalOpen: false,
+        toggleModal: jest.fn(),
     }
 
     const authContextValue = {

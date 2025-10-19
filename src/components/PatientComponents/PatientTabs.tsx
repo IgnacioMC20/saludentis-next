@@ -3,6 +3,7 @@ import Tab from '@mui/material/Tab'
 import Tabs, { tabsClasses } from '@mui/material/Tabs'
 import Typography from '@mui/material/Typography'
 import dynamic from 'next/dynamic'
+import { useRouter } from 'next/router'
 import { SyntheticEvent, useState } from 'react'
 
 const ClinicHistory = dynamic(() => import('@/components/PatientComponents/ClinicHistory'))
@@ -75,8 +76,15 @@ function a11yProps(index: number) {
 
 export const PatientTabs = () => {
     const [value, setValue] = useState(0)
+    const router = useRouter()
+    const { id } = router.query
 
     const handleChange = (_event: SyntheticEvent<any>, newValue: number) => {
+        console.log('newValue', newValue)
+        if (newValue === 5) {
+            router.push(`/paciente/saldo/${id}`)
+            return
+        }
         setValue(newValue)
     }
 
@@ -110,6 +118,7 @@ export const PatientTabs = () => {
                     {Forms.map(({ title }, index) => (
                         <Tab label={title} key={title} {...a11yProps(index)} />
                     ))}
+                    <Tab label={'Citas'} />
 
                 </Tabs>
 
@@ -131,6 +140,7 @@ export const PatientTabs = () => {
                     {Forms.map(({ title }, index) => (
                         <Tab label={title} key={title} {...a11yProps(index)} />
                     ))}
+                    <Tab label={'Citas'} />
                 </Tabs>
             </Box>
 

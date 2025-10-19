@@ -1,28 +1,30 @@
 import { Autocomplete, TextField, FormControl } from '@mui/material'
 import React, { useState } from 'react'
 
-import { Patient } from '@/interfaces'
+import { IPatient } from '@/interfaces'
+import { getFullName } from '@/utils'
 
 interface Props {
-  patients: Patient[]
+  patients: IPatient[]
   // eslint-disable-next-line no-unused-vars
-  setPatientId: (id: number | null) => void
+  setPatientId: (id: string) => void
 }
 
-export const Select: React.FC<Props> = ({ patients, setPatientId }) => {
-  const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null)
+export const Select: React.FC<Props> = ({ patients = [], setPatientId }) => {
+  const patientsFormatted = patients.map((patient) => ({ _id: patient._id, fullName: getFullName(patient.firstName, patient.middleName, patient.lastName) }))
+  const [selectedPatient, setSelectedPatient] = useState(null)
 
-  const handleChange = (event: any, value: Patient | null) => {
+  const handleChange = (event: any, value: any) => {
     setSelectedPatient(value)
-    console.log('Selected Patient:', value)
-    setPatientId(value?.id ?? null)
+
+    setPatientId(value?._id?.toString() ?? null)
   }
 
   return (
     <FormControl sx={{ width: '100%' }}>
       <Autocomplete
-        options={patients}
-        getOptionLabel={(option) => option.name}
+        options={patientsFormatted}
+        getOptionLabel={(option) => option.fullName}
         value={selectedPatient}
         onChange={handleChange}
         renderInput={(params) => (
@@ -33,7 +35,7 @@ export const Select: React.FC<Props> = ({ patients, setPatientId }) => {
             fullWidth
           />
         )}
-        isOptionEqualToValue={(option, value) => option.id === value.id}
+        isOptionEqualToValue={(option, value) => option._id === value._id}
       />
     </FormControl>
   )

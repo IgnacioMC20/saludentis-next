@@ -3,5 +3,6 @@
 
 export * as dbUsers from './dbUsers'
 export * as db from './db'
-// export * as dbProducts from './dbProducts'
-// export * as dbOrders from './dbOrders'
+export * as dbPatient from './dbPatient'
+export * as dbTreatment from './dbTreatment'
+export * as dbDisease from './dbDisease'

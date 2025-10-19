@@ -2,9 +2,10 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { getToken } from 'next-auth/jwt'
 
 export async function middleware(request: NextRequest) {
-  // const session = true
   const session = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET })
   const { pathname } = request.nextUrl
+
+  console.log('Middleware - Path:', pathname, 'Session:', !!session)
 
   // Allow access to login page if there's no session
   if (!session && pathname === '/auth/login') {
@@ -13,11 +14,13 @@ export async function middleware(request: NextRequest) {
 
   // Redirect to home page if there's a session and the user is on the login page
   if (session && pathname === '/auth/login') {
+    console.log('Redirecting from login to home')
     return NextResponse.redirect(new URL('/', request.url))
   }
 
   // Redirect to login page if there's no session and the user is not on the login page
   if (!session && pathname !== '/auth/login') {
+    console.log('No session, redirecting to login')
     return NextResponse.redirect(new URL('/auth/login', request.url))
   }
 

@@ -1,0 +1,84 @@
+# Auto-labeling configuration for PRs based on changed files
+
+# Frontend/UI changes
+'frontend':
+  - changed-files:
+    - any-glob-to-any-file: 
+      - 'src/components/**/*'
+      - 'src/pages/**/*'
+      - 'src/themes/**/*'
+      - 'public/**/*'
+
+# Backend/API changes
+'backend':
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'src/api/**/*'
+      - 'src/database/**/*'
+      - 'src/models/**/*'
+      - 'src/pages/api/**/*'
+
+# Testing changes
+'testing':
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'src/__tests__/**/*'
+      - '**/*.test.ts'
+      - '**/*.test.tsx'
+      - 'jest.config.ts'
+      - 'jest.setup.ts'
+
+# Documentation changes
+'documentation':
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/*.md'
+      - 'README.md'
+      - 'memory-bank/**/*'
+
+# Configuration changes
+'configuration':
+  - changed-files:
+    - any-glob-to-any-file:
+      - '*.config.*'
+      - '*.json'
+      - '.github/**/*'
+      - '.husky/**/*'
+      - 'docker-compose.yaml'
+
+# Dependencies
+'dependencies':
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'package.json'
+      - 'yarn.lock'
+      - 'pnpm-lock.yaml'
+
+# Database/Models
+'database':
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'src/models/**/*'
+      - 'src/database/**/*'
+
+# Authentication
+'auth':
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'src/context/auth/**/*'
+      - 'src/pages/api/auth/**/*'
+      - 'src/pages/auth/**/*'
+
+# UI Components
+'ui-components':
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'src/components/ui/**/*'
+
+# Patient Management
+'patient-management':
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'src/components/PatientComponents/**/*'
+      - 'src/pages/paciente/**/*'
+      - 'src/hooks/usePatient*'

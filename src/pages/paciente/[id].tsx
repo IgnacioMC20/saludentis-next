@@ -1,9 +1,19 @@
+import { Edit } from '@mui/icons-material'
 import { Card } from '@mui/material'
+import { useRouter } from 'next/router'
 
-import { PatientTabs } from '@/components'
+import { PatientTabs, FloatingActionButton } from '@/components'
 import { Layout } from '@/layout'
 
 export default function PatientPage() {
+
+    const router = useRouter()
+    const { id, edit } = router.query
+    const editFunction = () => {
+        const newEditValue = edit !== 'true' ? 'true' : 'false'
+        router.push(`/paciente/${id}?edit=${newEditValue}`)
+    }
+
     return (
         <Layout>
             <Card sx={{
@@ -20,6 +30,10 @@ export default function PatientPage() {
             }}>
                 <PatientTabs />
             </Card>
+            {
+                edit !== 'true' &&
+                (<FloatingActionButton icon={<Edit color='info' />} func={editFunction} />)
+            }
         </Layout>
 
     )

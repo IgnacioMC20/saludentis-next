@@ -1,4 +1,8 @@
 export * as validations from './validations'
 export * as jwt from './jwt'
 export * from './getProperName'
+export * from './getFullName'
 export * from './showToast'
+export * from './getAge'
+export * from './getAgeGroupData'
+export * from './delay'

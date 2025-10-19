@@ -1,5 +1,10 @@
 import { createTheme } from '@mui/material/styles'
 
+import CakeBackground from '../../public/background-1.jpg'
+import DefaultBackground from '../../public/background-default.jpg'
+import DefualtIcon from '../../public/saludentis.webp'
+import CakeIcon from '../../public/saludentisLogo.png'
+
 export const theme = {
   lightSeaGreen: '#0bc0c0',
   robinEggBlue: '#3dccc7',
@@ -11,6 +16,18 @@ export const theme = {
   black: '#000',
   gray: '#f5f5f5',
   skyBlue: '#87ceeb',
+  lightPurple: 'rgba(198, 178, 214)',
+  lightPink: 'rgba(240, 173, 183)',
+}
+
+export const background = {
+  default: DefaultBackground,
+  cake: CakeBackground
+}
+
+export const icon = {
+  default: DefualtIcon,
+  cake: CakeIcon
 }
 
 export const lightTheme = createTheme({
@@ -27,7 +44,7 @@ export const lightTheme = createTheme({
     }
   },
   components: {
-    
+
     MuiLink: {
       defaultProps: {
         underline: 'none',
@@ -85,6 +102,13 @@ export const lightTheme = createTheme({
             transition: 'all 0.3s ease-in-out',
           }
         },
+        containedSecondary: {
+          backgroundColor: theme.lightPurple,
+          ':hover': {
+            backgroundColor: theme.lightPink,
+            transition: 'all 0.3s ease-in-out',
+          }
+        }
       }
     },
 

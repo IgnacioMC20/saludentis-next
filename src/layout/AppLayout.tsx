@@ -3,6 +3,7 @@ import Head from 'next/head'
 import { FC } from 'react'
 
 import { Navbar, SideMenu } from '@/components'
+import { background } from '@/themes'
 
 interface Props {
     children: React.ReactNode
@@ -15,6 +16,9 @@ export const Layout: FC<Props> = ({ children }) => {
             flexDirection: 'column',
             minHeight: '100vh',
             width: '100vw',
+            background: `url(${background.default.src})`,
+            backgroundRepeat: 'repeat',
+            backgroundSize: '200px 200px',
             padding: '0',
         }}>
             <Head>
