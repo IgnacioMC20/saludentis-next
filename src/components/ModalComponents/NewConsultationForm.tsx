@@ -187,7 +187,7 @@ export const NewConsultationForm: React.FC<NewConsultationFormProps> = ({
                           fullWidth
                           error={!!errors.consultationDetails?.[index]?.treatmentId}
                         >
-                          <InputLabel>Tratamiento</InputLabel>
+                          <InputLabel shrink>Tratamiento</InputLabel>
                           <MuiSelect {...field} label="Tratamiento" displayEmpty>
                             <MenuItem value="" disabled>
                               Seleccione tratamiento
@@ -213,7 +213,7 @@ export const NewConsultationForm: React.FC<NewConsultationFormProps> = ({
                           fullWidth
                           error={!!errors.consultationDetails?.[index]?.diseaseId}
                         >
-                          <InputLabel>Enfermedad</InputLabel>
+                          <InputLabel shrink>Enfermedad</InputLabel>
                           <MuiSelect {...field} label="Enfermedad" displayEmpty>
                             <MenuItem value="" disabled>
                               Seleccione enfermedad

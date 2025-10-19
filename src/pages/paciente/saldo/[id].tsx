@@ -135,11 +135,10 @@ const PatientBalance = () => {
                 </Box>
 
                 <Box marginTop={3} display={'flex'} justifyContent={'space-between'}>
-                    <Box>
-
                         <Button sx={{
                             ...linkStyles,
                             variant: 'text',
+                            marginRight: 2,
                             size: 'medium',
                             textTransform: 'none',
                             padding: 0,
@@ -173,7 +172,6 @@ const PatientBalance = () => {
                             onClick={handleOpen}>
                             <Typography variant='h6'>Cita nueva</Typography>
                         </Button>
-                    </Box>
                     <Typography variant={'h6'} textAlign={'center'}>
                         Saldo actual: Q. {balanceResponse?.balance?.balance?.toLocaleString('es-GT') || '0'}
                     </Typography>
@@ -182,7 +180,7 @@ const PatientBalance = () => {
 
             <Modal open={open} handleClose={handleClose}>
                 {
-                    true ?
+                    isConsultationNotPayment ?
                         <ConsultationDetails
                             consultation={consultationResponse?.consultation}
                             isLoading={isConsultationLoading}

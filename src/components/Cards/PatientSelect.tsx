@@ -33,9 +33,9 @@ export const PatientSelect = () => {
 
     const handleConsultationSuccess = () => {
         handleCloseModal()
-        // Optionally navigate to the patient's page or balance page
+        // Navigate to the patient's balance page after creating a consultation
         if (patientId) {
-            router.push(`/paciente/${patientId}`)
+            router.push(`/paciente/saldo/${patientId}`)
         }
     }
 
@@ -76,8 +76,27 @@ export const PatientSelect = () => {
                             {
                                 isLoading ? (
                                     <CircularProgress />
-                                ) :
-                                    patients?.data.length > 0 && patients && (<Select patients={patients.data} setPatientId={setPatientId} />)
+                                ) : patients?.data.length > 0 && patients ? (
+                                    <Select patients={patients.data} setPatientId={setPatientId} />
+                                ) : (
+                                    <Box display={'flex'} flexDirection={'column'} alignItems={'center'} gap={2}>
+                                        <Typography variant='body1' textAlign={'center'} color={'text.secondary'}>
+                                            No hay pacientes registrados
+                                        </Typography>
+                                        <NextLink href={'/paciente/nuevo'} passHref legacyBehavior>
+                                            <Link sx={{ textDecoration: 'none' }}>
+                                                <Button
+                                                    variant='contained'
+                                                    color='primary'
+                                                    endIcon={<AddCircleOutline />}
+                                                    sx={{ padding: '0.75rem 1.5rem' }}
+                                                >
+                                                    <Typography variant='h6' color={'white'}>Crear primer paciente</Typography>
+                                                </Button>
+                                            </Link>
+                                        </NextLink>
+                                    </Box>
+                                )
                             }
                         </Grid>
                         <Grid item display={'flex'} justifyContent={'space-evenly'} alignItems={'center'} flexDirection={{ xs: 'column', md: 'row' }} width={'100%'}>
