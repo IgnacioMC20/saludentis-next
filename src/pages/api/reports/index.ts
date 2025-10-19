@@ -1,4 +1,3 @@
-import mongoose from 'mongoose'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
 import { db } from '@/database'

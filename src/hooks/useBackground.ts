@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { saludentisApi } from '@/api'
 import { IBackground } from '@/models/Background'
+import { showToast } from '@/utils'
 
 export interface BackgroundResponse {
     ok: boolean;
@@ -61,6 +62,8 @@ export const useCreateBackground = () => {
             }
         },
         onError: (error) => {
+            console.error('Error creating background:', error)
+            showToast('Error al crear el historial clínico. Por favor, intente nuevamente.', 'error')
         }
     })
 }
@@ -84,6 +87,8 @@ export const useUpdateBackground = (patientId: string) => {
             queryClient.invalidateQueries({ queryKey: ['background', patientId] })
         },
         onError: (error) => {
+            console.error('Error updating background:', error)
+            showToast('Error al actualizar el historial clínico. Por favor, intente nuevamente.', 'error')
         }
     })
 }

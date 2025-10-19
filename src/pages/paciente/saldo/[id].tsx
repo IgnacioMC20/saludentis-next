@@ -30,6 +30,7 @@ const PatientBalance = () => {
         setIsConsultationNotPayment(false)
         setSelectedConsultationId('') // Reset the selected consultation ID
     }
+    // eslint-disable-next-line no-unused-vars
     const [isConsultationNotPayment, setIsConsultationNotPayment] = useState(false)
     const [selectedConsultationId, setSelectedConsultationId] = useState<string>('')
     const router = useRouter()
