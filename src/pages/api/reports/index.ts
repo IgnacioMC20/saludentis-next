@@ -1,12 +1,7 @@
-import type { NextApiRequest, NextApiResponse } from 'next'
 import mongoose from 'mongoose'
+import type { NextApiRequest, NextApiResponse } from 'next'
 
 import { db } from '@/database'
-import Patient from '@/models/Patient'
-import Balance from '@/models/Balance'
-import Consultation from '@/models/Consultation'
-import Quotation from '@/models/Quotation'
-import Treatment from '@/models/Treatment'
 import {
     IReportsData,
     IReportFilters,
@@ -14,6 +9,12 @@ import {
     IConsultationRow,
     ITreatmentRevenue
 } from '@/interfaces/reports'
+import Balance from '@/models/Balance'
+import Consultation from '@/models/Consultation'
+import Patient from '@/models/Patient'
+import Quotation from '@/models/Quotation'
+import Treatment from '@/models/Treatment'
+import { getFullName } from '@/utils'
 import {
     calculateTotalRevenue,
     calculateCollectedPayments,
@@ -23,7 +24,6 @@ import {
     calculateARAgingBuckets,
     calculatePaidForConsultation
 } from '@/utils/reportMetrics'
-import { getFullName } from '@/utils'
 
 type Data =
     | { message: string; success: boolean }

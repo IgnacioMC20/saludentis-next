@@ -1,9 +1,9 @@
-import type { NextApiRequest, NextApiResponse } from 'next'
 import mongoose from 'mongoose'
+import type { NextApiRequest, NextApiResponse } from 'next'
 
 import { db } from '@/database'
-import Background, { IBackground } from '@/models/Background'
 import { ApiResponse } from '@/interfaces'
+import Background, { IBackground } from '@/models/Background'
 
 export default function handler(req: NextApiRequest, res: NextApiResponse<ApiResponse>) {
     switch (req.method) {
