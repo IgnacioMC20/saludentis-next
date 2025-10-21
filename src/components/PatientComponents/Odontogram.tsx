@@ -1,9 +1,13 @@
 import { Grid, Typography } from '@mui/material'
+import { useRouter } from 'next/router'
 import React from 'react'
 
 import { Odontogram } from '../Odontogram'
 
 const OdontogramComponent = () => {
+  const router = useRouter()
+  const { id } = router.query
+
   return (
     <Grid container>
       <Typography variant={'h4'} color={'black'} marginY={2} display={{
@@ -19,7 +23,7 @@ const OdontogramComponent = () => {
       }}
         overflow={'hidden'}
       >
-        <Odontogram.App />
+        <Odontogram.App patientId={id as string} />
       </Grid>
 
     </Grid >

@@ -25,8 +25,11 @@ const patientSchema = new Schema<IPatient>({
     diet: { type: String },
     lastMedicalCheckup: { type: String },
     medications: { type: String },
+    diagnosis: { type: String },
     consultationReason: { type: String },
     emotionalState: { type: String },
+    organSystems: { type: [String], default: [] },
+    currentOdontogramId: { type: mongoose.Types.ObjectId, ref: 'Odontogram' },  // Reference to Odontogram collection
 }, {
     timestamps: true // Automatically adds `createdAt` and `updatedAt`
 })
