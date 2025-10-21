@@ -22,11 +22,14 @@ export interface IPatient {
   diet?: string;
   lastMedicalCheckup?: string;
   medications?: string;
+  diagnosis?: string;
   reasonForVisit?: string;
   emotionalState?: string;
   physicalActivity?: string;
+  organSystems?: string[];
   createdAt?: Date;
   updatedAt?: Date;
   lastTreatment?: string;
   consultationReason?: string;
+  currentOdontogramId?: mongoose.Types.ObjectId; // Refers to Odontogram collection
 }

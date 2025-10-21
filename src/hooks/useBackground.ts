@@ -46,8 +46,9 @@ export const useCreateBackground = () => {
 
     return useMutation<CreateBackgroundResponse, Error, IBackground>({
         mutationFn: async (backgroundData: IBackground) => {
+            const patientId = backgroundData.patientId.toString()
             const response = await saludentisApi({
-                url: '/background',
+                url: `/background/${patientId}`,
                 method: 'POST',
                 data: backgroundData
             })

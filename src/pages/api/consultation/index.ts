@@ -3,6 +3,7 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 
 import { cleanResponse } from '@/api'
 import { db } from '@/database'
+import Balance from '@/models/Balance'
 import Consultation, { IConsultation } from '@/models/Consultation'
 
 export interface ApiResponse<T = any> {
@@ -64,6 +65,41 @@ async function createConsultation(req: NextApiRequest, res: NextApiResponse<ApiR
     try {
         const newConsultation = new Consultation(consultationData)
         await newConsultation.save()
+
+        // Update or create balance for the patient
+        const patientId = consultationData.patientId
+        const consultationTotal = consultationData.total || 0
+
+        // Find existing balance or create new one
+        let balance = await Balance.findOne({ patientId })
+
+        if (!balance) {
+            // Create new balance if it doesn't exist
+            balance = new Balance({
+                patientId,
+                balance: consultationTotal,
+                balanceDetails: [{
+                    consultationId: newConsultation._id,
+                    amount: 0,
+                    total: consultationTotal,
+                    createdAt: new Date(),
+                    updatedAt: new Date()
+                }]
+            })
+        } else {
+            // Update existing balance
+            balance.balance = (balance.balance || 0) + consultationTotal
+            balance.balanceDetails = balance.balanceDetails || []
+            balance.balanceDetails.push({
+                consultationId: newConsultation._id,
+                amount: 0,
+                total: consultationTotal,
+                createdAt: new Date(),
+                updatedAt: new Date()
+            })
+        }
+
+        await balance.save()
 
         await db.disconnect()
 

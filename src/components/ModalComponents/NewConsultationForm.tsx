@@ -125,6 +125,7 @@ export const NewConsultationForm: React.FC<NewConsultationFormProps> = ({
       const result = await createConsultation.mutateAsync(payload)
       if (result.ok) {
         showToast('Consulta creada exitosamente', 'success')
+        // Call onSuccess which will handle refetching in parent
         onSuccess?.()
       } else {
         showToast(result.message || 'Error al crear la consulta', 'error')

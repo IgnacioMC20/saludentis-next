@@ -4,7 +4,7 @@ import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 
 import { getFullName } from '../../../utils/getFullName'
-import { ConsultationDetails, LoadingSpinner, Modal, PatientBalanceModalContent, Table, } from '@/components'
+import { ConsultationDetails, LoadingSpinner, Modal, NewConsultationForm, PatientBalanceModalContent, Table, } from '@/components'
 import { usePatient, useConsultation, useBalance } from '@/hooks'
 import { IPatient } from '@/interfaces'
 import { Layout } from '@/layout'
@@ -24,22 +24,22 @@ const linkStyles = {
 const PatientBalance = () => {
 
     const [open, setOpen] = useState(false)
-    const handleOpen = () => setOpen(true)
+    const [modalType, setModalType] = useState<'consultation' | 'payment' | 'newConsultation'>('consultation')
+    const [selectedConsultationId, setSelectedConsultationId] = useState<string>('')
+    
     const handleClose = () => {
         setOpen(false)
-        setIsConsultationNotPayment(false)
-        setSelectedConsultationId('') // Reset the selected consultation ID
+        setModalType('consultation')
+        setSelectedConsultationId('')
     }
-    // eslint-disable-next-line no-unused-vars
-    const [isConsultationNotPayment, setIsConsultationNotPayment] = useState(false)
-    const [selectedConsultationId, setSelectedConsultationId] = useState<string>('')
     const router = useRouter()
     const { id } = router.query
 
     const { data: response, isLoading, isFetching } = usePatient(id as string)
     const {
         data: balanceResponse,
-        isLoading: isBalanceLoading
+        isLoading: isBalanceLoading,
+        refetch: refetchBalance
     } = useBalance(id as string)
     const {
         data: consultationResponse,
@@ -47,9 +47,31 @@ const PatientBalance = () => {
     } = useConsultation(selectedConsultationId)
 
     const handleOpenConsultationModal = (id: string) => {
-        setIsConsultationNotPayment(true)
-        setSelectedConsultationId(id) // Set the selected consultation ID
-        handleOpen()
+        setModalType('consultation')
+        setSelectedConsultationId(id)
+        setOpen(true)
+    }
+
+    const handleOpenPaymentModal = () => {
+        setModalType('payment')
+        setOpen(true)
+    }
+
+    const handleOpenNewConsultationModal = () => {
+        setModalType('newConsultation')
+        setOpen(true)
+    }
+
+    const handleConsultationSuccess = async () => {
+        // Refetch balance data to update the table
+        await refetchBalance()
+        handleClose()
+    }
+
+    const handlePaymentSuccess = async () => {
+        // Refetch balance data to update the table
+        await refetchBalance()
+        handleClose()
     }
 
     useEffect(() => {
@@ -135,12 +157,13 @@ const PatientBalance = () => {
                 </Box>
 
                 <Box marginTop={3} display={'flex'} justifyContent={'space-between'}>
+                    <Box>
                         <Button sx={{
                             ...linkStyles,
                             variant: 'text',
-                            marginRight: 2,
                             size: 'medium',
                             textTransform: 'none',
+                            marginRight: 2,
                             padding: 0,
                             minWidth: 'auto',
                             boxShadow: 'none',
@@ -151,7 +174,7 @@ const PatientBalance = () => {
                                 backgroundColor: 'transparent',
                             },
                         }}
-                            onClick={handleOpen}>
+                            onClick={handleOpenPaymentModal}>
                             <Typography variant='h6'>Realizar pago</Typography>
                         </Button>
                         <Button sx={{
@@ -169,9 +192,10 @@ const PatientBalance = () => {
                                 backgroundColor: 'transparent',
                             },
                         }}
-                            onClick={handleOpen}>
+                            onClick={handleOpenNewConsultationModal}>
                             <Typography variant='h6'>Cita nueva</Typography>
                         </Button>
+                    </Box>
                     <Typography variant={'h6'} textAlign={'center'}>
                         Saldo actual: Q. {balanceResponse?.balance?.balance?.toLocaleString('es-GT') || '0'}
                     </Typography>
@@ -179,15 +203,25 @@ const PatientBalance = () => {
             </Card>
 
             <Modal open={open} handleClose={handleClose}>
-                {
-                    isConsultationNotPayment ?
-                        <ConsultationDetails
-                            consultation={consultationResponse?.consultation}
-                            isLoading={isConsultationLoading}
-                        />
-                        :
-                        <PatientBalanceModalContent />
-                }
+                {modalType === 'consultation' && (
+                    <ConsultationDetails
+                        consultation={consultationResponse?.consultation}
+                        isLoading={isConsultationLoading}
+                    />
+                )}
+                {modalType === 'payment' && (
+                    <PatientBalanceModalContent
+                        patientId={id as string}
+                        currentBalance={balanceResponse?.balance?.balance || 0}
+                        onSuccess={handlePaymentSuccess}
+                    />
+                )}
+                {modalType === 'newConsultation' && (
+                    <NewConsultationForm
+                        patientId={id as string}
+                        onSuccess={handleConsultationSuccess}
+                    />
+                )}
             </Modal>
         </Layout >
     )

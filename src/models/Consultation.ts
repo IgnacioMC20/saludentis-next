@@ -1,10 +1,19 @@
 import mongoose, { Schema, model, Model } from 'mongoose'
 
+// Interface for OdontogramChange
+export interface IOdontogramChange {
+    toothNumber: number;
+    facePosition: string;
+    treatment: string;
+    color: string;
+}
+
 // Interface for ConsultationDetail
 export interface IConsultationDetail {
     tooth?: string;
     treatmentId?: mongoose.Types.ObjectId;
     diseaseId?: mongoose.Types.ObjectId;
+    odontogramChanges?: IOdontogramChange[];
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -18,11 +27,20 @@ export interface IConsultation {
     updatedAt?: Date;
 }
 
+// Schema for OdontogramChange
+const odontogramChangeSchema = new Schema<IOdontogramChange>({
+    toothNumber: { type: Number, required: true },
+    facePosition: { type: String, required: true },
+    treatment: { type: String, required: true },
+    color: { type: String, required: true }
+}, { _id: false })
+
 // Schema for ConsultationDetail
 const consultationDetailSchema = new Schema<IConsultationDetail>({
     tooth: { type: String },
     treatmentId: { type: mongoose.Types.ObjectId, ref: 'Treatment' },
     diseaseId: { type: mongoose.Types.ObjectId, ref: 'Disease' },
+    odontogramChanges: { type: [odontogramChangeSchema] },
     createdAt: { type: Date },
     updatedAt: { type: Date }
 }, {
