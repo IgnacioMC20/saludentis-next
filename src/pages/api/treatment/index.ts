@@ -15,8 +15,8 @@ export default async function seedHandler(
     }
 
     try {
-        await Treatment.deleteMany()
-        await Treatment.insertMany(seedTreatments)
+        // await Treatment.deleteMany()
+        // await Treatment.insertMany(seedTreatments)
         await db.connect()
         const treatments = await Treatment.find().lean()
         await db.disconnect()

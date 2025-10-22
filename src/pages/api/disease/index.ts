@@ -15,8 +15,8 @@ export default async function seedHandler(
     }
 
     try {
-        await Disease.deleteMany()
-        await Disease.insertMany(seedDisieases)
+        // await Disease.deleteMany()
+        // await Disease.insertMany(seedDisieases)
         await db.connect()
         const diseases = await Disease.find().lean()
         await db.disconnect()
