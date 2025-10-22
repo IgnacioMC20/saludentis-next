@@ -272,6 +272,13 @@ export const Table = ({
                                                 role="checkbox"
                                                 tabIndex={-1}
                                                 key={row.id}
+                                                onClick={() => handleOpenConsultationModal?.(row.id)}
+                                                sx={{
+                                                    cursor: handleOpenConsultationModal ? 'pointer' : 'default',
+                                                    '&:hover': handleOpenConsultationModal ? {
+                                                        backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                                                    } : {}
+                                                }}
                                             >
                                                 {columns.map(column =>
                                                     renderCellContent(column, row, rowIndex, phone)
@@ -293,6 +300,8 @@ export const Table = ({
                         page={page}
                         onPageChange={handleChangePage}
                         onRowsPerPageChange={handleChangeRowsPerPage}
+                        labelRowsPerPage="Filas por página:"
+                        labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count !== -1 ? count : `más de ${to}`}`}
                     />
                 </>
             )}

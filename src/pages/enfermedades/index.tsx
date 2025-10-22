@@ -41,20 +41,17 @@ const Enfermedades = () => {
 
     useEffect(() => {
         if (diseaseData?.data) {
-            console.log('resetting form with data:', diseaseData?.data)
             reset(diseaseData?.data)
         }
     }, [diseaseData?.data, reset])
 
     const fetchDisease = (id: string) => {
-        console.log('fetchDisease called with ID:', id)
         setSelectedId(id)
         if (!isDiseaseLoading)
             toggleModal()
     }
 
     const onSubmitForm = async (diseaseData: FormValues) => {
-        console.log('diseaseData:', diseaseData)
 
         const url = selectedId ? `/disease/${selectedId}` : '/disease'
         const method = selectedId ? 'PUT' : 'POST'

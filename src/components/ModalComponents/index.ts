@@ -1,3 +1,5 @@
 export * from './PatientBalanceModalContent'
 export * from './ConsultationDetails'
 export * from './NewConsultationForm'
+export * from './QuotationForm'
+export * from './QuotationDetails'

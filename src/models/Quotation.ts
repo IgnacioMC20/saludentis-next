@@ -30,9 +30,7 @@ const quotationSchema = new Schema<IQuotation>({
     patientId: { type: mongoose.Types.ObjectId, ref: 'Patient' },      // Reference to Patient
     annotations: { type: String },
     total: { type: Number },
-    quotationDetails: [quotationDetailSchema],                         // Array of QuotationDetail
-    createdAt: { type: Date },
-    updatedAt: { type: Date }
+    quotationDetails: [quotationDetailSchema]                          // Array of QuotationDetail
 }, {
     timestamps: true // Automatically adds createdAt and updatedAt
 })

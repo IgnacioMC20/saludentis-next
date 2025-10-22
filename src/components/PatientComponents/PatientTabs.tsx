@@ -80,7 +80,6 @@ export const PatientTabs = () => {
     const { id } = router.query
 
     const handleChange = (_event: SyntheticEvent<any>, newValue: number) => {
-        console.log('newValue', newValue)
         if (newValue === 5) {
             router.push(`/paciente/saldo/${id}`)
             return

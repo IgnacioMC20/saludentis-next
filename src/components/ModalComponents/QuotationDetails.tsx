@@ -1,3 +1,4 @@
+import { PictureAsPdf } from '@mui/icons-material'
 import {
     Box,
     Typography,
@@ -11,20 +12,26 @@ import {
     TableRow,
     Grid,
     Chip,
-    CircularProgress
+    CircularProgress,
+    Button
 } from '@mui/material'
 import React from 'react'
 
-import { IConsultation } from '@/models/Consultation'
+import { IQuotation } from '@/models/Quotation'
 import { theme } from '@/themes'
 import { formatDateToDDMMMYYYY } from '@/utils'
 
-interface ConsultationDetailsProps {
-    consultation?: IConsultation;
+interface QuotationDetailsProps {
+    quotation?: IQuotation;
     isLoading?: boolean;
+    onExportPDF?: () => void;
 }
 
-export const ConsultationDetails: React.FC<ConsultationDetailsProps> = ({ consultation, isLoading = false }) => {
+export const QuotationDetails: React.FC<QuotationDetailsProps> = ({ 
+    quotation, 
+    isLoading = false,
+    onExportPDF 
+}) => {
     // Format currency function
     const formatCurrency = (amount?: number) => {
         if (amount === undefined) return 'N/A'
@@ -43,7 +50,7 @@ export const ConsultationDetails: React.FC<ConsultationDetailsProps> = ({ consul
         <Box sx={{ p: 2 }}>
             {/* Header Section */}
             <Typography variant="h5" component="h2" gutterBottom>
-                Detalles de la Consulta
+                Detalles de la Cotización
             </Typography>
             <Divider sx={{ mb: 3 }} />
 
@@ -55,7 +62,7 @@ export const ConsultationDetails: React.FC<ConsultationDetailsProps> = ({ consul
                     </Typography>
                     <Typography variant="body1" gutterBottom>
                         {(() => {
-                            const patient = consultation?.patientId as any
+                            const patient = quotation?.patientId as any
                             if (!patient) return 'N/A'
                             if (typeof patient === 'string') return patient
                             const fullName = `${patient.firstName || ''} ${patient.middleName || ''} ${patient.lastName || ''}`.trim()
@@ -68,7 +75,7 @@ export const ConsultationDetails: React.FC<ConsultationDetailsProps> = ({ consul
                         Total
                     </Typography>
                     <Typography variant="body1" gutterBottom>
-                        {formatCurrency(consultation?.total)}
+                        {formatCurrency(quotation?.total)}
                     </Typography>
                 </Grid>
                 <Grid item xs={12} md={6}>
@@ -76,7 +83,7 @@ export const ConsultationDetails: React.FC<ConsultationDetailsProps> = ({ consul
                         Fecha de Creación
                     </Typography>
                     <Typography variant="body1" gutterBottom>
-                        {formatDateToDDMMMYYYY(consultation?.createdAt)}
+                        {formatDateToDDMMMYYYY(quotation?.createdAt)}
                     </Typography>
                 </Grid>
                 <Grid item xs={12} md={6}>
@@ -84,19 +91,19 @@ export const ConsultationDetails: React.FC<ConsultationDetailsProps> = ({ consul
                         Última Actualización
                     </Typography>
                     <Typography variant="body1" gutterBottom>
-                        {formatDateToDDMMMYYYY(consultation?.updatedAt)}
+                        {formatDateToDDMMMYYYY(quotation?.updatedAt)}
                     </Typography>
                 </Grid>
             </Grid>
 
-            {/* Consultation Details Section */}
+            {/* Quotation Details Section */}
             <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
                 Detalles del Tratamiento
             </Typography>
 
-            {consultation?.consultationDetails && consultation.consultationDetails.length > 0 ? (
+            {quotation?.quotationDetails && quotation.quotationDetails.length > 0 ? (
                 <TableContainer component={Paper} sx={{ mt: 2, boxShadow: 'none' }}>
-                    <Table aria-label="consultation details table">
+                    <Table aria-label="quotation details table">
                         <TableHead>
                             <TableRow>
                                 <TableCell sx={{ backgroundColor: theme.gray, fontWeight: 700 }}>Diente</TableCell>
@@ -106,7 +113,7 @@ export const ConsultationDetails: React.FC<ConsultationDetailsProps> = ({ consul
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {consultation.consultationDetails.map((detail: any, index: number) => {
+                            {quotation.quotationDetails.map((detail: any, index: number) => {
                                 const treatment = detail.treatmentId
                                 const disease = detail.diseaseId
                                 
@@ -139,22 +146,51 @@ export const ConsultationDetails: React.FC<ConsultationDetailsProps> = ({ consul
             ) : (
                 <Box sx={{ mt: 2, p: 2, bgcolor: 'background.paper', borderRadius: 1 }}>
                     <Typography variant="body1" color="text.secondary" align="center">
-                        No hay detalles de consulta disponibles
+                        No hay detalles de cotización disponibles
                     </Typography>
                 </Box>
             )}
 
+            {/* Annotations Section */}
+            {quotation?.annotations && (
+                <Box sx={{ mt: 3 }}>
+                    <Typography variant="h6" gutterBottom>
+                        Anotaciones
+                    </Typography>
+                    <Paper sx={{ p: 2, bgcolor: 'grey.50' }}>
+                        <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>
+                            {quotation.annotations}
+                        </Typography>
+                    </Paper>
+                </Box>
+            )}
+
             {/* Summary Section */}
-            <Box sx={{ mt: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Box sx={{ mt: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
                 <Chip
-                    label={`Total: ${formatCurrency(consultation?.total)}`}
+                    label={`Total: ${formatCurrency(quotation?.total)}`}
                     color="primary"
                     sx={{ fontWeight: 'bold', color: 'white' }}
                 />
                 <Typography variant="caption" color="text.secondary">
-                    {consultation?.consultationDetails?.length || 0} tratamientos registrados
+                    {quotation?.quotationDetails?.length || 0} tratamientos registrados
                 </Typography>
             </Box>
+
+            {/* Export PDF Button */}
+            {onExportPDF && (
+                <Box sx={{ mt: 3, display: 'flex', justifyContent: 'center' }}>
+                    <Button
+                        variant="contained"
+                        color="secondary"
+                        startIcon={<PictureAsPdf />}
+                        onClick={onExportPDF}
+                        sx={{ minWidth: '200px' }}
+                    >
+                        Exportar a PDF
+                    </Button>
+                </Box>
+            )}
         </Box>
     )
 }

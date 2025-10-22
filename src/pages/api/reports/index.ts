@@ -57,18 +57,22 @@ export default async function handler(
         const pageNum = parseInt(page as string)
         const pageSizeNum = parseInt(pageSize as string)
 
-        // Fetch all data within date range
-        const [consultations, balances, patients, quotations, treatments] = await Promise.all([
-            Consultation.find({
-                createdAt: { $gte: filters.startDate, $lte: filters.endDate }
-            }).lean(),
+        // Fetch all data
+        // For better UX, we fetch all historical data and filter in memory when needed
+        const [allConsultations, balances, patients, quotations, treatments] = await Promise.all([
+            Consultation.find().lean(),
             Balance.find().lean(),
             Patient.find().lean(),
-            Quotation.find({
-                createdAt: { $gte: filters.startDate, $lte: filters.endDate }
-            }).lean(),
+            Quotation.find().lean(),
             Treatment.find().lean()
         ])
+
+        // Filter consultations by date range for revenue calculations
+        const consultations = allConsultations.filter(c => {
+            if (!c.createdAt) return false
+            const created = new Date(c.createdAt)
+            return created >= filters.startDate! && created <= filters.endDate!
+        })
 
         // Create patient map for quick lookup
         const patientMap = new Map(
@@ -80,8 +84,8 @@ export default async function handler(
             treatments.map(t => [t._id.toString(), t])
         )
 
-        // Calculate KPIs
-        const totalRevenue = calculateTotalRevenue(consultations)
+        // Calculate KPIs using all consultations for historical totals
+        const totalRevenue = calculateTotalRevenue(allConsultations)
         const collectedPayments = calculateCollectedPayments(balances)
         const outstandingBalances = calculateOutstandingBalances(balances)
         const pendingCollections = calculatePendingCollections(balances)
@@ -93,8 +97,13 @@ export default async function handler(
             return created >= filters.startDate! && created <= filters.endDate!
         }).length
 
-        // Get unique patients from consultations
-        const uniquePatientIds = new Set(
+        // Get unique patients from ALL consultations (not just filtered ones)
+        const allUniquePatientIds = new Set(
+            allConsultations.map(c => c.patientId?.toString()).filter(Boolean)
+        )
+
+        // Get unique patients from filtered consultations
+        const filteredUniquePatientIds = new Set(
             consultations.map(c => c.patientId?.toString()).filter(Boolean)
         )
 
@@ -103,8 +112,8 @@ export default async function handler(
             collectedPayments,
             outstandingBalances,
             pendingCollections,
-            consultationsCount: consultations.length,
-            patientsSeen: uniquePatientIds.size,
+            consultationsCount: allConsultations.length, // Show total consultations
+            patientsSeen: allUniquePatientIds.size, // Show all unique patients
             newPatients
         }
 
@@ -194,43 +203,75 @@ export default async function handler(
         const startIndex = (pageNum - 1) * pageSizeNum
         const paginatedBalances = allPatientBalances.slice(startIndex, startIndex + pageSizeNum)
 
-        // Consultations table data
-        const consultationsData: IConsultationRow[] = consultations.map(consultation => {
-            const patient = patientMap.get(consultation.patientId?.toString() || '')
-            const balance = balances.find(b => b.patientId?.toString() === consultation.patientId?.toString())
-            const paid = balance ? calculatePaidForConsultation(
-                consultation._id.toString(),
-                balance.balanceDetails || []
-            ) : 0
+        // Consultations table data - use all consultations and sort by date
+        const consultationsData: IConsultationRow[] = allConsultations
+            .map(consultation => {
+                const patient = patientMap.get(consultation.patientId?.toString() || '')
+                const balance = balances.find(b => b.patientId?.toString() === consultation.patientId?.toString())
+                const paid = balance ? calculatePaidForConsultation(
+                    consultation._id.toString(),
+                    balance.balanceDetails || []
+                ) : 0
 
-            return {
-                consultationId: consultation._id.toString(),
-                date: consultation.createdAt || new Date(),
-                patientName: patient ? getFullName(patient.firstName, patient.middleName, patient.lastName) : 'Unknown',
-                patientId: consultation.patientId?.toString() || '',
-                total: consultation.total || 0,
-                paid,
-                due: (consultation.total || 0) - paid,
-                treatmentsCount: consultation.consultationDetails?.length || 0
+                return {
+                    consultationId: consultation._id.toString(),
+                    date: consultation.createdAt || new Date(),
+                    patientName: patient ? getFullName(patient.firstName, patient.middleName, patient.lastName) : 'Unknown',
+                    patientId: consultation.patientId?.toString() || '',
+                    total: consultation.total || 0,
+                    paid,
+                    due: (consultation.total || 0) - paid,
+                    treatmentsCount: consultation.consultationDetails?.length || 0
+                }
+            })
+            .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()) // Sort by date, newest first
+            .slice(0, 50) // Limit to 50 most recent consultations
+
+        // Quotation funnel - use all consultations for conversion tracking
+        const totalQuoted = quotations.reduce((sum, q) => sum + (q.total || 0), 0)
+        const quotationsCount = quotations.length
+        
+        // Create a map of quotation IDs by patient for better tracking
+        const quotationsByPatient = new Map<string, any[]>()
+        quotations.forEach(q => {
+            const patientId = q.patientId?.toString()
+            if (patientId) {
+                if (!quotationsByPatient.has(patientId)) {
+                    quotationsByPatient.set(patientId, [])
+                }
+                quotationsByPatient.get(patientId)!.push(q)
             }
         })
-
-        // Quotation funnel
-        const totalQuoted = quotations.reduce((sum, q) => sum + (q.total || 0), 0)
-        const quotationPatientIds = new Set(quotations.map(q => q.patientId?.toString()))
         
-        // Find consultations from patients who had quotations
-        const convertedConsultations = consultations.filter(c => 
-            quotationPatientIds.has(c.patientId?.toString())
-        )
-        const convertedAmount = convertedConsultations.reduce((sum, c) => sum + (c.total || 0), 0)
+        // Find consultations that happened after quotations for the same patient
+        let convertedAmount = 0
+        const convertedPatients = new Set<string>()
+        
+        // Use ALL consultations for conversion tracking
+        allConsultations.forEach(consultation => {
+            const patientId = consultation.patientId?.toString()
+            if (patientId && quotationsByPatient.has(patientId)) {
+                const patientQuotations = quotationsByPatient.get(patientId)!
+                // Check if consultation happened after any quotation
+                const hasQuotationBefore = patientQuotations.some(q => {
+                    const quotationDate = new Date(q.createdAt || q.updatedAt || new Date())
+                    const consultationDate = new Date(consultation.createdAt || new Date())
+                    return quotationDate <= consultationDate
+                })
+                
+                if (hasQuotationBefore && !convertedPatients.has(patientId)) {
+                    convertedPatients.add(patientId)
+                    convertedAmount += (consultation.total || 0)
+                }
+            }
+        })
 
         const quotationFunnel = {
             totalQuoted,
             convertedAmount,
-            conversionRate: totalQuoted > 0 ? (convertedAmount / totalQuoted) * 100 : 0,
-            quotationsCount: quotations.length,
-            convertedCount: convertedConsultations.length
+            conversionRate: quotationsCount > 0 ? (convertedPatients.size / quotationsCount) * 100 : 0,
+            quotationsCount,
+            convertedCount: convertedPatients.size
         }
 
         const reportsData: IReportsData = {

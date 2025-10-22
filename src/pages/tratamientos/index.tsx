@@ -41,13 +41,11 @@ const Tratamientos = () => {
 
     useEffect(() => {
         if (treatmentData?.data) {
-            console.log('resetting form with data:', treatmentData?.data)
             reset(treatmentData?.data)
         }
     }, [treatmentData?.data, reset])
 
     const fetchTreatment = async (id: string) => {
-        console.log('fetchDisease called with ID:', id)
         setSelectedId(id)
         if (!isTreatmentLoading)
             toggleModal()
@@ -57,7 +55,6 @@ const Tratamientos = () => {
 
         const url = selectedId ? `/treatment/${selectedId}` : '/treatment'
         const method = selectedId ? 'PUT' : 'POST'
-        console.log({ treatmentData, url, method })
         const response = await saludentisApi({
             url,
             method,
