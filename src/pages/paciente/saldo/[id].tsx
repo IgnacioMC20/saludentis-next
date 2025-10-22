@@ -1,15 +1,16 @@
-import { Box, Button, Card, Typography, Link } from '@mui/material'
+import { Download } from '@mui/icons-material'
+import { Box, Button, Card, Typography, Link, IconButton, Chip } from '@mui/material'
 import NextLink from 'next/link'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 
 import { getFullName } from '../../../utils/getFullName'
-import { ConsultationDetails, LoadingSpinner, Modal, NewConsultationForm, PatientBalanceModalContent, Table, } from '@/components'
-import { usePatient, useConsultation, useBalance } from '@/hooks'
+import { ConsultationDetails, LoadingSpinner, Modal, NewConsultationForm, PatientBalanceModalContent, QuotationDetails, QuotationForm, Table, } from '@/components'
+import { usePatient, useConsultation, useBalance, useQuotation, useQuotations } from '@/hooks'
 import { IPatient } from '@/interfaces'
 import { Layout } from '@/layout'
 import { theme } from '@/themes'
-import { showToast } from '@/utils'
+import { formatDateToDDMMMYYYY, generateQuotationPDF, showToast } from '@/utils'
 
 const linkStyles = {
     textDecoration: 'none',
@@ -24,8 +25,10 @@ const linkStyles = {
 const PatientBalance = () => {
 
     const [open, setOpen] = useState(false)
-    const [modalType, setModalType] = useState<'consultation' | 'payment' | 'newConsultation'>('consultation')
+    const [modalType, setModalType] = useState<'consultation' | 'payment' | 'newConsultation' | 'quotation' | 'newQuotation'>('consultation')
     const [selectedConsultationId, setSelectedConsultationId] = useState<string>('')
+    const [selectedQuotationId, setSelectedQuotationId] = useState<string>('')
+    const [selectedItemType, setSelectedItemType] = useState<'consultation' | 'quotation'>('consultation')
     
     const handleClose = () => {
         setOpen(false)
@@ -45,10 +48,24 @@ const PatientBalance = () => {
         data: consultationResponse,
         isLoading: isConsultationLoading
     } = useConsultation(selectedConsultationId)
+    const {
+        data: quotationsResponse,
+        refetch: refetchQuotations
+    } = useQuotations(id as string)
+    const {
+        data: quotationResponse,
+        isLoading: isQuotationLoading
+    } = useQuotation(selectedQuotationId)
 
-    const handleOpenConsultationModal = (id: string) => {
-        setModalType('consultation')
-        setSelectedConsultationId(id)
+    const handleOpenItemModal = (id: string, type: 'consultation' | 'quotation') => {
+        if (type === 'consultation') {
+            setModalType('consultation')
+            setSelectedConsultationId(id)
+        } else {
+            setModalType('quotation')
+            setSelectedQuotationId(id)
+        }
+        setSelectedItemType(type)
         setOpen(true)
     }
 
@@ -62,10 +79,68 @@ const PatientBalance = () => {
         setOpen(true)
     }
 
+    const handleOpenQuotationModal = (id: string) => {
+        setModalType('quotation')
+        setSelectedQuotationId(id)
+        setOpen(true)
+    }
+
+    const handleOpenNewQuotationModal = () => {
+        setModalType('newQuotation')
+        setOpen(true)
+    }
+
     const handleConsultationSuccess = async () => {
         // Refetch balance data to update the table
         await refetchBalance()
         handleClose()
+    }
+
+    const handleQuotationSuccess = async () => {
+        // Refetch quotations data to update the table
+        await refetchQuotations()
+        handleClose()
+    }
+
+    const handleExportQuotationPDF = (quotationId?: string) => {
+        // If quotationId is provided, fetch that specific quotation
+        const quotationToExport = quotationId
+            ? quotationsResponse?.data?.find((q: any) => q._id === quotationId)
+            : quotationResponse?.quotation
+
+        if (!quotationToExport || !response?.data) {
+            showToast('No hay datos de cotización para exportar', 'error')
+            return
+        }
+
+        try {
+            const patient = response.data as IPatient
+
+            // Prepare treatments data
+            const treatments = quotationToExport.quotationDetails?.map((detail: any) => ({
+                tooth: detail.tooth || 'N/A',
+                treatment: detail.treatmentId?.description || 'N/A',
+                disease: detail.diseaseId?.detail || 'N/A',
+                price: detail.treatmentId?.price || 0
+            })) || []
+
+            // Generate PDF
+            generateQuotationPDF({
+                quotation: quotationToExport,
+                patient: {
+                    firstName: patient.firstName || '',
+                    middleName: patient.middleName,
+                    lastName: patient.lastName || '',
+                    nationalId: patient.nationalId || 'N/A'
+                },
+                treatments
+            })
+
+            showToast('PDF generado exitosamente', 'success')
+        } catch (error) {
+            console.error('Error generating PDF:', error)
+            showToast('Error al generar el PDF', 'error')
+        }
     }
 
     const handlePaymentSuccess = async () => {
@@ -137,23 +212,66 @@ const PatientBalance = () => {
                     height: '80%',
                     overflow: 'auto'
                 }}>
-                    {balanceResponse?.balance?.balanceDetails && balanceResponse.balance.balanceDetails.length > 0 ? (
-                        <Table
-                            data={balanceResponse.balance.balanceDetails.map(detail => ({
-                                id: detail.consultationId ? detail.consultationId.toString() : '',
-                                consulta: 'Consulta',
-                                fecha: detail.createdAt ? new Date(detail.createdAt).toISOString().split('T')[0] : '',
-                                total: detail.total || 0,
-                                pagado: detail.amount || 0,
-                            }))}
-                            handleOpenConsultationModal={handleOpenConsultationModal}
-                            customRowsPerPage={5}
-                        />
-                    ) : (
-                        <Typography variant="body1" textAlign="center" sx={{ my: 4 }}>
-                            No hay historial de citas disponible
-                        </Typography>
-                    )}
+                    {(() => {
+                        // Combine consultations and quotations
+                        const consultations = balanceResponse?.balance?.balanceDetails?.map(detail => ({
+                            id: detail.consultationId ? detail.consultationId.toString() : '',
+                            tipo: 'Consulta',
+                            fecha: formatDateToDDMMMYYYY(detail.createdAt),
+                            total: detail.total || 0,
+                            pagado: detail.amount || 0,
+                            itemType: 'consultation' as const
+                        })) || []
+
+                        const quotations = quotationsResponse?.data?.map((quotation: any) => ({
+                            id: quotation._id || '',
+                            tipo: 'Cotización',
+                            fecha: formatDateToDDMMMYYYY(quotation.createdAt || quotation.updatedAt),
+                            total: quotation.total || 0,
+                            pagado: 0,
+                            itemType: 'quotation' as const,
+                            quotationData: quotation
+                        })) || []
+
+                        const combinedData = [...consultations, ...quotations].sort((a, b) => {
+                            return new Date(b.fecha).getTime() - new Date(a.fecha).getTime()
+                        })
+
+                        if (combinedData.length === 0) {
+                            return (
+                                <Typography variant="body1" textAlign="center" sx={{ my: 4 }}>
+                                    No hay historial de citas ni cotizaciones disponible
+                                </Typography>
+                            )
+                        }
+
+                        return (
+                            <Table
+                                data={combinedData.map(item => {
+                                    const baseData: any = {
+                                        id: item.id,
+                                        tipo: item.tipo,
+                                        fecha: item.fecha,
+                                        total: item.total,
+                                    }
+
+                                    // Only add 'pagado' for consultations
+                                    if (item.itemType === 'consultation') {
+                                        baseData.pagado = item.pagado
+                                    }
+
+                                    return baseData
+                                })}
+                                handleOpenConsultationModal={(id: string) => {
+                                    const item = combinedData.find(i => i.id === id)
+                                    if (item) {
+                                        handleOpenItemModal(id, item.itemType)
+                                    }
+                                }}
+                                customRowsPerPage={10}
+                            />
+                        )
+                    })()}
                 </Box>
 
                 <Box marginTop={3} display={'flex'} justifyContent={'space-between'}>
@@ -195,6 +313,25 @@ const PatientBalance = () => {
                             onClick={handleOpenNewConsultationModal}>
                             <Typography variant='h6'>Cita nueva</Typography>
                         </Button>
+                        <Button sx={{
+                            ...linkStyles,
+                            variant: 'text',
+                            size: 'medium',
+                            textTransform: 'none',
+                            marginLeft: 2,
+                            padding: 0,
+                            minWidth: 'auto',
+                            boxShadow: 'none',
+                            borderRadius: 0,
+                            '&:hover': {
+                                ...linkStyles['&:hover'],
+                                color: theme.lightSeaGreen,
+                                backgroundColor: 'transparent',
+                            },
+                        }}
+                            onClick={handleOpenNewQuotationModal}>
+                            <Typography variant='h6'>Nueva Cotización</Typography>
+                        </Button>
                     </Box>
                     <Typography variant={'h6'} textAlign={'center'}>
                         Saldo actual: Q. {balanceResponse?.balance?.balance?.toLocaleString('es-GT') || '0'}
@@ -220,6 +357,19 @@ const PatientBalance = () => {
                     <NewConsultationForm
                         patientId={id as string}
                         onSuccess={handleConsultationSuccess}
+                    />
+                )}
+                {modalType === 'quotation' && (
+                    <QuotationDetails
+                        quotation={quotationResponse?.quotation}
+                        isLoading={isQuotationLoading}
+                        onExportPDF={() => handleExportQuotationPDF()}
+                    />
+                )}
+                {modalType === 'newQuotation' && (
+                    <QuotationForm
+                        patientId={id as string}
+                        onSuccess={handleQuotationSuccess}
                     />
                 )}
             </Modal>

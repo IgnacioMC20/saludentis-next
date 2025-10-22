@@ -114,12 +114,10 @@ export default function PacientInfo() {
           <Grid item xs={12} sm={6}>
             <TextField
               fullWidth
-              label='Segundo Nombre'
+              label='Segundo Nombre (Opcional)'
               variant='outlined'
               placeholder='Ingrese el segundo nombre del paciente'
-              {...register('middleName', {
-                required: 'Este campo es requerido',
-              })}
+              {...register('middleName')}
               error={!!errors.middleName}
               helperText={errors.middleName?.message}
             />

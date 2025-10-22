@@ -44,11 +44,13 @@ type Props = {
     customRowsPerPage?: number
 
     // eslint-disable-next-line no-unused-vars
-    fetchFunc: (id: string) => void
+    fetchFunc?: (id: string) => void
+    // eslint-disable-next-line no-unused-vars
+    onRowClick?: (id: string) => void
 }
 
 // eslint-disable-next-line no-unused-vars
-export const Table = ({ data, progress = false, customRowsPerPage = 10, fetchFunc }: Props) => {
+export const Table = ({ data, progress = false, customRowsPerPage = 10, fetchFunc, onRowClick }: Props) => {
     if (!data?.length) return null
 
     // const router = useRouter()
@@ -133,7 +135,19 @@ export const Table = ({ data, progress = false, customRowsPerPage = 10, fetchFun
                                         .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                                         .map((row) => {
                                             return (
-                                                <TableRow hover role="checkbox" tabIndex={-1} key={row.id}>
+                                                <TableRow
+                                                    hover
+                                                    role="checkbox"
+                                                    tabIndex={-1}
+                                                    key={row.id}
+                                                    onClick={() => onRowClick?.(row.id)}
+                                                    sx={{
+                                                        cursor: onRowClick ? 'pointer' : 'default',
+                                                        '&:hover': onRowClick ? {
+                                                            backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                                                        } : {}
+                                                    }}
+                                                >
                                                     {columns.map((column) => {
                                                         const value = (row as { [key: string]: any })[column.id]
                                                         const rowIndex = rows.indexOf(row) + 1
@@ -146,7 +160,7 @@ export const Table = ({ data, progress = false, customRowsPerPage = 10, fetchFun
                                                         if (column.id === 'Editar') {
                                                             return (
                                                                 <TableCell key={column.id} align={column.align}>
-                                                                    <Button onClick={() => fetchFunc(value)} variant='contained' color='info' sx={{
+                                                                    <Button onClick={() => fetchFunc?.(value)} variant='contained' color='info' sx={{
                                                                         ':hover': {
                                                                             backgroundColor: theme.gray,
                                                                             color: theme.white,

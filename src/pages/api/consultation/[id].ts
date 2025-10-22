@@ -44,10 +44,8 @@ const getConsultationById = async (req: NextApiRequest, res: NextApiResponse<Dat
     try {
         await db.connect()
 
-        const consultation = await Consultation.findById(id)
-            .populate('patientId', 'firstName lastName nationalId')
-            .populate('consultationDetails.treatmentId', 'name price')
-            .populate('consultationDetails.diseaseId', 'name')
+        let consultation = await Consultation.findById(id)
+            .populate('patientId', 'firstName middleName lastName nationalId')
 
         if (!consultation) {
             await db.disconnect()
@@ -55,6 +53,20 @@ const getConsultationById = async (req: NextApiRequest, res: NextApiResponse<Dat
                 message: 'Consulta no encontrada',
                 ok: false
             })
+        }
+
+        // Manually populate nested fields in consultationDetails
+        if (consultation.consultationDetails && consultation.consultationDetails.length > 0) {
+            await consultation.populate([
+                {
+                    path: 'consultationDetails.treatmentId',
+                    select: 'description price'
+                },
+                {
+                    path: 'consultationDetails.diseaseId',
+                    select: 'detail'
+                }
+            ])
         }
 
         await db.disconnect()

@@ -21,18 +21,13 @@ const LoginPage: NextPage = () => {
 
     const onLoginUser = async ({ email, password }: FormData) => {
         try {
-            console.log('Attempting login...')
             const res = await signIn('credentials', {
                 redirect: false,
                 email,
                 password,
                 callbackUrl: '/',
             })
-
-            console.log('SignIn response:', res)
-
             if (res?.ok) {
-                console.log('Login successful, redirecting...')
                 // Use window.location for a full page reload to ensure middleware picks up the session
                 window.location.href = '/'
             } else {
