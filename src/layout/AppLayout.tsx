@@ -1,9 +1,10 @@
-import { Box, Link, Typography } from '@mui/material'
+import { Box } from '@mui/material'
 import Head from 'next/head'
 import { FC } from 'react'
 
 import { Navbar, SideMenu } from '@/components'
-import { background } from '@/themes'
+import { dashboardSidebarWidth } from '@/components/SideMenu'
+import { background, theme } from '@/themes'
 
 interface Props {
     children: React.ReactNode
@@ -11,86 +12,46 @@ interface Props {
 
 export const Layout: FC<Props> = ({ children }) => {
     return (
-        <Box sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            minHeight: '100vh',
-            width: '100vw',
-            background: `url(${background.default.src})`,
-            backgroundRepeat: 'repeat',
-            backgroundSize: '200px 200px',
-            padding: '0',
-            position: 'relative',
-        }}>
+        <>
             <Head>
-                <title>Saludentis App</title>
-                <meta name='description' content='Saludentis App' />
+                <title>Saludentis Dashboard</title>
+                <meta name='description' content='Panel operativo y financiero de Saludentis' />
                 <meta name='viewport' content='width=device-width, initial-scale=1' />
             </Head>
-            <nav>
-                <Navbar />
-            </nav>
-            <SideMenu />
-
-            <Box sx={{
-                overflow: 'auto',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'center',
-                alignItems: 'center',
-                padding: '0px 30px 40px 30px',
-                height: {
-                    xs: 'calc(100vh - 65px)',
-                    md: 'calc(100vh - 85px)',
-                }
-            }}>
-                {children}
-            </Box>
 
             <Box
-                component="footer"
                 sx={{
-                    position: 'fixed',
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    py: 0.5,
-                    px: 2,
-                    backgroundColor: 'rgba(255, 255, 255, 0.8)',
-                    backdropFilter: 'blur(8px)',
-                    borderTop: '1px solid rgba(0, 0, 0, 0.1)',
-                    zIndex: 1000,
+                    minHeight: '100vh',
+                    width: '100%',
+                    backgroundColor: theme.background,
+                    backgroundImage: `
+                        radial-gradient(circle at top right, rgba(102, 224, 230, 0.18), transparent 28%),
+                        radial-gradient(circle at bottom left, rgba(126, 92, 194, 0.08), transparent 24%),
+                        url(${background.default.src})
+                    `,
+                    backgroundRepeat: 'no-repeat, no-repeat, repeat',
+                    backgroundPosition: 'top right, bottom left, center',
+                    backgroundSize: 'auto, auto, 280px 280px',
                 }}
             >
-                <Typography
-                    variant="caption"
+                <SideMenu />
+                <Navbar />
+
+                <Box
+                    component="main"
                     sx={{
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        gap: 0.5,
-                        fontSize: '0.7rem',
-                        color: 'text.secondary',
+                        minHeight: '100vh',
+                        ml: { md: `${dashboardSidebarWidth}px` },
+                        width: { md: `calc(100% - ${dashboardSidebarWidth}px)` },
+                        pt: { xs: '68px', md: 0 },
+                        px: { xs: 1.5, sm: 2.5, md: 3.5, lg: 4 },
+                        pb: 0,
+                        boxSizing: 'border-box',
                     }}
                 >
-                    Powered by{' '}
-                    <Link
-                        href="https://www.antiguatechlabs.com/es"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        sx={{
-                            color: 'primary.main',
-                            textDecoration: 'none',
-                            fontWeight: 500,
-                            '&:hover': {
-                                textDecoration: 'underline',
-                            }
-                        }}
-                    >
-                        Antigua Tech Labs
-                    </Link>
-                </Typography>
+                    {children}
+                </Box>
             </Box>
-        </Box>
+        </>
     )
 }

@@ -2,6 +2,7 @@ import mongoose from 'mongoose'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
 import { db } from '@/database'
+import { CONSULTATION_STATUS_OPTIONS } from '@/interfaces/reports'
 import Balance from '@/models/Balance'
 import Consultation, { IConsultation } from '@/models/Consultation'
 
@@ -72,7 +73,14 @@ const getConsultationById = async (req: NextApiRequest, res: NextApiResponse<Dat
         await db.disconnect()
 
         return res.status(200).json({
-            consultation,
+            consultation: {
+                ...consultation.toObject(),
+                status: CONSULTATION_STATUS_OPTIONS.includes(consultation.status as any)
+                    ? consultation.status
+                    : 'completada',
+                doctorName: consultation.doctorName || 'Sin asignar',
+                siteName: consultation.siteName || 'Principal',
+            } as any,
             message: 'Consulta encontrada exitosamente',
             ok: true
         })
@@ -118,6 +126,16 @@ const updateConsultation = async (req: NextApiRequest, res: NextApiResponse<Data
         }
     }
 
+    if (
+        consultationData.status
+        && !CONSULTATION_STATUS_OPTIONS.includes(consultationData.status as any)
+    ) {
+        return res.status(400).json({
+            message: 'El estado de la consulta no es válido',
+            ok: false
+        })
+    }
+
     try {
         await db.connect()
 
@@ -134,7 +152,11 @@ const updateConsultation = async (req: NextApiRequest, res: NextApiResponse<Data
         // Update the consultation
         const updatedConsultation = await Consultation.findByIdAndUpdate(
             id,
-            consultationData,
+            {
+                ...consultationData,
+                doctorName: consultationData.doctorName?.trim() || consultation.doctorName || 'Sin asignar',
+                siteName: consultationData.siteName?.trim() || consultation.siteName || 'Principal',
+            },
             { new: true, runValidators: true }
         )
 

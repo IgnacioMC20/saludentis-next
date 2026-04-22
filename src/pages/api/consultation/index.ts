@@ -3,6 +3,7 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 
 import { cleanResponse } from '@/api'
 import { db } from '@/database'
+import { CONSULTATION_STATUS_OPTIONS } from '@/interfaces/reports'
 import Balance from '@/models/Balance'
 import Consultation, { IConsultation } from '@/models/Consultation'
 
@@ -26,16 +27,24 @@ export default function handler(req: NextApiRequest, res: NextApiResponse<ApiRes
 
 async function createConsultation(req: NextApiRequest, res: NextApiResponse<ApiResponse>) {
     const consultationData = req.body as IConsultation
+    const normalizedConsultation: IConsultation = {
+        ...consultationData,
+        status: CONSULTATION_STATUS_OPTIONS.includes(consultationData.status as any)
+            ? consultationData.status
+            : 'completada',
+        doctorName: consultationData.doctorName?.trim() || 'Sin asignar',
+        siteName: consultationData.siteName?.trim() || 'Principal',
+    }
 
     // Validate required fields
-    if (!consultationData.patientId) {
+    if (!normalizedConsultation.patientId) {
         return res.status(400).json({
             ok: false,
             message: 'El ID del paciente es requerido',
         })
     }
 
-    if (!mongoose.isValidObjectId(consultationData.patientId)) {
+    if (!mongoose.isValidObjectId(normalizedConsultation.patientId)) {
         return res.status(400).json({
             ok: false,
             message: 'El ID del paciente no es válido',
@@ -43,8 +52,8 @@ async function createConsultation(req: NextApiRequest, res: NextApiResponse<ApiR
     }
 
     // Validate consultation details if provided
-    if (consultationData.consultationDetails && consultationData.consultationDetails.length > 0) {
-        for (const detail of consultationData.consultationDetails) {
+    if (normalizedConsultation.consultationDetails && normalizedConsultation.consultationDetails.length > 0) {
+        for (const detail of normalizedConsultation.consultationDetails) {
             if (detail.treatmentId && !mongoose.isValidObjectId(detail.treatmentId)) {
                 return res.status(400).json({
                     ok: false,
@@ -63,12 +72,12 @@ async function createConsultation(req: NextApiRequest, res: NextApiResponse<ApiR
     await db.connect()
 
     try {
-        const newConsultation = new Consultation(consultationData)
+        const newConsultation = new Consultation(normalizedConsultation)
         await newConsultation.save()
 
         // Update or create balance for the patient
-        const patientId = consultationData.patientId
-        const consultationTotal = consultationData.total || 0
+        const patientId = normalizedConsultation.patientId
+        const consultationTotal = normalizedConsultation.total || 0
 
         // Find existing balance or create new one
         let balance = await Balance.findOne({ patientId })
@@ -148,9 +157,8 @@ async function getConsultations(req: NextApiRequest, res: NextApiResponse<ApiRes
                 .lean()
         }
 
-        await db.disconnect()
-
         if (!consultations || consultations.length === 0) {
+            await db.disconnect()
             return res.status(404).json({
                 ok: false,
                 data: [],
@@ -158,9 +166,19 @@ async function getConsultations(req: NextApiRequest, res: NextApiResponse<ApiRes
             })
         }
 
+        await db.disconnect()
+        const normalizedConsultations = (cleanResponse(consultations, true) as any[]).map((consultation: any) => ({
+            ...consultation,
+            status: CONSULTATION_STATUS_OPTIONS.includes(consultation.status)
+                ? consultation.status
+                : 'completada',
+            doctorName: consultation.doctorName || 'Sin asignar',
+            siteName: consultation.siteName || 'Principal',
+        }))
+
         return res.status(200).json({
             ok: true,
-            data: cleanResponse(consultations, true),
+            data: normalizedConsultations,
         })
     } catch (error: any) {
         console.error(error)

@@ -73,12 +73,13 @@ export const useCreateConsultation = () => {
                 const data = await response.json()
                 return data
             },
-            onSuccess: (data) => {
+            onSuccess: () => {
                 // Invalidate consultations queries to refetch data
                 queryClient.invalidateQueries({ queryKey: ['consultations'] })
                 
                 // Invalidate all balance queries to ensure the appointment history updates
                 queryClient.invalidateQueries({ queryKey: ['balance'] })
+                queryClient.invalidateQueries({ queryKey: ['reports'] })
             }
         }
     )
@@ -106,6 +107,7 @@ export const useUpdateConsultation = (id: string) => {
                 
                 // Invalidate all balance queries
                 queryClient.invalidateQueries({ queryKey: ['balance'] })
+                queryClient.invalidateQueries({ queryKey: ['reports'] })
             }
         }
     )
@@ -131,6 +133,7 @@ export const useDeleteConsultation = () => {
                 
                 // Invalidate all balance queries since we don't have patientId in delete response
                 queryClient.invalidateQueries({ queryKey: ['balance'] })
+                queryClient.invalidateQueries({ queryKey: ['reports'] })
             }
         }
     )

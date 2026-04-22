@@ -18,6 +18,7 @@ import React, { useMemo } from 'react'
 import { Controller, useFieldArray, useForm, useWatch } from 'react-hook-form'
 
 import { useCreateConsultation, useDiseases, useTreatments } from '@/hooks'
+import { CONSULTATION_STATUS_LABELS, CONSULTATION_STATUS_OPTIONS, ConsultationStatus } from '@/interfaces/reports'
 import { IConsultation } from '@/models/Consultation'
 import { showToast } from '@/utils'
 
@@ -33,6 +34,9 @@ type ConsultationDetailForm = {
 }
 
 type FormData = {
+  doctorName: string
+  siteName: string
+  status: ConsultationStatus
   consultationDetails: ConsultationDetailForm[]
 }
 
@@ -54,6 +58,9 @@ export const NewConsultationForm: React.FC<NewConsultationFormProps> = ({
     trigger,
   } = useForm<FormData>({
     defaultValues: {
+      doctorName: 'Sin asignar',
+      siteName: 'Principal',
+      status: 'completada',
       consultationDetails: [{ tooth: '', treatmentId: '', diseaseId: '' }],
     },
     mode: 'onBlur',
@@ -113,6 +120,9 @@ export const NewConsultationForm: React.FC<NewConsultationFormProps> = ({
 
     const payload: IConsultation = {
       patientId: patientId as any,
+      doctorName: data.doctorName?.trim() || 'Sin asignar',
+      siteName: data.siteName?.trim() || 'Principal',
+      status: data.status || 'completada',
       total: Number(computedTotal || 0), // compute at source of truth
       consultationDetails: validDetails.map((d) => ({
         tooth: d.tooth,
@@ -157,6 +167,57 @@ export const NewConsultationForm: React.FC<NewConsultationFormProps> = ({
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
         <Grid container spacing={3}>
           <Grid item xs={12}>
+            <Grid container spacing={2} sx={{ mb: 3 }}>
+              <Grid item xs={12} md={4}>
+                <Controller
+                  name="doctorName"
+                  control={control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      label="Doctor"
+                      fullWidth
+                      autoComplete="off"
+                    />
+                  )}
+                />
+              </Grid>
+
+              <Grid item xs={12} md={4}>
+                <Controller
+                  name="siteName"
+                  control={control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      label="Sede"
+                      fullWidth
+                      autoComplete="off"
+                    />
+                  )}
+                />
+              </Grid>
+
+              <Grid item xs={12} md={4}>
+                <Controller
+                  name="status"
+                  control={control}
+                  render={({ field }) => (
+                    <FormControl fullWidth>
+                      <InputLabel shrink>Estado</InputLabel>
+                      <MuiSelect {...field} label="Estado">
+                        {CONSULTATION_STATUS_OPTIONS.map(status => (
+                          <MenuItem key={status} value={status}>
+                            {CONSULTATION_STATUS_LABELS[status]}
+                          </MenuItem>
+                        ))}
+                      </MuiSelect>
+                    </FormControl>
+                  )}
+                />
+              </Grid>
+            </Grid>
+
             {fields.map((field, index) => (
               <Box key={field.id} sx={{ mb: 2, p: 2, border: '1px solid #eee', borderRadius: 2 }}>
                 <Grid container spacing={2} alignItems="center">

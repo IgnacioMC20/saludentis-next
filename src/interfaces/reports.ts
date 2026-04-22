@@ -1,9 +1,26 @@
+export type ConsultationStatus = 'confirmada' | 'completada' | 'cancelada' | 'no_asistio'
+
+export const CONSULTATION_STATUS_OPTIONS: ConsultationStatus[] = [
+    'confirmada',
+    'completada',
+    'cancelada',
+    'no_asistio',
+]
+
+export const CONSULTATION_STATUS_LABELS: Record<ConsultationStatus, string> = {
+    confirmada: 'Confirmadas',
+    completada: 'Completadas',
+    cancelada: 'Canceladas',
+    no_asistio: 'No presentadas',
+}
+
 export interface IReportFilters {
     startDate: Date;
     endDate: Date;
     groupBy: 'day' | 'week' | 'month';
-    providerId?: string;
-    treatmentId?: string;
+    siteName?: string;
+    doctorName?: string;
+    consultationStatus?: ConsultationStatus | 'todos';
     patientSearch?: string;
 }
 
@@ -11,10 +28,18 @@ export interface IKPIMetrics {
     totalRevenue: number;
     collectedPayments: number;
     outstandingBalances: number;
-    pendingCollections: number;
     consultationsCount: number;
     patientsSeen: number;
     newPatients: number;
+    pendingCollectionsCount: number;
+}
+
+export interface IMetricComparison {
+    current: number;
+    previous: number;
+    deltaPercent: number;
+    trend: 'up' | 'down' | 'neutral';
+    comparisonLabel: string;
 }
 
 export interface IRevenueDataPoint {
@@ -44,9 +69,11 @@ export interface IPatientBalance {
     lastVisit: Date | null;
     balance: number;
     pending: number;
-    phone: number;
+    phone: number | null;
     email: string;
-    status: 'Due' | 'Clear';
+    contact: string;
+    status: 'Pendiente' | 'Vencido' | 'Crítico' | 'Al día';
+    daysPastDue: number;
 }
 
 export interface IConsultationRow {
@@ -58,6 +85,9 @@ export interface IConsultationRow {
     paid: number;
     due: number;
     treatmentsCount: number;
+    status: ConsultationStatus;
+    doctorName: string;
+    siteName: string;
 }
 
 export interface IQuotationMetrics {
@@ -68,8 +98,40 @@ export interface IQuotationMetrics {
     convertedCount: number;
 }
 
+export interface IAlertMetrics {
+    total: number;
+    pendingCollections: number;
+    overdueOver90Days: number;
+}
+
+export interface IAgeMixMetrics {
+    children: number;
+    adults: number;
+    total: number;
+    childrenPercentage: number;
+    adultsPercentage: number;
+}
+
+export interface IAppointmentStatusMetric {
+    status: ConsultationStatus;
+    label: string;
+    count: number;
+    percentage: number;
+}
+
+export interface IAvailableReportFilters {
+    sites: string[];
+    doctors: string[];
+    statuses: ConsultationStatus[];
+}
+
 export interface IReportsData {
     kpis: IKPIMetrics;
+    comparisons: Record<keyof IKPIMetrics, IMetricComparison>;
+    alerts: IAlertMetrics;
+    ageMix: IAgeMixMetrics;
+    appointmentStatus: IAppointmentStatusMetric[];
+    availableFilters: IAvailableReportFilters;
     revenueTrend: IRevenueDataPoint[];
     arAging: IARAgingBucket[];
     topTreatments: ITreatmentRevenue[];

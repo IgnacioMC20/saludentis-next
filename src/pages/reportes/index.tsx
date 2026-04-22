@@ -1,350 +1,432 @@
-import { TrendingUp, AccountBalance, People, Receipt } from '@mui/icons-material'
-import { Card, Typography, Grid, Box, TextField, MenuItem, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Chip, Skeleton, TablePagination } from '@mui/material'
-import { format, subMonths, startOfYear } from 'date-fns'
-import { useState, useEffect } from 'react'
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from 'recharts'
+import {
+    DownloadRounded,
+    PaymentsOutlined,
+    TrendingUpRounded,
+    WarningAmberRounded,
+} from '@mui/icons-material'
+import {
+    alpha,
+    Box,
+    Button,
+    Card,
+    Grid,
+    MenuItem,
+    Stack,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    TextField,
+    Typography,
+} from '@mui/material'
+import { endOfMonth, format, startOfMonth } from 'date-fns'
+import { useState } from 'react'
+import {
+    Area,
+    AreaChart,
+    Bar,
+    BarChart,
+    CartesianGrid,
+    ResponsiveContainer,
+    Tooltip,
+    XAxis,
+    YAxis,
+} from 'recharts'
 
-import { IReportsData } from '@/interfaces/reports'
+import { useReports } from '@/hooks'
+import { CONSULTATION_STATUS_LABELS, ConsultationStatus } from '@/interfaces/reports'
 import { Layout } from '@/layout'
 import { theme } from '@/themes'
-import { formatCurrency, formatDate } from '@/utils/reportMetrics'
+import { generateDashboardPDF, formatCurrency, formatDate } from '@/utils'
 
-type DatePreset = 'thisMonth' | 'last3Months' | 'ytd' | 'custom'
+type FilterState = {
+    startDate: string
+    endDate: string
+    siteName: string
+    doctorName: string
+    consultationStatus: ConsultationStatus | 'todos'
+}
+
+const getDefaultFilters = (): FilterState => {
+    const now = new Date()
+
+    return {
+        startDate: format(startOfMonth(now), 'yyyy-MM-dd'),
+        endDate: format(endOfMonth(now), 'yyyy-MM-dd'),
+        siteName: 'todos',
+        doctorName: 'todos',
+        consultationStatus: 'todos',
+    }
+}
+
+const patientStatusStyles = (status: string) => {
+    switch (status) {
+        case 'Crítico':
+            return { color: theme.red, backgroundColor: alpha(theme.red, 0.12) }
+        case 'Vencido':
+            return { color: theme.amber, backgroundColor: alpha(theme.amber, 0.16) }
+        case 'Pendiente':
+            return { color: theme.lightSeaGreen, backgroundColor: alpha(theme.lightSeaGreen, 0.12) }
+        default:
+            return { color: theme.success, backgroundColor: alpha(theme.success, 0.12) }
+    }
+}
 
 export default function Reports() {
-    const [loading, setLoading] = useState(true)
-    const [reportsData, setReportsData] = useState<IReportsData | null>(null)
-    const [datePreset, setDatePreset] = useState<DatePreset>('thisMonth')
-    const [startDate, setStartDate] = useState(format(subMonths(new Date(), 1), 'yyyy-MM-dd'))
-    const [endDate, setEndDate] = useState(format(new Date(), 'yyyy-MM-dd'))
-    const [groupBy, setGroupBy] = useState<'day' | 'week' | 'month'>('month')
-    const [page, setPage] = useState(0)
-    const [rowsPerPage, setRowsPerPage] = useState(10)
+    const [filters, setFilters] = useState<FilterState>(getDefaultFilters)
 
-    useEffect(() => {
-        fetchReportsData()
-    }, [startDate, endDate, groupBy, page, rowsPerPage])
+    const reportQuery = useReports({
+        startDate: new Date(filters.startDate),
+        endDate: new Date(filters.endDate),
+        siteName: filters.siteName === 'todos' ? undefined : filters.siteName,
+        doctorName: filters.doctorName === 'todos' ? undefined : filters.doctorName,
+        consultationStatus: filters.consultationStatus,
+        groupBy: 'month',
+        page: 1,
+        pageSize: 50,
+    })
 
-    useEffect(() => {
-        updateDatesFromPreset()
-    }, [datePreset])
-
-    const updateDatesFromPreset = () => {
-        const now = new Date()
-        switch (datePreset) {
-            case 'thisMonth':
-                setStartDate(format(subMonths(now, 1), 'yyyy-MM-dd'))
-                setEndDate(format(now, 'yyyy-MM-dd'))
-                break
-            case 'last3Months':
-                setStartDate(format(subMonths(now, 3), 'yyyy-MM-dd'))
-                setEndDate(format(now, 'yyyy-MM-dd'))
-                break
-            case 'ytd':
-                setStartDate(format(startOfYear(now), 'yyyy-MM-dd'))
-                setEndDate(format(now, 'yyyy-MM-dd'))
-                break
-            case 'custom':
-                break
-        }
-    }
-
-    const fetchReportsData = async () => {
-        setLoading(true)
-        try {
-            const params = new URLSearchParams({
-                startDate,
-                endDate,
-                groupBy,
-                page: (page + 1).toString(),
-                pageSize: rowsPerPage.toString()
-            })
-            const response = await fetch(`/api/reports?${params}`)
-            const result = await response.json()
-            if (result.success) {
-                setReportsData(result.data)
-            }
-        } catch (error) {
-            console.error('Error fetching reports:', error)
-        } finally {
-            setLoading(false)
-        }
-    }
-
-    const COLORS = [theme.lightSeaGreen, theme.robinEggBlue, theme.tiffanyBlue, theme.celeste, theme.celeste2]
+    const reportsData = reportQuery.data?.data
 
     return (
         <Layout>
-            <Box sx={{ width: '100%', maxWidth: '1400px', height: 'auto', p: 4, marginTop: '16px', marginBottom: '16px', overflowY: 'auto', backgroundColor: 'white' }}>
-                <Box sx={{ mb: 3 }}>
-                    <Typography variant='h4' sx={{ fontWeight: 600 }}>Reportes Financieros</Typography>
-                </Box>
+            <Stack spacing={3} sx={{ py: { xs: 2, md: 3 } }}>
+                <Card sx={{ p: { xs: 2, md: 3 } }}>
+                    <Stack
+                        direction={{ xs: 'column', lg: 'row' }}
+                        spacing={2}
+                        justifyContent="space-between"
+                        alignItems={{ xs: 'flex-start', lg: 'center' }}
+                    >
+                        <Box>
+                            <Typography variant="h3">Reportes financieros</Typography>
+                            <Typography variant="body1" color="text.secondary" sx={{ mt: 0.75 }}>
+                                Vista detallada para revisar ingresos, cobros, saldos y rendimiento por tratamiento.
+                            </Typography>
+                        </Box>
 
-                <Card sx={{ mb: 3, p: 5 }}>
-                    <Grid container spacing={2} alignItems='center'>
-                        <Grid item xs={12} sm={6} md={3}>
-                            <TextField select fullWidth label='Período' value={datePreset} onChange={(e) => setDatePreset(e.target.value as DatePreset)} size='small'>
-                                <MenuItem value='thisMonth'>Este Mes</MenuItem>
-                                <MenuItem value='last3Months'>Últimos 3 Meses</MenuItem>
-                                <MenuItem value='ytd'>Año Actual</MenuItem>
-                                <MenuItem value='custom'>Personalizado</MenuItem>
-                            </TextField>
-                        </Grid>
-                        <Grid item xs={12} sm={6} md={3}>
-                            <TextField fullWidth type='date' label='Fecha Inicio' value={startDate} onChange={(e) => { setStartDate(e.target.value); setDatePreset('custom') }} size='small' InputLabelProps={{ shrink: true }} />
-                        </Grid>
-                        <Grid item xs={12} sm={6} md={3}>
-                            <TextField fullWidth type='date' label='Fecha Fin' value={endDate} onChange={(e) => { setEndDate(e.target.value); setDatePreset('custom') }} size='small' InputLabelProps={{ shrink: true }} />
-                        </Grid>
-                        <Grid item xs={12} sm={6} md={3}>
-                            <TextField select fullWidth label='Agrupar Por' value={groupBy} onChange={(e) => setGroupBy(e.target.value as 'day' | 'week' | 'month')} size='small'>
-                                <MenuItem value='day'>Día</MenuItem>
-                                <MenuItem value='week'>Semana</MenuItem>
-                                <MenuItem value='month'>Mes</MenuItem>
-                            </TextField>
-                        </Grid>
-                    </Grid>
-                </Card>
+                        <Button
+                            variant="outlined"
+                            startIcon={<DownloadRounded />}
+                            disabled={!reportsData}
+                            onClick={() => {
+                                if (!reportsData) return
 
-                <Grid container spacing={2} sx={{ mb: 3 }}>
-                    {[
-                        { icon: <TrendingUp sx={{ color: theme.lightSeaGreen, mr: 1 }} />, label: 'Ingresos Totales', value: formatCurrency(reportsData?.kpis.totalRevenue || 0) },
-                        { icon: <AccountBalance sx={{ color: theme.robinEggBlue, mr: 1 }} />, label: 'Pagos Cobrados', value: formatCurrency(reportsData?.kpis.collectedPayments || 0) },
-                        { icon: <Receipt sx={{ color: theme.purple, mr: 1 }} />, label: 'Saldos Pendientes', value: formatCurrency(reportsData?.kpis.outstandingBalances || 0), color: theme.purple },
-                        { icon: <People sx={{ color: theme.tiffanyBlue, mr: 1 }} />, label: 'Pacientes Atendidos', value: reportsData?.kpis.patientsSeen || 0 }
-                    ].map((kpi, idx) => (
-                        <Grid item xs={12} sm={6} md={3} key={idx}>
-                            <Card sx={{ p: 5, height: '100%' }}>
-                                <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                                    {kpi.icon}
-                                    <Typography variant='body2' color='text.secondary'>{kpi.label}</Typography>
-                                </Box>
-                                {loading ? <Skeleton variant='text' width='80%' height={40} /> : <Typography variant='h5' sx={{ fontWeight: 600, color: kpi.color }}>{kpi.value}</Typography>}
-                            </Card>
-                        </Grid>
-                    ))}
-                </Grid>
+                                generateDashboardPDF({
+                                    data: reportsData,
+                                    dateRangeLabel: `${format(new Date(filters.startDate), 'dd/MM/yyyy')} - ${format(new Date(filters.endDate), 'dd/MM/yyyy')}`,
+                                    siteLabel: filters.siteName === 'todos' ? 'Todas las sedes' : filters.siteName,
+                                    doctorLabel: filters.doctorName === 'todos' ? 'Todos los doctores' : filters.doctorName,
+                                    statusLabel: filters.consultationStatus === 'todos'
+                                        ? 'Todos'
+                                        : CONSULTATION_STATUS_LABELS[filters.consultationStatus],
+                                })
+                            }}
+                        >
+                            Exportar resumen
+                        </Button>
+                    </Stack>
 
-                <Grid container spacing={2} sx={{ mb: 3 }}>
-                    {[
-                        { label: 'Consultas', value: reportsData?.kpis.consultationsCount || 0 },
-                        { label: 'Nuevos Pacientes', value: reportsData?.kpis.newPatients || 0 },
-                        { label: 'Cobros Pendientes', value: formatCurrency(reportsData?.kpis.pendingCollections || 0), color: theme.purple }
-                    ].map((kpi, idx) => (
-                        <Grid item xs={12} sm={4} key={idx}>
-                            <Card sx={{ p: 5, textAlign: 'center' }}>
-                                <Typography variant='body2' color='text.secondary' gutterBottom>{kpi.label}</Typography>
-                                {loading ? <Skeleton variant='text' width='60%' height={30} sx={{ mx: 'auto' }} /> : <Typography variant='h6' sx={{ fontWeight: 600, color: kpi.color }}>{kpi.value}</Typography>}
-                            </Card>
-                        </Grid>
-                    ))}
-                </Grid>
-
-                <Card sx={{ mb: 3, p: 5 }}>
-                    <Typography variant='h6' gutterBottom sx={{ fontWeight: 600 }}>Tendencia de Ingresos y Cobros</Typography>
-                    {loading ? <Skeleton variant='rectangular' height={300} /> : (
-                        <ResponsiveContainer width='100%' height={300}>
-                            <LineChart data={reportsData?.revenueTrend || []}>
-                                <CartesianGrid strokeDasharray='3 3' />
-                                <XAxis dataKey='date' />
-                                <YAxis />
-                                <Tooltip formatter={(value: any) => formatCurrency(Number(value))} />
-                                <Legend />
-                                <Line type='monotone' dataKey='revenue' stroke={theme.lightSeaGreen} name='Ingresos' strokeWidth={2} />
-                                <Line type='monotone' dataKey='collections' stroke={theme.robinEggBlue} name='Cobros' strokeWidth={2} />
-                            </LineChart>
-                        </ResponsiveContainer>
-                    )}
-                </Card>
-
-                <Grid container spacing={2} sx={{ mb: 3 }}>
-                    <Grid item xs={12} md={6}>
-                        <Card sx={{ p: 5, height: '100%' }}>
-                            <Typography variant='h6' gutterBottom sx={{ fontWeight: 600 }}>Antigüedad de Cuentas por Cobrar</Typography>
-                            {loading ? <Skeleton variant='rectangular' height={250} /> : (
-                                <ResponsiveContainer width='100%' height={250}>
-                                    <BarChart data={reportsData?.arAging || []}>
-                                        <CartesianGrid strokeDasharray='3 3' />
-                                        <XAxis dataKey='range' />
-                                        <YAxis />
-                                        <Tooltip formatter={(value: any) => formatCurrency(Number(value))} />
-                                        <Bar dataKey='amount' name='Monto'>
-                                            {reportsData?.arAging.map((entry, index) => (
-                                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                            ))}
-                                        </Bar>
-                                    </BarChart>
-                                </ResponsiveContainer>
-                            )}
-                        </Card>
-                    </Grid>
-                    <Grid item xs={12} md={6}>
-                        <Card sx={{ p: 5, height: '100%' }}>
-                            <Typography variant='h6' gutterBottom sx={{ fontWeight: 600 }}>Top 10 Tratamientos</Typography>
-                            {loading ? <Skeleton variant='rectangular' height={250} /> : (
-                                <TableContainer sx={{ maxHeight: 250 }}>
-                                    <Table size='small' stickyHeader>
-                                        <TableHead>
-                                            <TableRow>
-                                                <TableCell>Tratamiento</TableCell>
-                                                <TableCell align='right'>Cantidad</TableCell>
-                                                <TableCell align='right'>Ingresos</TableCell>
-                                            </TableRow>
-                                        </TableHead>
-                                        <TableBody>
-                                            {reportsData?.topTreatments.map((treatment) => (
-                                                <TableRow key={treatment.treatmentId}>
-                                                    <TableCell>{treatment.treatmentName}</TableCell>
-                                                    <TableCell align='right'>{treatment.count}</TableCell>
-                                                    <TableCell align='right'>{formatCurrency(treatment.revenue)}</TableCell>
-                                                </TableRow>
-                                            ))}
-                                        </TableBody>
-                                    </Table>
-                                </TableContainer>
-                            )}
-                        </Card>
-                    </Grid>
-                </Grid>
-
-                <Grid container spacing={2} sx={{ mb: 3 }}>
-                    <Grid item xs={12} md={6}>
-                        <Card sx={{ p: 5, height: '100%' }}>
-                            <Typography variant='h6' gutterBottom sx={{ fontWeight: 600 }}>Top 10 Pacientes con Saldo</Typography>
-                            {loading ? <Skeleton variant='rectangular' height={250} /> : (
-                                <TableContainer sx={{ maxHeight: 250 }}>
-                                    <Table size='small' stickyHeader>
-                                        <TableHead>
-                                            <TableRow>
-                                                <TableCell>Paciente</TableCell>
-                                                <TableCell align='right'>Saldo</TableCell>
-                                                <TableCell align='right'>Pendiente</TableCell>
-                                            </TableRow>
-                                        </TableHead>
-                                        <TableBody>
-                                            {reportsData?.topPatients.map((patient) => (
-                                                <TableRow key={patient.patientId}>
-                                                    <TableCell>{patient.patientName}</TableCell>
-                                                    <TableCell align='right'>{formatCurrency(patient.balance)}</TableCell>
-                                                    <TableCell align='right'>{formatCurrency(patient.pending)}</TableCell>
-                                                </TableRow>
-                                            ))}
-                                        </TableBody>
-                                    </Table>
-                                </TableContainer>
-                            )}
-                        </Card>
-                    </Grid>
-                    <Grid item xs={12} md={6}>
-                        <Card sx={{ p: 5, height: '100%' }}>
-                            <Typography variant='h6' gutterBottom sx={{ fontWeight: 600 }}>Embudo de Cotizaciones</Typography>
-                            {loading ? <Skeleton variant='rectangular' height={250} /> : (
-                                <Box>
-                                    <Grid container spacing={2} sx={{ mb: 2 }}>
-                                        <Grid item xs={6}>
-                                            <Box sx={{ textAlign: 'center', p: 2, bgcolor: theme.gray, borderRadius: 2 }}>
-                                                <Typography variant='body2' color='text.secondary'>Total Cotizado</Typography>
-                                                <Typography variant='h6' sx={{ fontWeight: 600 }}>{formatCurrency(reportsData?.quotationFunnel.totalQuoted || 0)}</Typography>
-                                                <Typography variant='caption' color='text.secondary'>{reportsData?.quotationFunnel.quotationsCount || 0} cotizaciones</Typography>
-                                            </Box>
-                                        </Grid>
-                                        <Grid item xs={6}>
-                                            <Box sx={{ textAlign: 'center', p: 2, bgcolor: theme.gray, borderRadius: 2 }}>
-                                                <Typography variant='body2' color='text.secondary'>Convertido</Typography>
-                                                <Typography variant='h6' sx={{ fontWeight: 600, color: theme.lightSeaGreen }}>{formatCurrency(reportsData?.quotationFunnel.convertedAmount || 0)}</Typography>
-                                                <Typography variant='caption' color='text.secondary'>{reportsData?.quotationFunnel.convertedCount || 0} consultas</Typography>
-                                            </Box>
-                                        </Grid>
-                                    </Grid>
-                                    <Box sx={{ textAlign: 'center', p: 2, bgcolor: theme.celeste2, borderRadius: 2 }}>
-                                        <Typography variant='body2' color='text.secondary'>Tasa de Conversión</Typography>
-                                        <Typography variant='h4' sx={{ fontWeight: 600, color: theme.lightSeaGreen }}>{reportsData?.quotationFunnel.conversionRate.toFixed(1) || 0}%</Typography>
-                                    </Box>
-                                </Box>
-                            )}
-                        </Card>
-                    </Grid>
-                </Grid>
-
-                <Card sx={{ mb: 3, p: 5 }}>
-                    <Typography variant='h6' gutterBottom sx={{ fontWeight: 600 }}>Saldos de Pacientes</Typography>
-                    {loading ? <Skeleton variant='rectangular' height={400} /> : (
-                        <>
-                            <TableContainer>
-                                <Table>
-                                    <TableHead>
-                                        <TableRow>
-                                            <TableCell>Paciente</TableCell>
-                                            <TableCell>DPI/CUI</TableCell>
-                                            <TableCell>Última Visita</TableCell>
-                                            <TableCell align='right'>Saldo</TableCell>
-                                            <TableCell align='right'>Pendiente</TableCell>
-                                            <TableCell>Contacto</TableCell>
-                                            <TableCell>Estado</TableCell>
-                                        </TableRow>
-                                    </TableHead>
-                                    <TableBody>
-                                        {reportsData?.patientBalances.data.map((patient) => (
-                                            <TableRow key={patient.patientId}>
-                                                <TableCell>{patient.patientName}</TableCell>
-                                                <TableCell>{patient.nationalId}</TableCell>
-                                                <TableCell>{formatDate(patient.lastVisit)}</TableCell>
-                                                <TableCell align='right'>{formatCurrency(patient.balance)}</TableCell>
-                                                <TableCell align='right'>{formatCurrency(patient.pending)}</TableCell>
-                                                <TableCell>{patient.phone || 'N/A'}</TableCell>
-                                                <TableCell>
-                                                    <Chip label={patient.status} size='small' color={patient.status === 'Due' ? 'error' : 'success'} />
-                                                </TableCell>
-                                            </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
-                            </TableContainer>
-                            <TablePagination
-                                component='div'
-                                count={reportsData?.patientBalances.total || 0}
-                                page={page}
-                                onPageChange={(e, newPage) => setPage(newPage)}
-                                rowsPerPage={rowsPerPage}
-                                onRowsPerPageChange={(e) => { setRowsPerPage(parseInt(e.target.value, 10)); setPage(0) }}
-                                rowsPerPageOptions={[5, 10, 25, 50]}
+                    <Grid container spacing={1.5} sx={{ mt: 1.5 }}>
+                        <Grid item xs={12} md={6} lg={4}>
+                            <TextField
+                                fullWidth
+                                type="date"
+                                label="Inicio"
+                                value={filters.startDate}
+                                onChange={(event) => setFilters(current => ({ ...current, startDate: event.target.value }))}
+                                InputLabelProps={{ shrink: true }}
                             />
-                        </>
-                    )}
+                        </Grid>
+                        <Grid item xs={12} md={6} lg={4}>
+                            <TextField
+                                fullWidth
+                                type="date"
+                                label="Fin"
+                                value={filters.endDate}
+                                onChange={(event) => setFilters(current => ({ ...current, endDate: event.target.value }))}
+                                InputLabelProps={{ shrink: true }}
+                            />
+                        </Grid>
+                        <Grid item xs={12} md={6} lg={4}>
+                            <TextField
+                                select
+                                fullWidth
+                                label="Sede"
+                                value={filters.siteName}
+                                onChange={(event) => setFilters(current => ({ ...current, siteName: event.target.value }))}
+                            >
+                                <MenuItem value="todos">Todas las sedes</MenuItem>
+                                {reportsData?.availableFilters.sites.map(site => (
+                                    <MenuItem key={site} value={site}>
+                                        {site}
+                                    </MenuItem>
+                                ))}
+                            </TextField>
+                        </Grid>
+                        <Grid item xs={12} md={6} lg={4}>
+                            <TextField
+                                select
+                                fullWidth
+                                label="Doctor"
+                                value={filters.doctorName}
+                                onChange={(event) => setFilters(current => ({ ...current, doctorName: event.target.value }))}
+                            >
+                                <MenuItem value="todos">Todos los doctores</MenuItem>
+                                {reportsData?.availableFilters.doctors.map(doctor => (
+                                    <MenuItem key={doctor} value={doctor}>
+                                        {doctor}
+                                    </MenuItem>
+                                ))}
+                            </TextField>
+                        </Grid>
+                        <Grid item xs={12} md={6} lg={4}>
+                            <TextField
+                                select
+                                fullWidth
+                                label="Estado"
+                                value={filters.consultationStatus}
+                                onChange={(event) => setFilters(current => ({ ...current, consultationStatus: event.target.value as ConsultationStatus | 'todos' }))}
+                            >
+                                <MenuItem value="todos">Todos</MenuItem>
+                                {Object.entries(CONSULTATION_STATUS_LABELS).map(([status, label]) => (
+                                    <MenuItem key={status} value={status}>
+                                        {label}
+                                    </MenuItem>
+                                ))}
+                            </TextField>
+                        </Grid>
+                    </Grid>
                 </Card>
 
-                <Card sx={{ mb: 3, p: 5 }}>
-                    <Typography variant='h6' gutterBottom sx={{ fontWeight: 600 }}>Consultas Recientes</Typography>
-                    {loading ? <Skeleton variant='rectangular' height={400} /> : (
-                        <TableContainer sx={{ maxHeight: 400 }}>
-                            <Table stickyHeader>
-                                <TableHead>
-                                    <TableRow>
-                                        <TableCell>Fecha</TableCell>
-                                        <TableCell>Paciente</TableCell>
-                                        <TableCell align='right'>Total</TableCell>
-                                        <TableCell align='right'>Pagado</TableCell>
-                                        <TableCell align='right'>Pendiente</TableCell>
-                                        <TableCell align='center'>Tratamientos</TableCell>
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {reportsData?.consultations.map((consultation) => (
-                                        <TableRow key={consultation.consultationId}>
-                                            <TableCell>{formatDate(consultation.date)}</TableCell>
-                                            <TableCell>{consultation.patientName}</TableCell>
-                                            <TableCell align='right'>{formatCurrency(consultation.total)}</TableCell>
-                                            <TableCell align='right'>{formatCurrency(consultation.paid)}</TableCell>
-                                            <TableCell align='right' sx={{ color: consultation.due > 0 ? theme.purple : 'inherit' }}>{formatCurrency(consultation.due)}</TableCell>
-                                            <TableCell align='center'>{consultation.treatmentsCount}</TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </TableContainer>
-                    )}
-                </Card>
-            </Box>
+                {!reportsData ? (
+                    <Card sx={{ p: 4 }}>
+                        <Typography variant="body1" color="text.secondary">
+                            Cargando reportes...
+                        </Typography>
+                    </Card>
+                ) : (
+                    <>
+                        <Grid container spacing={2.5}>
+                            <Grid item xs={12} md={4}>
+                                <Card sx={{ p: 3 }}>
+                                    <Stack direction="row" spacing={1.5} alignItems="center">
+                                        <TrendingUpRounded sx={{ color: theme.lightSeaGreen }} />
+                                        <Typography variant="body2" color="text.secondary">Ingresos totales</Typography>
+                                    </Stack>
+                                    <Typography variant="h4" sx={{ mt: 1.25 }}>
+                                        {formatCurrency(reportsData.kpis.totalRevenue)}
+                                    </Typography>
+                                </Card>
+                            </Grid>
+                            <Grid item xs={12} md={4}>
+                                <Card sx={{ p: 3 }}>
+                                    <Stack direction="row" spacing={1.5} alignItems="center">
+                                        <PaymentsOutlined sx={{ color: theme.robinEggBlue }} />
+                                        <Typography variant="body2" color="text.secondary">Pagos cobrados</Typography>
+                                    </Stack>
+                                    <Typography variant="h4" sx={{ mt: 1.25 }}>
+                                        {formatCurrency(reportsData.kpis.collectedPayments)}
+                                    </Typography>
+                                </Card>
+                            </Grid>
+                            <Grid item xs={12} md={4}>
+                                <Card sx={{ p: 3 }}>
+                                    <Stack direction="row" spacing={1.5} alignItems="center">
+                                        <WarningAmberRounded sx={{ color: theme.red }} />
+                                        <Typography variant="body2" color="text.secondary">Saldos pendientes</Typography>
+                                    </Stack>
+                                    <Typography variant="h4" sx={{ mt: 1.25 }}>
+                                        {formatCurrency(reportsData.kpis.outstandingBalances)}
+                                    </Typography>
+                                </Card>
+                            </Grid>
+                        </Grid>
+
+                        <Grid container spacing={2.5}>
+                            <Grid item xs={12} xl={7}>
+                                <Card sx={{ p: 3 }}>
+                                    <Typography variant="h6">Ingresos vs cobros</Typography>
+                                    <Box sx={{ width: '100%', height: 320, mt: 2 }}>
+                                        <ResponsiveContainer width="100%" height="100%">
+                                            <AreaChart data={reportsData.revenueTrend}>
+                                                <defs>
+                                                    <linearGradient id="reportsRevenue" x1="0" y1="0" x2="0" y2="1">
+                                                        <stop offset="5%" stopColor={theme.lightSeaGreen} stopOpacity={0.28} />
+                                                        <stop offset="95%" stopColor={theme.lightSeaGreen} stopOpacity={0.03} />
+                                                    </linearGradient>
+                                                </defs>
+                                                <CartesianGrid strokeDasharray="4 4" stroke={alpha(theme.border, 0.9)} />
+                                                <XAxis dataKey="date" tick={{ fontSize: 11 }} stroke={theme.textMuted} />
+                                                <YAxis tick={{ fontSize: 11 }} stroke={theme.textMuted} />
+                                                <Tooltip formatter={(value: number) => formatCurrency(Number(value))} />
+                                                <Area dataKey="revenue" stroke={theme.lightSeaGreen} fill="url(#reportsRevenue)" strokeWidth={3} name="Ingresos" />
+                                                <Area dataKey="collections" stroke={theme.robinEggBlue} fillOpacity={0} strokeWidth={3} name="Cobros" />
+                                            </AreaChart>
+                                        </ResponsiveContainer>
+                                    </Box>
+                                </Card>
+                            </Grid>
+                            <Grid item xs={12} xl={5}>
+                                <Card sx={{ p: 3 }}>
+                                    <Typography variant="h6">Antigüedad de cuentas por cobrar</Typography>
+                                    <Stack spacing={1.5} sx={{ mt: 2.5 }}>
+                                        {reportsData.arAging.map((bucket, index) => {
+                                            const maxAmount = Math.max(...reportsData.arAging.map(item => item.amount), 1)
+                                            const width = `${Math.max((bucket.amount / maxAmount) * 100, 6)}%`
+                                            const colors = [theme.lightSeaGreen, theme.robinEggBlue, theme.amber, theme.red]
+                                            return (
+                                                <Box key={bucket.range}>
+                                                    <Stack direction="row" justifyContent="space-between" spacing={1}>
+                                                        <Typography variant="body2">{bucket.range}</Typography>
+                                                        <Typography variant="body2" fontWeight={700}>{formatCurrency(bucket.amount)}</Typography>
+                                                    </Stack>
+                                                    <Box sx={{ mt: 0.75, height: 12, borderRadius: 999, backgroundColor: alpha(theme.border, 0.5) }}>
+                                                        <Box sx={{ width, height: '100%', borderRadius: 999, backgroundColor: colors[index] }} />
+                                                    </Box>
+                                                </Box>
+                                            )
+                                        })}
+                                    </Stack>
+                                </Card>
+                            </Grid>
+                        </Grid>
+
+                        <Grid container spacing={2.5}>
+                            <Grid item xs={12} lg={6}>
+                                <Card sx={{ p: 3 }}>
+                                    <Typography variant="h6">Top tratamientos</Typography>
+                                    <Box sx={{ width: '100%', height: 320, mt: 2 }}>
+                                        <ResponsiveContainer width="100%" height="100%">
+                                            <BarChart data={reportsData.topTreatments}>
+                                                <CartesianGrid strokeDasharray="4 4" stroke={alpha(theme.border, 0.9)} vertical={false} />
+                                                <XAxis dataKey="treatmentName" tick={{ fontSize: 10 }} stroke={theme.textMuted} interval={0} angle={-20} textAnchor="end" height={70} />
+                                                <YAxis tick={{ fontSize: 11 }} stroke={theme.textMuted} />
+                                                <Tooltip formatter={(value: number) => value} />
+                                                <Bar dataKey="count" fill={theme.lightSeaGreen} radius={[8, 8, 0, 0]} />
+                                            </BarChart>
+                                        </ResponsiveContainer>
+                                    </Box>
+                                </Card>
+                            </Grid>
+                            <Grid item xs={12} lg={6}>
+                                <Card sx={{ p: 3 }}>
+                                    <Typography variant="h6">Top pacientes con saldo</Typography>
+                                    <Stack spacing={1.2} sx={{ mt: 2 }}>
+                                        {reportsData.topPatients.map(patient => (
+                                            <Stack
+                                                key={patient.patientId}
+                                                direction="row"
+                                                justifyContent="space-between"
+                                                alignItems="center"
+                                                sx={{
+                                                    p: 1.5,
+                                                    borderRadius: '16px',
+                                                    backgroundColor: alpha(theme.celeste2, 0.9),
+                                                }}
+                                            >
+                                                <Box>
+                                                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                                        {patient.patientName}
+                                                    </Typography>
+                                                    <Typography variant="caption" color="text.secondary">
+                                                        {formatCurrency(patient.pending)}
+                                                    </Typography>
+                                                </Box>
+                                                <Box
+                                                    sx={{
+                                                        px: 1.2,
+                                                        py: 0.6,
+                                                        borderRadius: 999,
+                                                        ...patientStatusStyles(patient.status),
+                                                    }}
+                                                >
+                                                    <Typography variant="caption" sx={{ fontWeight: 700, color: 'inherit' }}>
+                                                        {patient.status}
+                                                    </Typography>
+                                                </Box>
+                                            </Stack>
+                                        ))}
+                                    </Stack>
+                                </Card>
+                            </Grid>
+                        </Grid>
+
+                        <Grid container spacing={2.5}>
+                            <Grid item xs={12} lg={6}>
+                                <Card sx={{ p: 0 }}>
+                                    <Box sx={{ p: 3, pb: 2 }}>
+                                        <Typography variant="h6">Saldos de pacientes</Typography>
+                                    </Box>
+                                    <TableContainer>
+                                        <Table>
+                                            <TableHead>
+                                                <TableRow>
+                                                    <TableCell>Paciente</TableCell>
+                                                    <TableCell>Estado</TableCell>
+                                                    <TableCell align="right">Pendiente</TableCell>
+                                                </TableRow>
+                                            </TableHead>
+                                            <TableBody>
+                                                {reportsData.patientBalances.data.slice(0, 10).map(patient => (
+                                                    <TableRow key={patient.patientId}>
+                                                        <TableCell>{patient.patientName}</TableCell>
+                                                        <TableCell>
+                                                            <Box
+                                                                sx={{
+                                                                    px: 1.2,
+                                                                    py: 0.6,
+                                                                    borderRadius: 999,
+                                                                    display: 'inline-flex',
+                                                                    ...patientStatusStyles(patient.status),
+                                                                }}
+                                                            >
+                                                                <Typography variant="caption" sx={{ fontWeight: 700, color: 'inherit' }}>
+                                                                    {patient.status}
+                                                                </Typography>
+                                                            </Box>
+                                                        </TableCell>
+                                                        <TableCell align="right">{formatCurrency(patient.pending)}</TableCell>
+                                                    </TableRow>
+                                                ))}
+                                            </TableBody>
+                                        </Table>
+                                    </TableContainer>
+                                </Card>
+                            </Grid>
+                            <Grid item xs={12} lg={6}>
+                                <Card sx={{ p: 0 }}>
+                                    <Box sx={{ p: 3, pb: 2 }}>
+                                        <Typography variant="h6">Consultas recientes</Typography>
+                                    </Box>
+                                    <TableContainer>
+                                        <Table>
+                                            <TableHead>
+                                                <TableRow>
+                                                    <TableCell>Fecha</TableCell>
+                                                    <TableCell>Paciente</TableCell>
+                                                    <TableCell align="right">Total</TableCell>
+                                                </TableRow>
+                                            </TableHead>
+                                            <TableBody>
+                                                {reportsData.consultations.slice(0, 10).map(consultation => (
+                                                    <TableRow key={consultation.consultationId}>
+                                                        <TableCell>{formatDate(consultation.date)}</TableCell>
+                                                        <TableCell>{consultation.patientName}</TableCell>
+                                                        <TableCell align="right">{formatCurrency(consultation.total)}</TableCell>
+                                                    </TableRow>
+                                                ))}
+                                            </TableBody>
+                                        </Table>
+                                    </TableContainer>
+                                </Card>
+                            </Grid>
+                        </Grid>
+                    </>
+                )}
+            </Stack>
         </Layout>
     )
 }

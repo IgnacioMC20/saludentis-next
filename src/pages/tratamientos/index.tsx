@@ -73,86 +73,96 @@ const Tratamientos = () => {
 
     return (
         <Layout>
-            <Card sx={{
-                paddingY: { xs: 3, md: 5 },
-                paddingX: { xs: 2, md: 5 },
-                width: {
-                    xs: '100%',
-                },
-                height: '700px',
-                minHeight: '500px',
-                boxShadow: 'none',
-            }}>
-                <Typography variant='h4' mb={3} align='center'>Tratamientos</Typography>
-                {
-                    isTreatmentsLoading ?
-                        <LoadingSpinner /> :
-                        <Table data={formattedData} fetchFunc={fetchTreatment} />
-                }
-                <Modal open={isModalOpen} handleClose={toggleModal}>
-                    <Grid
-                        container
-                        spacing={4}
-                        direction="column"
-                        alignItems="center"
-                        justifyContent="center"
-                        sx={{ minHeight: '500px', textAlign: 'center' }}
-                    >
-                        <Typography variant="h4" mb={3}>
-                            {selectedId ? 'Editar Tratamiento' : 'Agregar Tratamiento'}
-                        </Typography>
+            <Box
+                sx={{
+                    minHeight: { xs: 'calc(100dvh - 92px)', md: 'calc(100dvh - 32px)' },
+                    height: { xs: 'calc(100dvh - 92px)', md: 'calc(100dvh - 32px)' },
+                    display: 'grid',
+                    placeItems: 'center',
+                    width: '100%',
+                    py: 0,
+                }}
+            >
+                <Card sx={{
+                    paddingY: { xs: 3, md: 5 },
+                    paddingX: { xs: 2, md: 5 },
+                    width: '100%',
+                    maxWidth: '1120px',
+                    mx: 'auto',
+                    height: '700px',
+                    minHeight: '500px',
+                }}>
+                    <Typography variant='h4' mb={3} align='center'>Tratamientos</Typography>
+                    {
+                        isTreatmentsLoading ?
+                            <LoadingSpinner /> :
+                            <Table data={formattedData} fetchFunc={fetchTreatment} />
+                    }
+                    <Modal open={isModalOpen} handleClose={toggleModal}>
+                        <Grid
+                            container
+                            spacing={4}
+                            direction="column"
+                            alignItems="center"
+                            justifyContent="center"
+                            sx={{ minHeight: '500px', textAlign: 'center' }}
+                        >
+                            <Typography variant="h4" mb={3}>
+                                {selectedId ? 'Editar Tratamiento' : 'Agregar Tratamiento'}
+                            </Typography>
 
-                        {isTreatmentsLoading || isFetching ? (
-                            <LoadingSpinner />
-                        ) : (
-                            <Box
-                                sx={{
-                                    maxWidth: 600,
-                                    width: '100%',
-                                    textAlign: 'left',
-                                }}
-                            >
-                                <form onSubmit={handleSubmit(onSubmitForm)} noValidate>
-                                    <Grid container spacing={2}>
-                                        {/* Detalles */}
-                                        <Grid item xs={12}>
-                                            <TextField
-                                                fullWidth
-                                                label="Detalles"
-                                                variant="outlined"
-                                                {...register('description', {
-                                                    required: 'Este campo es requerido',
-                                                })}
-                                                error={!!errors.description}
-                                                helperText={errors.description?.message}
-                                            />
+                            {isTreatmentsLoading || isFetching ? (
+                                <LoadingSpinner />
+                            ) : (
+                                <Box
+                                    sx={{
+                                        maxWidth: 600,
+                                        width: '100%',
+                                        textAlign: 'left',
+                                    }}
+                                >
+                                    <form onSubmit={handleSubmit(onSubmitForm)} noValidate>
+                                        <Grid container spacing={2}>
+                                            {/* Detalles */}
+                                            <Grid item xs={12}>
+                                                <TextField
+                                                    fullWidth
+                                                    label="Detalles"
+                                                    variant="outlined"
+                                                    {...register('description', {
+                                                        required: 'Este campo es requerido',
+                                                    })}
+                                                    error={!!errors.description}
+                                                    helperText={errors.description?.message}
+                                                />
+                                            </Grid>
+                                            {/* Precio */}
+                                            <Grid item xs={12}>
+                                                <TextField
+                                                    fullWidth
+                                                    label="Precio"
+                                                    variant="outlined"
+                                                    type="number"
+                                                    {...register('price', {
+                                                        required: 'Este campo es requerido',
+                                                    })}
+                                                    error={!!errors.price}
+                                                    helperText={errors.price?.message}
+                                                />
+                                            </Grid>
                                         </Grid>
-                                        {/* Precio */}
-                                        <Grid item xs={12}>
-                                            <TextField
-                                                fullWidth
-                                                label="Precio"
-                                                variant="outlined"
-                                                type="number"
-                                                {...register('price', {
-                                                    required: 'Este campo es requerido',
-                                                })}
-                                                error={!!errors.price}
-                                                helperText={errors.price?.message}
-                                            />
-                                        </Grid>
-                                    </Grid>
-                                    <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
-                                        <Button type="submit" variant="contained" color="primary">
-                                            <Typography variant="h6">Guardar</Typography>
-                                        </Button>
-                                    </Box>
-                                </form>
-                            </Box>
-                        )}
-                    </Grid>
-                </Modal>
-            </Card>
+                                        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
+                                            <Button type="submit" variant="contained" color="primary">
+                                                <Typography variant="h6">Guardar</Typography>
+                                            </Button>
+                                        </Box>
+                                    </form>
+                                </Box>
+                            )}
+                        </Grid>
+                    </Modal>
+                </Card>
+            </Box>
             <FloatingActionButton func={() => {
                 setSelectedId(null)
                 reset({ description: '', price: 0 })

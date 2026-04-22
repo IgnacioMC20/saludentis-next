@@ -8,12 +8,10 @@ export default function Document() {
         <link rel='icon' href='/saludentis.ico' />
       </Head>
       <body style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
         minHeight: '100vh',
         margin: 0,
-        padding: 0
+        padding: 0,
+        width: '100%',
       }}>
         <Main />
         <NextScript />

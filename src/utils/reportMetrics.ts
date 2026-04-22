@@ -1,7 +1,23 @@
-import { format, startOfDay, startOfWeek, startOfMonth, differenceInDays } from 'date-fns'
+import {
+    differenceInCalendarDays,
+    differenceInDays,
+    format,
+    startOfDay,
+    startOfMonth,
+    startOfWeek,
+    subDays,
+} from 'date-fns'
 
 import { IPatient } from '@/interfaces'
-import { IRevenueDataPoint, IARAgingBucket } from '@/interfaces/reports'
+import {
+    CONSULTATION_STATUS_LABELS,
+    IAgeMixMetrics,
+    IAppointmentStatusMetric,
+    IARAgingBucket,
+    IMetricComparison,
+    IRevenueDataPoint,
+    ConsultationStatus,
+} from '@/interfaces/reports'
 import { IBalance, IBalanceDetail } from '@/models/Balance'
 import { IConsultation } from '@/models/Consultation'
 
@@ -40,10 +56,15 @@ export const calculateTotalRevenue = (
  * Calculate collected payments from balance details
  */
 export const calculateCollectedPayments = (
-    balances: IBalance[]
+    balances: IBalance[],
+    consultationIds?: Set<string>
 ): number => {
     return balances.reduce((sum, balance) => {
         const detailsSum = (balance.balanceDetails || []).reduce((detailSum, detail) => {
+            if (consultationIds) {
+                const consultationId = detail.consultationId?.toString()
+                if (!consultationId || !consultationIds.has(consultationId)) return detailSum
+            }
             return detailSum + (detail.amount || 0)
         }, 0)
         return sum + detailsSum
@@ -54,10 +75,22 @@ export const calculateCollectedPayments = (
  * Calculate outstanding balances (A/R)
  */
 export const calculateOutstandingBalances = (
-    balances: IBalance[]
+    balances: IBalance[],
+    consultationIds?: Set<string>
 ): number => {
+    if (!consultationIds) {
+        return balances.reduce((sum, balance) => {
+            return sum + (balance.balance || 0)
+        }, 0)
+    }
+
     return balances.reduce((sum, balance) => {
-        return sum + (balance.balance || 0)
+        const pending = (balance.balanceDetails || []).reduce((detailSum, detail) => {
+            const consultationId = detail.consultationId?.toString()
+            if (!consultationId || !consultationIds.has(consultationId)) return detailSum
+            return detailSum + Math.max((detail.total || 0) - (detail.amount || 0), 0)
+        }, 0)
+        return sum + pending
     }, 0)
 }
 
@@ -65,14 +98,37 @@ export const calculateOutstandingBalances = (
  * Calculate pending collections (total - paid)
  */
 export const calculatePendingCollections = (
-    balances: IBalance[]
+    balances: IBalance[],
+    consultationIds?: Set<string>
 ): number => {
     return balances.reduce((sum, balance) => {
         const detailsSum = (balance.balanceDetails || []).reduce((detailSum, detail) => {
+            if (consultationIds) {
+                const consultationId = detail.consultationId?.toString()
+                if (!consultationId || !consultationIds.has(consultationId)) return detailSum
+            }
             const pending = (detail.total || 0) - (detail.amount || 0)
             return detailSum + pending
         }, 0)
         return sum + detailsSum
+    }, 0)
+}
+
+export const calculatePendingCollectionsCount = (
+    balances: IBalance[],
+    consultationIds?: Set<string>
+): number => {
+    return balances.reduce((sum, balance) => {
+        const count = (balance.balanceDetails || []).reduce((detailCount, detail) => {
+            if (consultationIds) {
+                const consultationId = detail.consultationId?.toString()
+                if (!consultationId || !consultationIds.has(consultationId)) return detailCount
+            }
+
+            return ((detail.total || 0) > (detail.amount || 0)) ? detailCount + 1 : detailCount
+        }, 0)
+
+        return sum + count
     }, 0)
 }
 
@@ -82,12 +138,14 @@ export const calculatePendingCollections = (
 export const groupRevenueByPeriod = (
     consultations: IConsultation[],
     balances: IBalance[],
-    groupBy: 'day' | 'week' | 'month'
+    groupBy: 'day' | 'week' | 'month',
+    consultationIds?: Set<string>
 ): IRevenueDataPoint[] => {
     const revenueMap = new Map<string, { revenue: number; collections: number }>()
 
     // Group consultations (revenue)
     consultations.forEach(consultation => {
+        if (consultationIds && !consultationIds.has((consultation as any)._id?.toString?.() || '')) return
         if (consultation.createdAt) {
             const period = groupByPeriod(consultation.createdAt, groupBy)
             const current = revenueMap.get(period) || { revenue: 0, collections: 0 }
@@ -99,6 +157,8 @@ export const groupRevenueByPeriod = (
     // Group payments (collections)
     balances.forEach(balance => {
         (balance.balanceDetails || []).forEach(detail => {
+            const consultationId = detail.consultationId?.toString()
+            if (consultationIds && (!consultationId || !consultationIds.has(consultationId))) return
             if (detail.createdAt) {
                 const period = groupByPeriod(detail.createdAt, groupBy)
                 const current = revenueMap.get(period) || { revenue: 0, collections: 0 }
@@ -123,7 +183,8 @@ export const groupRevenueByPeriod = (
  */
 export const calculateARAgingBuckets = (
     balances: IBalance[],
-    patients: Map<string, IPatient>
+    patients: Map<string, IPatient>,
+    consultationIds?: Set<string>
 ): IARAgingBucket[] => {
     const buckets: IARAgingBucket[] = [
         { range: '0-30 days', count: 0, amount: 0, patients: [] },
@@ -135,10 +196,18 @@ export const calculateARAgingBuckets = (
     const now = new Date()
 
     balances.forEach(balance => {
-        if ((balance.balance || 0) > 0 && balance.balanceDetails && balance.balanceDetails.length > 0) {
+        const relevantDetails = (balance.balanceDetails || []).filter(detail => {
+            if (consultationIds) {
+                const consultationId = detail.consultationId?.toString()
+                if (!consultationId || !consultationIds.has(consultationId)) return false
+            }
+
+            return (detail.total || 0) > (detail.amount || 0)
+        })
+
+        if (relevantDetails.length > 0) {
             // Find oldest unpaid detail
-            const oldestUnpaid = balance.balanceDetails
-                .filter(detail => (detail.total || 0) > (detail.amount || 0))
+            const oldestUnpaid = relevantDetails
                 .sort((a, b) => {
                     const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0
                     const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0
@@ -159,7 +228,9 @@ export const calculateARAgingBuckets = (
                 else if (daysPast > 30) bucketIndex = 1
 
                 buckets[bucketIndex].count++
-                buckets[bucketIndex].amount += balance.balance || 0
+                buckets[bucketIndex].amount += relevantDetails.reduce((sum, detail) => {
+                    return sum + Math.max((detail.total || 0) - (detail.amount || 0), 0)
+                }, 0)
                 buckets[bucketIndex].patients.push(patientName)
             }
         }
@@ -179,6 +250,135 @@ export const calculatePaidForConsultation = (
         d => d.consultationId?.toString() === consultationId
     )
     return detail?.amount || 0
+}
+
+export const normalizeConsultationStatus = (
+    status?: string | null
+): ConsultationStatus => {
+    switch (status) {
+        case 'confirmada':
+        case 'completada':
+        case 'cancelada':
+        case 'no_asistio':
+            return status
+        default:
+            return 'completada'
+    }
+}
+
+export const getConsultationDefaults = (consultation: IConsultation) => ({
+    status: normalizeConsultationStatus(consultation.status),
+    doctorName: consultation.doctorName?.trim() || 'Sin asignar',
+    siteName: consultation.siteName?.trim() || 'Principal',
+})
+
+export const getPreviousPeriodRange = (startDate: Date, endDate: Date) => {
+    const rangeLength = Math.max(differenceInCalendarDays(endDate, startDate), 0) + 1
+    const previousEnd = subDays(startDate, 1)
+    const previousStart = subDays(previousEnd, rangeLength - 1)
+
+    return { previousStart, previousEnd }
+}
+
+export const createMetricComparison = (
+    current: number,
+    previous: number,
+    comparisonLabel: string
+): IMetricComparison => {
+    if (previous === 0 && current === 0) {
+        return {
+            current,
+            previous,
+            deltaPercent: 0,
+            trend: 'neutral',
+            comparisonLabel,
+        }
+    }
+
+    if (previous === 0) {
+        return {
+            current,
+            previous,
+            deltaPercent: 100,
+            trend: 'up',
+            comparisonLabel,
+        }
+    }
+
+    const deltaPercent = Number((((current - previous) / previous) * 100).toFixed(1))
+    const trend = deltaPercent === 0 ? 'neutral' : deltaPercent > 0 ? 'up' : 'down'
+
+    return {
+        current,
+        previous,
+        deltaPercent,
+        trend,
+        comparisonLabel,
+    }
+}
+
+export const calculateAgeMixMetrics = (patients: IPatient[]): IAgeMixMetrics => {
+    const total = patients.length
+    let adults = 0
+
+    patients.forEach(patient => {
+        if (!patient.birthDate) return
+
+        const birthDate = new Date(patient.birthDate)
+        if (isNaN(birthDate.getTime())) return
+
+        const today = new Date()
+        const age = today.getFullYear() - birthDate.getFullYear()
+        const hasBirthdayPassed =
+            today.getMonth() > birthDate.getMonth()
+            || (today.getMonth() === birthDate.getMonth() && today.getDate() >= birthDate.getDate())
+
+        const adjustedAge = hasBirthdayPassed ? age : age - 1
+        if (adjustedAge >= 18) adults++
+    })
+
+    const children = total - adults
+
+    return {
+        children,
+        adults,
+        total,
+        childrenPercentage: total ? Number(((children / total) * 100).toFixed(1)) : 0,
+        adultsPercentage: total ? Number(((adults / total) * 100).toFixed(1)) : 0,
+    }
+}
+
+export const calculateAppointmentStatusMetrics = (
+    consultations: Array<IConsultation & { status?: ConsultationStatus }>
+): IAppointmentStatusMetric[] => {
+    const total = consultations.length
+    const counts = consultations.reduce<Record<ConsultationStatus, number>>((acc, consultation) => {
+        const status = normalizeConsultationStatus(consultation.status)
+        acc[status] += 1
+        return acc
+    }, {
+        confirmada: 0,
+        completada: 0,
+        cancelada: 0,
+        no_asistio: 0,
+    })
+
+    return Object.entries(counts).map(([status, count]) => ({
+        status: status as ConsultationStatus,
+        label: CONSULTATION_STATUS_LABELS[status as ConsultationStatus],
+        count,
+        percentage: total ? Number(((count / total) * 100).toFixed(1)) : 0,
+    }))
+}
+
+export const getPatientBalanceStatus = (
+    daysPastDue: number,
+    pending: number
+): 'Pendiente' | 'Vencido' | 'Crítico' | 'Al día' => {
+    if (pending <= 0) return 'Al día'
+    if (daysPastDue > 90) return 'Crítico'
+    if (daysPastDue > 30) return 'Vencido'
+    return 'Pendiente'
 }
 
 /**

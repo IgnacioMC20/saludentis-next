@@ -74,74 +74,86 @@ const Enfermedades = () => {
 
     return (
         <Layout>
-            <Card
+            <Box
                 sx={{
-                    paddingY: { xs: 3, md: 5 },
-                    paddingX: { xs: 2, md: 5 },
-                    width: { xs: '100%' },
-                    height: '700px',
-                    minHeight: '500px',
-                    boxShadow: 'none',
+                    minHeight: { xs: 'calc(100dvh - 92px)', md: 'calc(100dvh - 32px)' },
+                    height: { xs: 'calc(100dvh - 92px)', md: 'calc(100dvh - 32px)' },
+                    display: 'grid',
+                    placeItems: 'center',
+                    width: '100%',
+                    py: 0,
                 }}
             >
-                <Typography variant="h4" mb={3} align="center">
-                    Enfermedades
-                </Typography>
-                {
-                    isDiseasesLoading ?
-                        <LoadingSpinner /> :
-                        <Table data={formattedData} fetchFunc={fetchDisease} />
-                }
-                <Modal open={isModalOpen} handleClose={toggleModal}>
-                    <Grid
-                        container
-                        spacing={4}
-                        direction="column"
-                        alignItems="center"
-                        justifyContent="center"
-                        sx={{ minHeight: '500px', textAlign: 'center' }}
-                    >
-                        <Typography variant="h4" mb={3}>
-                            {selectedId ? 'Editar Enfermedad' : 'Agregar Enfermedad'}
-                        </Typography>
+                <Card
+                    sx={{
+                        paddingY: { xs: 3, md: 5 },
+                        paddingX: { xs: 2, md: 5 },
+                        width: '100%',
+                        maxWidth: '1120px',
+                        mx: 'auto',
+                        height: '700px',
+                        minHeight: '500px',
+                    }}
+                >
+                    <Typography variant="h4" mb={3} align="center">
+                        Enfermedades
+                    </Typography>
+                    {
+                        isDiseasesLoading ?
+                            <LoadingSpinner /> :
+                            <Table data={formattedData} fetchFunc={fetchDisease} />
+                    }
+                    <Modal open={isModalOpen} handleClose={toggleModal}>
+                        <Grid
+                            container
+                            spacing={4}
+                            direction="column"
+                            alignItems="center"
+                            justifyContent="center"
+                            sx={{ minHeight: '500px', textAlign: 'center' }}
+                        >
+                            <Typography variant="h4" mb={3}>
+                                {selectedId ? 'Editar Enfermedad' : 'Agregar Enfermedad'}
+                            </Typography>
 
-                        {isDiseasesLoading || isFetching ? (
-                            <LoadingSpinner />
-                        ) : (
-                            <Box
-                                sx={{
-                                    maxWidth: 600,
-                                    width: '100%',
-                                    textAlign: 'left',
-                                }}
-                            >
-                                <form onSubmit={handleSubmit(onSubmitForm)} noValidate style={{ width: '100%' }}>
-                                    <Grid container spacing={2}>
-                                        {/* Detalles */}
-                                        <Grid item xs={12}>
-                                            <TextField
-                                                fullWidth
-                                                label="Detalles"
-                                                variant="outlined"
-                                                {...register('detail', {
-                                                    required: 'Este campo es requerido',
-                                                })}
-                                                error={!!errors.detail}
-                                                helperText={errors.detail?.message}
-                                            />
+                            {isDiseasesLoading || isFetching ? (
+                                <LoadingSpinner />
+                            ) : (
+                                <Box
+                                    sx={{
+                                        maxWidth: 600,
+                                        width: '100%',
+                                        textAlign: 'left',
+                                    }}
+                                >
+                                    <form onSubmit={handleSubmit(onSubmitForm)} noValidate style={{ width: '100%' }}>
+                                        <Grid container spacing={2}>
+                                            {/* Detalles */}
+                                            <Grid item xs={12}>
+                                                <TextField
+                                                    fullWidth
+                                                    label="Detalles"
+                                                    variant="outlined"
+                                                    {...register('detail', {
+                                                        required: 'Este campo es requerido',
+                                                    })}
+                                                    error={!!errors.detail}
+                                                    helperText={errors.detail?.message}
+                                                />
+                                            </Grid>
                                         </Grid>
-                                    </Grid>
-                                    <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
-                                        <Button type="submit" variant="contained" color="primary">
-                                            <Typography variant="h6">Guardar</Typography>
-                                        </Button>
-                                    </Box>
-                                </form>
-                            </Box>
-                        )}
-                    </Grid>
-                </Modal>
-            </Card>
+                                        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
+                                            <Button type="submit" variant="contained" color="primary">
+                                                <Typography variant="h6">Guardar</Typography>
+                                            </Button>
+                                        </Box>
+                                    </form>
+                                </Box>
+                            )}
+                        </Grid>
+                    </Modal>
+                </Card>
+            </Box>
             <FloatingActionButton func={() => {
                 setSelectedId(null)
                 reset({ detail: '' })

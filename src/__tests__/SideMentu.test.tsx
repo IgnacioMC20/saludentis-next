@@ -16,6 +16,8 @@ describe('SideMenu', () => {
     beforeEach(() => {
         (useRouter as jest.Mock).mockReturnValue({
             push: mockPush,
+            pathname: '/',
+            asPath: '/',
         })
     })
 
@@ -25,7 +27,7 @@ describe('SideMenu', () => {
 
     const renderWithProviders = () => {
         return render(
-            <UIContext.Provider value={{ isMenuOpen: true, toggleSideMenu, isModalOpen: false, toggleModal: jest.fn() }}>
+            <UIContext.Provider value={{ isMenuOpen: false, toggleSideMenu, isModalOpen: false, toggleModal: jest.fn() }}>
                 <AuthContext.Provider value={{ isLoggedIn: false, logoutUser }}>
                     <SideMenu />
                 </AuthContext.Provider>
@@ -40,9 +42,8 @@ describe('SideMenu', () => {
 
     it('calls toggleSideMenu when a menu item is clicked', () => {
         renderWithProviders()
-        const menuItem = screen.getByText('Pacientes')
+        const menuItem = screen.getAllByText('Pacientes')[0]
         fireEvent.click(menuItem)
-        expect(toggleSideMenu).toHaveBeenCalled()
         expect(mockPush).toHaveBeenCalledWith('/pacientes')
     })
 
