@@ -27,6 +27,7 @@ export interface IPatient {
   emotionalState?: string;
   physicalActivity?: string;
   organSystems?: string[];
+  annotations?: string;
   createdAt?: Date;
   updatedAt?: Date;
   lastTreatment?: string;

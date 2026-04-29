@@ -24,9 +24,10 @@ const TabContainer: React.FC<TabContainerProps> = ({ children }) => {
 
 type AppProps = {
   patientId: string;
+  showChildOdontogram?: boolean;
 };
 
-export const App: React.FC<AppProps> = ({ patientId }) => {
+export const App: React.FC<AppProps> = ({ patientId, showChildOdontogram = false }) => {
   const [selectedTab, setSelectedTab] = useState(0)
   const [markedColor, setMarkedColor] = useState('')
   const [markedName, setMarkedName] = useState('')
@@ -153,13 +154,15 @@ export const App: React.FC<AppProps> = ({ patientId }) => {
             boxShadow: 'none',
             width: '80%',
           }}>
-            <Tabs value={selectedTab} onChange={handleTabChange}>
-              <Tab label="Adulto" />
-              <Tab label="Niño" />
-            </Tabs>
+            {showChildOdontogram && (
+              <Tabs value={selectedTab} onChange={handleTabChange}>
+                <Tab label="Adulto" />
+                <Tab label="Niño" />
+              </Tabs>
+            )}
           </AppBar>
 
-          {selectedTab === 0 && (
+          {(selectedTab === 0 || !showChildOdontogram) && (
             <TabContainer>
               <Box
                 paddingLeft={8}
@@ -189,7 +192,7 @@ export const App: React.FC<AppProps> = ({ patientId }) => {
             </TabContainer>
           )}
 
-          {selectedTab === 1 && (
+          {showChildOdontogram && selectedTab === 1 && (
             <TabContainer>
               <Box
                 paddingLeft={23}

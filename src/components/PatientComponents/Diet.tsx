@@ -58,14 +58,14 @@ const Diet = () => {
   }, [patientResponse, reset])
 
   const onSubmit = async (data: FormData) => {
-    if (!patientId || !patientResponse?.data?.nationalId) {
+    if (!patientId) {
       showToast('ID de paciente no encontrado', 'error')
       return
     }
 
     try {
       const result = await updatePatient.mutateAsync({
-        nationalId: patientResponse.data.nationalId,
+        _id: patientId,
         organSystems: data.organSystems,
         diet: data.diet,
         emotionalState: data.emotionalState,

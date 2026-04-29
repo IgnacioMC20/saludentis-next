@@ -27,22 +27,34 @@ export default function (req: NextApiRequest, res: NextApiResponse<ApiResponse>)
             return res.status(400).json({ ok: false, message: 'Bad request' })
     }
 
+    const normalizePatientData = (patientData: IPatient) => {
+        const nationalId = patientData.nationalId?.trim()
+
+        return {
+            ...patientData,
+            nationalId: nationalId || undefined,
+        }
+    }
+
     async function createPatient(req: NextApiRequest, res: NextApiResponse<ApiResponse>) {
-        const patientData = req.body as IPatient
+        const patientData = normalizePatientData(req.body as IPatient)
 
         await db.connect()
 
         try {
-            const existingPatient = await Patient.findOne({ nationalId: patientData.nationalId })
-            if (existingPatient) {
-                return res.status(400).json({
-                    ok: false,
-                    message: 'Ya existe un paciente con ese DPI/CUI',
-                })
+            await Patient.syncIndexes()
+
+            if (patientData.nationalId) {
+                const existingPatient = await Patient.findOne({ nationalId: patientData.nationalId })
+                if (existingPatient) {
+                    await db.disconnect()
+                    return res.status(400).json({
+                        ok: false,
+                        message: 'Ya existe un paciente con ese DPI/CUI',
+                    })
+                }
             }
 
-            await Patient.collection.dropIndexes()
-            await Patient.syncIndexes()
             const newPatient = new Patient(patientData)
 
             newPatient.consultationReason = patientData.consultationReason
@@ -89,18 +101,51 @@ export default function (req: NextApiRequest, res: NextApiResponse<ApiResponse>)
     }
 
     async function updatePatient(req: NextApiRequest, res: NextApiResponse<ApiResponse<any>>) {
-        const patientData = req.body as IPatient
+        const patientData = normalizePatientData(req.body as IPatient)
 
         await db.connect()
 
         try {
+            if (!patientData._id) {
+                await db.disconnect()
+                return res.status(400).json({
+                    ok: false,
+                    message: 'El ID del paciente es requerido',
+                })
+            }
+
+            await Patient.syncIndexes()
+
+            if (patientData.nationalId) {
+                const existingPatient = await Patient.findOne({
+                    nationalId: patientData.nationalId,
+                    _id: { $ne: patientData._id },
+                })
+
+                if (existingPatient) {
+                    await db.disconnect()
+                    return res.status(400).json({
+                        ok: false,
+                        message: 'Ya existe un paciente con ese DPI/CUI',
+                    })
+                }
+            }
+
+            const { _id, nationalId, ...restPatientData } = patientData
             const updatedPatient = await Patient.findOneAndUpdate(
-                { nationalId: patientData.nationalId },
-                { $set: patientData },
+                { _id },
+                {
+                    $set: {
+                        ...restPatientData,
+                        ...(nationalId ? { nationalId } : {}),
+                    },
+                    ...(nationalId ? {} : { $unset: { nationalId: 1 } }),
+                },
                 { new: true, runValidators: true }
             )
 
             if (updatedPatient) {
+                await db.disconnect()
                 return res.status(200).json({
                     ok: true,
                     data: updatedPatient,
@@ -111,7 +156,7 @@ export default function (req: NextApiRequest, res: NextApiResponse<ApiResponse>)
 
             return res.status(401).json({
                 ok: false,
-                message: 'No existe un paciente con ese DPI/CUI',
+                message: 'No existe un paciente con ese ID',
             })
         } catch (error: any) {
             console.error(error)
