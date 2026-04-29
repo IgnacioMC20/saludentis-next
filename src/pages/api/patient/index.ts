@@ -36,6 +36,28 @@ export default function (req: NextApiRequest, res: NextApiResponse<ApiResponse>)
         }
     }
 
+    const getOdontogramProfile = (
+        birthDate?: Date | string,
+        referenceDate?: Date | string
+    ): 'adult' | 'child' => {
+        if (!birthDate) return 'adult'
+
+        const birth = new Date(birthDate)
+        const reference = referenceDate ? new Date(referenceDate) : new Date()
+
+        if (Number.isNaN(birth.getTime()) || Number.isNaN(reference.getTime())) {
+            return 'adult'
+        }
+
+        const age = reference.getFullYear() - birth.getFullYear()
+        const birthdayPassed =
+            reference.getMonth() > birth.getMonth() ||
+            (reference.getMonth() === birth.getMonth() && reference.getDate() >= birth.getDate())
+
+        const isAdult = birthdayPassed ? age >= 18 : age - 1 >= 18
+        return isAdult ? 'adult' : 'child'
+    }
+
     async function createPatient(req: NextApiRequest, res: NextApiResponse<ApiResponse>) {
         const patientData = normalizePatientData(req.body as IPatient)
 
@@ -59,6 +81,7 @@ export default function (req: NextApiRequest, res: NextApiResponse<ApiResponse>)
 
             newPatient.consultationReason = patientData.consultationReason
             newPatient.lastTreatment = patientData.lastTreatment
+            newPatient.odontogramProfile = patientData.odontogramProfile || getOdontogramProfile(patientData.birthDate)
 
             await newPatient.save()
 
@@ -138,6 +161,7 @@ export default function (req: NextApiRequest, res: NextApiResponse<ApiResponse>)
                     $set: {
                         ...restPatientData,
                         ...(nationalId ? { nationalId } : {}),
+                        ...(patientData.odontogramProfile ? { odontogramProfile: patientData.odontogramProfile } : {}),
                     },
                     ...(nationalId ? {} : { $unset: { nationalId: 1 } }),
                 },

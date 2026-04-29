@@ -26,6 +26,7 @@ const patientSchema = new Schema<IPatient>({
     medications: { type: String },
     diagnosis: { type: String },
     annotations: { type: String },
+    odontogramProfile: { type: String, enum: ['adult', 'child'] },
     consultationReason: { type: String },
     emotionalState: { type: String },
     organSystems: { type: [String], default: [] },

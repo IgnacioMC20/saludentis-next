@@ -9,22 +9,7 @@ const OdontogramComponent = () => {
   const router = useRouter()
   const { id } = router.query
   const { data: patientResponse, isLoading } = usePatient(id as string)
-  const birthDate = patientResponse?.data?.birthDate
-
-  const isAdult = (() => {
-    if (!birthDate) return true
-
-    const dateOfBirth = new Date(birthDate)
-    if (Number.isNaN(dateOfBirth.getTime())) return true
-
-    const today = new Date()
-    const age = today.getFullYear() - dateOfBirth.getFullYear()
-    const birthdayPassed =
-      today.getMonth() > dateOfBirth.getMonth() ||
-      (today.getMonth() === dateOfBirth.getMonth() && today.getDate() >= dateOfBirth.getDate())
-
-    return birthdayPassed ? age >= 18 : age - 1 >= 18
-  })()
+  const odontogramProfile = patientResponse?.data?.odontogramProfile || 'adult'
 
   if (isLoading) {
     return (
@@ -49,7 +34,7 @@ const OdontogramComponent = () => {
       }}
         overflow={'hidden'}
       >
-        <Odontogram.App patientId={id as string} showChildOdontogram={!isAdult} />
+        <Odontogram.App patientId={id as string} showChildOdontogram={odontogramProfile === 'child'} />
       </Grid>
 
     </Grid >
