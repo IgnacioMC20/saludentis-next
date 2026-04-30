@@ -64,8 +64,6 @@ export default function (req: NextApiRequest, res: NextApiResponse<ApiResponse>)
         await db.connect()
 
         try {
-            await Patient.syncIndexes()
-
             if (patientData.nationalId) {
                 const existingPatient = await Patient.findOne({ nationalId: patientData.nationalId })
                 if (existingPatient) {
@@ -136,8 +134,6 @@ export default function (req: NextApiRequest, res: NextApiResponse<ApiResponse>)
                     message: 'El ID del paciente es requerido',
                 })
             }
-
-            await Patient.syncIndexes()
 
             if (patientData.nationalId) {
                 const existingPatient = await Patient.findOne({
