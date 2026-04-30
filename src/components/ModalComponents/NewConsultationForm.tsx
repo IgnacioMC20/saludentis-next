@@ -72,6 +72,11 @@ export const NewConsultationForm: React.FC<NewConsultationFormProps> = ({
     for (const t of treatments) map.set(t._id, t)
     return map
   }, [treatments])
+  const diseasesById = useMemo(() => {
+    const map = new Map<string, any>()
+    for (const disease of diseases) map.set(disease._id, disease)
+    return map
+  }, [diseases])
 
   const computedTotal = useMemo(() => {
     let total = 0
@@ -189,7 +194,19 @@ export const NewConsultationForm: React.FC<NewConsultationFormProps> = ({
                           error={!!errors.consultationDetails?.[index]?.treatmentId}
                         >
                           <InputLabel shrink>Tratamiento</InputLabel>
-                          <MuiSelect {...field} label="Tratamiento" displayEmpty>
+                          <MuiSelect
+                            {...field}
+                            value={field.value || ''}
+                            onChange={(event) => field.onChange(event.target.value)}
+                            label="Tratamiento"
+                            displayEmpty
+                            renderValue={(selected) => {
+                              if (!selected) return 'Seleccione tratamiento'
+
+                              const treatment = treatmentsById.get(String(selected))
+                              return treatment ? `${treatment.description} - Q.${treatment.price}` : 'Seleccione tratamiento'
+                            }}
+                          >
                             <MenuItem value="" disabled>
                               Seleccione tratamiento
                             </MenuItem>
@@ -215,7 +232,19 @@ export const NewConsultationForm: React.FC<NewConsultationFormProps> = ({
                           error={!!errors.consultationDetails?.[index]?.diseaseId}
                         >
                           <InputLabel shrink>Enfermedad</InputLabel>
-                          <MuiSelect {...field} label="Enfermedad" displayEmpty>
+                          <MuiSelect
+                            {...field}
+                            value={field.value || ''}
+                            onChange={(event) => field.onChange(event.target.value)}
+                            label="Enfermedad"
+                            displayEmpty
+                            renderValue={(selected) => {
+                              if (!selected) return 'Seleccione enfermedad'
+
+                              const disease = diseasesById.get(String(selected))
+                              return disease?.detail || 'Seleccione enfermedad'
+                            }}
+                          >
                             <MenuItem value="" disabled>
                               Seleccione enfermedad
                             </MenuItem>

@@ -7,7 +7,6 @@ import {
     ADULT_TEETH,
     CHILD_TEETH,
     ITooth,
-    IFace
 } from '@/interfaces'
 import Odontogram from '@/models/Odontogram'
 
@@ -30,6 +29,19 @@ const createDefaultTeeth = (archType: 'adult' | 'child'): ITooth[] => {
     }))
 }
 
+const createCompleteTeethSet = (): ITooth[] => [
+    ...createDefaultTeeth('adult'),
+    ...createDefaultTeeth('child'),
+]
+
+const ensureTeethSet = (teeth: ITooth[] = []): ITooth[] => {
+    const teethByNumber = new Map(teeth.map(tooth => [tooth.toothNumber, tooth]))
+
+    return createCompleteTeethSet().map(defaultTooth => (
+        teethByNumber.get(defaultTooth.toothNumber) || defaultTooth
+    ))
+}
+
 /**
  * Get or create odontogram for a patient
  * If odontogram doesn't exist, creates one with default white teeth
@@ -42,11 +54,10 @@ export const getOrCreateOdontogram = async (
 
     try {
         // Try to find existing odontogram
-        let odontogram = await Odontogram.findOne({ patientId }).lean()
+        let odontogram = await Odontogram.findOne({ patientId })
 
         if (!odontogram) {
-            // Create default teeth state
-            const defaultTeeth = createDefaultTeeth(archType)
+            const defaultTeeth = createCompleteTeethSet()
             const now = new Date()
 
             const initialState: ITeethState = {
@@ -66,10 +77,24 @@ export const getOrCreateOdontogram = async (
             })
 
             odontogram = await newOdontogram.save()
+        } else {
+            const normalizedInitialTeeth = ensureTeethSet(odontogram.initialState?.teeth)
+            const normalizedCurrentTeeth = ensureTeethSet(odontogram.currentState?.teeth)
+
+            const initialChanged = normalizedInitialTeeth.length !== odontogram.initialState.teeth.length
+            const currentChanged = normalizedCurrentTeeth.length !== odontogram.currentState.teeth.length
+
+            if (initialChanged || currentChanged) {
+                odontogram.initialState.teeth = normalizedInitialTeeth
+                odontogram.currentState.teeth = normalizedCurrentTeeth
+                odontogram.markModified('initialState.teeth')
+                odontogram.markModified('currentState.teeth')
+                odontogram = await odontogram.save()
+            }
         }
 
         await db.disconnect()
-        return odontogram as IOdontogram
+        return odontogram.toObject() as IOdontogram
     } catch (error) {
         await db.disconnect()
         throw error
@@ -134,10 +159,6 @@ export const calculateOdontogramChanges = (
     const initialTeethMap = new Map(
         initialState.teeth.map(tooth => [tooth.toothNumber, tooth])
     )
-    const currentTeethMap = new Map(
-        currentState.teeth.map(tooth => [tooth.toothNumber, tooth])
-    )
-
     // Check all teeth in current state
     currentState.teeth.forEach(currentTooth => {
         const initialTooth = initialTeethMap.get(currentTooth.toothNumber)

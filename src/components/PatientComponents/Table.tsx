@@ -1,5 +1,6 @@
 import { WhatsApp } from '@mui/icons-material'
 import {
+    Box,
     Paper,
     TableBody,
     TableCell,
@@ -16,6 +17,7 @@ import NextLink from 'next/link'
 import { ChangeEvent, useEffect, useState, useMemo } from 'react'
 
 import { Loading } from '../ui/Loading'
+import { TableSearch } from '../ui/TableSearch'
 import { theme } from '@/themes'
 import { formatDateToDDMMYYYY, getFullName, getProperName } from '@/utils'
 
@@ -83,9 +85,25 @@ export const Table = ({
     const [page, setPage] = useState(0)
     const [loading, setLoading] = useState(progress)
     const [rowsPerPage, setRowsPerPage] = useState(customRowsPerPage)
+    const [searchTerm, setSearchTerm] = useState('')
 
     // Memoize data transformations to avoid unnecessary recalculations
     const rows = useMemo(() => data.map(item => ({ ...item })), [data])
+    const filteredRows = useMemo(() => {
+        const normalizedQuery = searchTerm.trim().toLowerCase()
+
+        if (!normalizedQuery) return rows
+
+        return rows.filter((row) =>
+            Object.entries(row).some(([key, value]) => {
+                if (key === 'id' || typeof value === 'boolean' || value == null) {
+                    return false
+                }
+
+                return String(value).toLowerCase().includes(normalizedQuery)
+            })
+        )
+    }, [rows, searchTerm])
 
     const columns = useMemo(() =>
         Object.keys(data[0]).map(key => ({
@@ -106,6 +124,10 @@ export const Table = ({
             return () => clearTimeout(timer)
         }
     }, [progress])
+
+    useEffect(() => {
+        setPage(0)
+    }, [searchTerm])
 
     // Pagination handlers
     const handleChangePage = (event: unknown, newPage: number) => {
@@ -249,6 +271,13 @@ export const Table = ({
                 <Loading />
             ) : (
                 <>
+                    <Box>
+                        <TableSearch
+                            value={searchTerm}
+                            onChange={setSearchTerm}
+                            placeholder="Buscar pacientes"
+                        />
+                    </Box>
                     <TableContainer sx={{ maxHeight: 500 }}>
                         <MaterialTable stickyHeader aria-label="sticky table">
                             {/* Table Header */}
@@ -260,10 +289,10 @@ export const Table = ({
 
                             {/* Table Body */}
                             <TableBody>
-                                {rows
+                                {filteredRows
                                     .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                                     .map((row) => {
-                                        const rowIndex = rows.indexOf(row) + 1
+                                        const rowIndex = filteredRows.indexOf(row) + 1
                                         const phone = (row as any)['Numero de Telefono']
 
                                         return (
@@ -295,7 +324,7 @@ export const Table = ({
                     <TablePagination
                         rowsPerPageOptions={[customRowsPerPage, 25, 100]}
                         component="div"
-                        count={rows.length}
+                        count={filteredRows.length}
                         rowsPerPage={rowsPerPage}
                         page={page}
                         onPageChange={handleChangePage}

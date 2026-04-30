@@ -27,6 +27,8 @@ export interface IPatient {
   emotionalState?: string;
   physicalActivity?: string;
   organSystems?: string[];
+  annotations?: string;
+  odontogramProfile?: 'adult' | 'child';
   createdAt?: Date;
   updatedAt?: Date;
   lastTreatment?: string;

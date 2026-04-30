@@ -10,13 +10,23 @@ import { store } from './store'
 import { useOdontogram } from '@/hooks'
 import { ITooth } from '@/interfaces'
 
+const ADULT_DISPLAY_ORDER = [
+  1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16,
+  32, 31, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17,
+]
+
+const CHILD_DISPLAY_ORDER = [
+  55, 54, 53, 52, 51, 61, 62, 63, 64, 65,
+  85, 84, 83, 82, 81, 71, 72, 73, 74, 75,
+]
+
 type TabContainerProps = {
   children: React.ReactNode;
 };
 
 const TabContainer: React.FC<TabContainerProps> = ({ children }) => {
   return (
-    <Box sx={{ padding: 0, height: '400px' }}>
+    <Box sx={{ padding: 0, minHeight: '420px' }}>
       {children}
     </Box>
   )
@@ -24,9 +34,10 @@ const TabContainer: React.FC<TabContainerProps> = ({ children }) => {
 
 type AppProps = {
   patientId: string;
+  showChildOdontogram?: boolean;
 };
 
-export const App: React.FC<AppProps> = ({ patientId }) => {
+export const App: React.FC<AppProps> = ({ patientId, showChildOdontogram = false }) => {
   const [selectedTab, setSelectedTab] = useState(0)
   const [markedColor, setMarkedColor] = useState('')
   const [markedName, setMarkedName] = useState('')
@@ -109,14 +120,63 @@ export const App: React.FC<AppProps> = ({ patientId }) => {
   }
 
   // Get teeth based on dental arch type
-  const adultTeeth = currentState.teeth.filter(t => t.toothNumber <= 32)
-  const childTeeth = currentState.teeth.filter(t => t.toothNumber > 32)
+  const teethByNumber = new Map(currentState.teeth.map((tooth) => [tooth.toothNumber, tooth]))
+  const adultTeeth = ADULT_DISPLAY_ORDER
+    .map((toothNumber) => teethByNumber.get(toothNumber))
+    .filter((tooth): tooth is ITooth => Boolean(tooth))
+  const childTeeth = CHILD_DISPLAY_ORDER
+    .map((toothNumber) => teethByNumber.get(toothNumber))
+    .filter((tooth): tooth is ITooth => Boolean(tooth))
+
+  const getToothCssClass = (toothNumber: number) => {
+    if (toothNumber === 8 || toothNumber === 81) return 'spaceRight'
+    if (toothNumber === 16 || toothNumber === 65 || toothNumber === 75) return 'noMarginRight'
+    if (toothNumber === 32 || toothNumber === 85) return 'clear'
+    if (toothNumber === 51) return 'spaceRight'
+    return undefined
+  }
+
+  const renderTeeth = (teeth: ITooth[], width: number) => (
+    <Box
+      sx={{
+        width: `${width}px`,
+        maxWidth: '100%',
+        mx: 'auto',
+        pt: 4,
+        '&::after': {
+          content: '""',
+          display: 'block',
+          clear: 'both',
+        },
+      }}
+    >
+      {teeth.map((item, index) => (
+        <Tooth
+          key={item.toothNumber}
+          index={index}
+          data={{
+            id: item.toothNumber,
+            name: `tooth${item.toothNumber}`,
+            status: item.status,
+            faces: item.faces.map((f, i) => ({
+              id: `${item.toothNumber}face${i + 1}`,
+              name: f.position,
+              state: f.state
+            })),
+            css: getToothCssClass(item.toothNumber)
+          }}
+          toggleTooth={() => handleToggleTooth(item)}
+          setFace={(face, idx) => handleSetFace(face, idx, item)}
+        />
+      ))}
+    </Box>
+  )
 
   return (
     <div className="container">
       <main>
         {/* Auto-save indicator */}
-        <Box display="flex" justifyContent="flex-end" mb={1} width="80%">
+        <Box display="flex" justifyContent="flex-end" mb={1} width="100%">
           {saving && (
             <Chip 
               icon={<CloudUpload />} 
@@ -151,74 +211,25 @@ export const App: React.FC<AppProps> = ({ patientId }) => {
             backgroundColor: 'transparent',
             color: 'black',
             boxShadow: 'none',
-            width: '80%',
+            width: '100%',
           }}>
-            <Tabs value={selectedTab} onChange={handleTabChange}>
-              <Tab label="Adulto" />
-              <Tab label="Niño" />
-            </Tabs>
+            {showChildOdontogram && (
+              <Tabs value={selectedTab} onChange={handleTabChange}>
+                <Tab label="Adulto" />
+                <Tab label="Niño" />
+              </Tabs>
+            )}
           </AppBar>
 
-          {selectedTab === 0 && (
+          {(selectedTab === 0 || !showChildOdontogram) && (
             <TabContainer>
-              <Box
-                paddingLeft={8}
-                paddingTop={10}
-              >
-                {adultTeeth.map((item, index) => (
-                  <Tooth
-                    key={item.toothNumber}
-                    index={index}
-                    data={{
-                      id: item.toothNumber,
-                      name: `tooth${item.toothNumber}`,
-                      status: item.status,
-                      faces: item.faces.map((f, i) => ({
-                        id: `${item.toothNumber}face${i + 1}`,
-                        name: f.position,
-                        state: f.state
-                      })),
-                      css: item.toothNumber === 8 ? 'spaceRight' : 
-                           item.toothNumber === 16 ? 'noMarginRight' : undefined
-                    }}
-                    toggleTooth={() => handleToggleTooth(item)}
-                    setFace={(face, idx) => handleSetFace(face, idx, item)}
-                  />
-                ))}
-              </Box>
+              {renderTeeth(adultTeeth, 720)}
             </TabContainer>
           )}
 
-          {selectedTab === 1 && (
+          {showChildOdontogram && selectedTab === 1 && (
             <TabContainer>
-              <Box
-                paddingLeft={23}
-                paddingTop={10}
-              >
-                {childTeeth.map((item, index) => (
-                  <Tooth
-                    key={item.toothNumber}
-                    index={index}
-                    data={{
-                      id: item.toothNumber,
-                      name: `tooth${item.toothNumber}`,
-                      status: item.status,
-                      faces: item.faces.map((f, i) => ({
-                        id: `${item.toothNumber}face${i + 1}`,
-                        name: f.position,
-                        state: f.state
-                      })),
-                      css: item.toothNumber === 51 ? 'spaceRight' :
-                           item.toothNumber === 65 ? 'noMarginRight' :
-                           item.toothNumber === 85 ? 'clear' :
-                           item.toothNumber === 81 ? 'spaceRight' :
-                           item.toothNumber === 75 ? 'noMarginRight' : undefined
-                    }}
-                    toggleTooth={() => handleToggleTooth(item)}
-                    setFace={(face, idx) => handleSetFace(face, idx, item)}
-                  />
-                ))}
-              </Box>
+              {renderTeeth(childTeeth, 520)}
             </TabContainer>
           )}
         </Box>

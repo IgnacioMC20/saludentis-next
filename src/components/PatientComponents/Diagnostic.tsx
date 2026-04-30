@@ -9,6 +9,7 @@ import { showToast } from '@/utils'
 type FormData = {
   diagnosis: string
   medications: string
+  annotations: string
 }
 
 const Diagnostic = () => {
@@ -29,6 +30,7 @@ const Diagnostic = () => {
     defaultValues: {
       diagnosis: '',
       medications: '',
+      annotations: '',
     },
   })
 
@@ -38,21 +40,23 @@ const Diagnostic = () => {
       reset({
         diagnosis: patientResponse.data.diagnosis || '',
         medications: patientResponse.data.medications || '',
+        annotations: patientResponse.data.annotations || '',
       })
     }
   }, [patientResponse, reset])
 
   const onSubmit = async (data: FormData) => {
-    if (!patientId || !patientResponse?.data?.nationalId) {
+    if (!patientId) {
       showToast('ID de paciente no encontrado', 'error')
       return
     }
 
     try {
       const result = await updatePatient.mutateAsync({
-        nationalId: patientResponse.data.nationalId,
+        _id: patientId,
         diagnosis: data.diagnosis,
         medications: data.medications,
+        annotations: data.annotations,
       })
 
       if (result.ok) {
@@ -112,6 +116,25 @@ const Diagnostic = () => {
                 minRows={4}
                 error={!!errors.medications}
                 helperText={errors.medications?.message}
+              />
+            )}
+          />
+        </Grid>
+        <Grid item xs={12} paddingX={1} marginTop={2}>
+          <Typography variant="h6">Anotaciones</Typography>
+          <Controller
+            name="annotations"
+            control={control}
+            rules={{ maxLength: { value: 2000, message: 'Máximo 2000 caracteres' } }}
+            render={({ field }) => (
+              <TextField
+                {...field}
+                fullWidth
+                variant="outlined"
+                multiline
+                minRows={4}
+                error={!!errors.annotations}
+                helperText={errors.annotations?.message}
               />
             )}
           />

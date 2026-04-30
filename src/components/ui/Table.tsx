@@ -1,5 +1,6 @@
 import { EditOutlined } from '@mui/icons-material'
 import {
+    Box,
     Paper,
     TableBody,
     TableCell,
@@ -13,8 +14,9 @@ import {
     Link,
 } from '@mui/material'
 // import { useRouter } from 'next/router'
-import { ChangeEvent, useState } from 'react'
+import { ChangeEvent, useEffect, useMemo, useState } from 'react'
 
+import { TableSearch } from './TableSearch'
 import { theme } from '@/themes'
 import { getFullName } from '@/utils'
 
@@ -57,12 +59,11 @@ export const Table = ({ data, progress = false, customRowsPerPage = 10, fetchFun
     // get the last param from the url
     // const url = router.asPath.split('/').pop()
 
-    const rows = data.map((item) => {
-        return {
-            ...item
-        }
-    })
-    const columns = Object.keys(data[0]).map(key => {
+    const [searchTerm, setSearchTerm] = useState('')
+    const rows = useMemo(() => data.map((item) => ({
+        ...item
+    })), [data])
+    const columns = useMemo(() => Object.keys(data[0]).map(key => {
         return {
             id: key,
             label: key,
@@ -70,9 +71,28 @@ export const Table = ({ data, progress = false, customRowsPerPage = 10, fetchFun
             align: 'center' as 'center',
             format: (value: number) => 'Q. ' + value.toLocaleString('en-US')
         }
-    })
+    }), [data])
     const [page, setPage] = useState(0)
     const [rowsPerPage, setRowsPerPage] = useState(customRowsPerPage)
+    const filteredRows = useMemo(() => {
+        const normalizedQuery = searchTerm.trim().toLowerCase()
+
+        if (!normalizedQuery) return rows
+
+        return rows.filter((row) =>
+            Object.entries(row).some(([key, value]) => {
+                if (key === 'id' || key === 'Editar' || value == null) {
+                    return false
+                }
+
+                return String(value).toLowerCase().includes(normalizedQuery)
+            })
+        )
+    }, [rows, searchTerm])
+
+    useEffect(() => {
+        setPage(0)
+    }, [searchTerm])
 
     const handleChangePage = (event: unknown, newPage: number) => {
         setPage(newPage)
@@ -88,6 +108,13 @@ export const Table = ({ data, progress = false, customRowsPerPage = 10, fetchFun
             {
                 (
                     <>
+                        <Box>
+                            <TableSearch
+                                value={searchTerm}
+                                onChange={setSearchTerm}
+                                placeholder="Buscar tratamientos o enfermedades"
+                            />
+                        </Box>
 
                         <TableContainer sx={{ maxHeight: 500 }}>
                             <MaterialTable stickyHeader aria-label="sticky table">
@@ -131,7 +158,7 @@ export const Table = ({ data, progress = false, customRowsPerPage = 10, fetchFun
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
-                                    {rows
+                                    {filteredRows
                                         .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                                         .map((row) => {
                                             return (
@@ -150,7 +177,7 @@ export const Table = ({ data, progress = false, customRowsPerPage = 10, fetchFun
                                                 >
                                                     {columns.map((column) => {
                                                         const value = (row as { [key: string]: any })[column.id]
-                                                        const rowIndex = rows.indexOf(row) + 1
+                                                        const rowIndex = filteredRows.indexOf(row) + 1
 
                                                         if (!value) {
                                                             return (
@@ -220,7 +247,7 @@ export const Table = ({ data, progress = false, customRowsPerPage = 10, fetchFun
                         <TablePagination
                             rowsPerPageOptions={[]}
                             component="div"
-                            count={rows.length}
+                            count={filteredRows.length}
                             rowsPerPage={customRowsPerPage ? customRowsPerPage : rowsPerPage}
                             page={page}
                             onPageChange={handleChangePage}

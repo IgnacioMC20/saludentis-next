@@ -35,7 +35,7 @@ export async function getPatientById(req: NextApiRequest, res: NextApiResponse<A
     await db.connect()
 
     try {
-        const patient = await Patient.findById(id).lean()
+        const patient = await Patient.findById(id)
 
         if (!patient) {
             await db.disconnect()
@@ -45,10 +45,25 @@ export async function getPatientById(req: NextApiRequest, res: NextApiResponse<A
             })
         }
 
+        if (!patient.odontogramProfile) {
+            const birth = patient.birthDate ? new Date(patient.birthDate) : null
+            const created = patient.createdAt ? new Date(patient.createdAt) : null
+
+            if (birth && created && !Number.isNaN(birth.getTime()) && !Number.isNaN(created.getTime())) {
+                const age = created.getFullYear() - birth.getFullYear()
+                const birthdayPassed =
+                    created.getMonth() > birth.getMonth() ||
+                    (created.getMonth() === birth.getMonth() && created.getDate() >= birth.getDate())
+
+                patient.odontogramProfile = birthdayPassed ? (age >= 18 ? 'adult' : 'child') : (age - 1 >= 18 ? 'adult' : 'child')
+                await patient.save()
+            }
+        }
+
         await db.disconnect()
         return res.status(200).json({
             ok: true,
-            data: cleanResponse(patient, true),
+            data: cleanResponse(patient.toObject(), true),
             message: 'Paciente encontrado exitosamente',
         })
     } catch (error: any) {
@@ -63,4 +78,3 @@ export async function getPatientById(req: NextApiRequest, res: NextApiResponse<A
         })
     }
 }
-

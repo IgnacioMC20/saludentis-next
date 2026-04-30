@@ -1,7 +1,7 @@
 import { Box, Grid, TextField, Button, Typography, Radio, FormControlLabel, RadioGroup, FormLabel, FormControl } from '@mui/material'
 import { useRouter } from 'next/router'
 import { useEffect, useMemo, useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { Controller, useForm } from 'react-hook-form'
 
 // import { Patient } from '../../interfaces'
 import PatientFormSkeleton from './PatientInfo.Skeleton'
@@ -28,6 +28,44 @@ export type PatientFormData = {
   consultationReason: string
 }
 
+const defaultFormValues: PatientFormData = {
+  firstName: '',
+  middleName: '',
+  lastName: '',
+  nationalId: '',
+  gender: '',
+  birthDate: '',
+  address: '',
+  email: '',
+  phone: '',
+  maritalStatus: 'Soltero',
+  occupation: '',
+  guardianName: '',
+  guardianPhone: '',
+  lastVisit: '',
+  lastTreatment: '',
+  consultationReason: '',
+}
+
+const formatDateForInput = (value?: string | Date) => {
+  if (!value) return ''
+
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return ''
+
+  return date.toISOString().split('T')[0]
+}
+
+const normalizePatientFormData = (patientData: Partial<PatientFormData> & { birthDate?: string | Date, lastVisit?: string | Date }) => ({
+  ...defaultFormValues,
+  ...patientData,
+  nationalId: patientData.nationalId || '',
+  gender: patientData.gender || '',
+  maritalStatus: patientData.maritalStatus || 'Soltero',
+  birthDate: formatDateForInput(patientData.birthDate),
+  lastVisit: formatDateForInput(patientData.lastVisit),
+})
+
 export default function PacientInfo() {
 
   const router = useRouter()
@@ -41,24 +79,8 @@ export default function PacientInfo() {
     return response?.ok ? response.data : null
   }, [response, isLoading])
 
-  const { register, handleSubmit, watch, reset, formState: { errors } } = useForm<PatientFormData>({
-    defaultValues: {
-      firstName: '',
-      middleName: '',
-      lastName: '',
-      nationalId: '',
-      birthDate: '',
-      address: '',
-      email: '',
-      phone: '',
-      maritalStatus: 'Soltero',
-      occupation: '',
-      guardianName: '',
-      guardianPhone: '',
-      lastVisit: '',
-      lastTreatment: '',
-      consultationReason: '',
-    },
+  const { register, control, handleSubmit, watch, reset, formState: { errors } } = useForm<PatientFormData>({
+    defaultValues: defaultFormValues,
   })
 
   const guardianName = watch('guardianName')
@@ -67,7 +89,7 @@ export default function PacientInfo() {
 
   useEffect(() => {
     if (patientData) {
-      reset(patientData)
+      reset(normalizePatientFormData(patientData))
     }
   }, [patientData, reset])
 
@@ -76,11 +98,15 @@ export default function PacientInfo() {
   }, [birthDate])
 
   const onSubmitForm = async (patientData: PatientFormData) => {
+    const payload = {
+      ...patientData,
+      ...(isEditEnabled ? { _id: id as string } : {}),
+    }
 
     const response = await saludentisApi({
       url: '/patient',
       method: isEditEnabled ? 'PUT' : 'POST',
-      data: patientData
+      data: payload
     })
 
     const { ok, message, data } = await response.json()
@@ -146,11 +172,7 @@ export default function PacientInfo() {
               variant='outlined'
               placeholder='Ingrese el CUI/DPI del paciente'
               {...register('nationalId', {
-                required: 'Este campo es requerido',
-                pattern: {
-                  value: /^[0-9]+$/,
-                  message: 'Solo se permiten números del 0 al 9',
-                },
+                validate: (value) => !value || /^[0-9]+$/.test(value) || 'Solo se permiten números del 0 al 9',
               })}
               error={!!errors.nationalId}
               helperText={errors.nationalId?.message}
@@ -161,10 +183,16 @@ export default function PacientInfo() {
           <Grid item xs={12} sm={6}>
             <FormControl component='fieldset'>
               <FormLabel component='legend'>Sexo</FormLabel>
-              <RadioGroup row {...register('gender')}>
-                <FormControlLabel value='Masculino' control={<Radio />} label='Masculino' />
-                <FormControlLabel value='Femenino' control={<Radio />} label='Femenino' />
-              </RadioGroup>
+              <Controller
+                name='gender'
+                control={control}
+                render={({ field }) => (
+                  <RadioGroup row value={field.value || ''} onChange={(_, value) => field.onChange(value)}>
+                    <FormControlLabel value='Masculino' control={<Radio />} label='Masculino' />
+                    <FormControlLabel value='Femenino' control={<Radio />} label='Femenino' />
+                  </RadioGroup>
+                )}
+              />
             </FormControl>
           </Grid>
 
@@ -245,13 +273,19 @@ export default function PacientInfo() {
           <Grid item xs={12}>
             <FormControl component='fieldset'>
               <FormLabel component='legend'>Estado Civil</FormLabel>
-              <RadioGroup row {...register('maritalStatus')}>
-                <FormControlLabel value='Soltero' control={<Radio />} label='Soltero' />
-                <FormControlLabel value='Casado' control={<Radio />} label='Casado' />
-                <FormControlLabel value='Divorciado' control={<Radio />} label='Divorciado' />
-                <FormControlLabel value='Separado' control={<Radio />} label='Separado' />
-                <FormControlLabel value='Unido' control={<Radio />} label='Unido' />
-              </RadioGroup>
+              <Controller
+                name='maritalStatus'
+                control={control}
+                render={({ field }) => (
+                  <RadioGroup row value={field.value || 'Soltero'} onChange={(_, value) => field.onChange(value)}>
+                    <FormControlLabel value='Soltero' control={<Radio />} label='Soltero' />
+                    <FormControlLabel value='Casado' control={<Radio />} label='Casado' />
+                    <FormControlLabel value='Divorciado' control={<Radio />} label='Divorciado' />
+                    <FormControlLabel value='Separado' control={<Radio />} label='Separado' />
+                    <FormControlLabel value='Unido' control={<Radio />} label='Unido' />
+                  </RadioGroup>
+                )}
+              />
             </FormControl>
           </Grid>
 
