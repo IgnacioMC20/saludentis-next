@@ -103,24 +103,32 @@ export default function PacientInfo() {
       ...(isEditEnabled ? { _id: id as string } : {}),
     }
 
-    const response = await saludentisApi({
-      url: '/patient',
-      method: isEditEnabled ? 'PUT' : 'POST',
-      data: payload
-    })
+    try {
+      const response = await saludentisApi({
+        url: '/patient',
+        method: isEditEnabled ? 'PUT' : 'POST',
+        data: payload
+      })
 
-    const { ok, message, data } = await response.json()
+      const { ok, message, data } = await response.json()
 
-    if (!ok) showToast(message, 'error')
-    else {
-      showToast(message, 'success')
-      router.push(`/paciente/${data._id}`)
+      if (!ok) showToast(message, 'error')
+      else {
+        showToast(message, 'success')
+        router.push(`/paciente/${data._id}`)
+      }
+    } catch (error) {
+      showToast('Error al guardar el paciente', 'error')
     }
+  }
+
+  const onInvalidForm = () => {
+    showToast('Completa los campos requeridos para guardar el paciente', 'warning')
   }
 
   return (isLoading ? <PatientFormSkeleton /> : (
     <Box sx={{ flexGrow: 1, p: 0 }}>
-      <form onSubmit={handleSubmit(onSubmitForm)} noValidate>
+      <form onSubmit={handleSubmit(onSubmitForm, onInvalidForm)} noValidate>
         <Grid container spacing={2}>
           {/* Nombre */}
           <Grid item xs={12} sm={6}>

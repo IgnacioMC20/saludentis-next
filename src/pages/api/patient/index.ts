@@ -29,11 +29,30 @@ export default function (req: NextApiRequest, res: NextApiResponse<ApiResponse>)
 
     const normalizePatientData = (patientData: IPatient) => {
         const nationalId = patientData.nationalId?.trim()
-
-        return {
+        const normalizedData: any = {
             ...patientData,
             nationalId: nationalId || undefined,
         }
+
+        if (!normalizedData.nationalId) {
+            delete normalizedData.nationalId
+        }
+
+        if (!normalizedData.lastVisit) {
+            delete normalizedData.lastVisit
+        }
+
+        if (!normalizedData.birthDate) {
+            delete normalizedData.birthDate
+        }
+
+        if (normalizedData.phone === '' || normalizedData.phone === undefined || normalizedData.phone === null) {
+            delete normalizedData.phone
+        } else {
+            normalizedData.phone = Number(normalizedData.phone)
+        }
+
+        return normalizedData as IPatient
     }
 
     const getOdontogramProfile = (
