@@ -92,8 +92,6 @@ const odontogramSchema = new Schema<IOdontogram>({
     timestamps: true // Automatically adds createdAt and updatedAt
 })
 
-// Indexes for better query performance
-odontogramSchema.index({ patientId: 1 })
 odontogramSchema.index({ updatedAt: -1 })
 
 // Model for Odontogram
