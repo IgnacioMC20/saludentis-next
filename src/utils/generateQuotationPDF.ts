@@ -33,12 +33,22 @@ export const generateQuotationPDF = (data: QuotationPDFData): void => {
 
     // Configuration
     const pageWidth = doc.internal.pageSize.getWidth()
+    const pageHeight = doc.internal.pageSize.getHeight()
     const margin = 20
+    const footerY = pageHeight - 20
+    const contentBottomY = footerY - 12
     let yPosition = 20
 
     // Colors
     const primaryColor: [number, number, number] = [41, 128, 185] // Blue
     const secondaryColor: [number, number, number] = [52, 73, 94] // Dark gray
+
+    const ensureSpace = (requiredHeight: number) => {
+        if (yPosition + requiredHeight > contentBottomY) {
+            doc.addPage()
+            yPosition = margin
+        }
+    }
 
     // 1. Header - Company Name
     doc.setFontSize(24)
@@ -127,10 +137,11 @@ export const generateQuotationPDF = (data: QuotationPDFData): void => {
         }
     })
 
-    // Get final Y position after table
-    yPosition = (doc as any).lastAutoTable.finalY + 10
+    // Get final Y position after table. autoTable paginates long treatment lists.
+    yPosition = ((doc as any).lastAutoTable?.finalY || yPosition) + 10
 
     // 6. Total
+    ensureSpace(18)
     doc.setFontSize(14)
     doc.setFont('helvetica', 'bold')
     doc.setTextColor(...primaryColor)
@@ -143,6 +154,7 @@ export const generateQuotationPDF = (data: QuotationPDFData): void => {
 
     // 7. Annotations (if any)
     if (quotation.annotations && quotation.annotations.trim()) {
+        ensureSpace(16)
         doc.setFontSize(12)
         doc.setFont('helvetica', 'bold')
         doc.setTextColor(...secondaryColor)
@@ -156,14 +168,16 @@ export const generateQuotationPDF = (data: QuotationPDFData): void => {
         const maxWidth = pageWidth - (2 * margin)
         const annotationLines = doc.splitTextToSize(quotation.annotations, maxWidth)
         
-        doc.text(annotationLines, margin, yPosition)
-        yPosition += (annotationLines.length * 5) + 10
+        annotationLines.forEach((line: string) => {
+            ensureSpace(5)
+            doc.text(line, margin, yPosition)
+            yPosition += 5
+        })
+
+        yPosition += 10
     }
 
     // 8. Footer
-    const pageHeight = doc.internal.pageSize.getHeight()
-    const footerY = pageHeight - 20
-
     doc.setDrawColor(...primaryColor)
     doc.setLineWidth(0.5)
     doc.line(margin, footerY - 5, pageWidth - margin, footerY - 5)

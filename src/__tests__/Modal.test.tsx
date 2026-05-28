@@ -1,6 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 
-import { Modal } from '@/components'
+import { Modal } from '@/components/ui/Modal'
 
 describe('Modal Component', () => {
     const handleClose = jest.fn()
@@ -33,5 +33,14 @@ describe('Modal Component', () => {
     it('displays the children correctly', () => {
         renderModal(true, <div>Some content</div>)
         expect(screen.getByText('Some content')).toBeInTheDocument()
+    })
+
+    it('keeps long content inside a scrollable modal body', () => {
+        renderModal(true, <div style={{ height: '1600px' }}>Long Modal Content</div>)
+
+        const scrollContainer = screen.getByTestId('modal-scroll-container')
+        expect(scrollContainer).toHaveStyle({ overflowY: 'auto' })
+        expect(scrollContainer).toHaveStyle({ maxHeight: 'calc(100dvh - 32px)' })
+        expect(screen.getByText('Long Modal Content')).toBeInTheDocument()
     })
 })

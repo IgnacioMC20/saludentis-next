@@ -1,6 +1,4 @@
-import mongoose from 'mongoose'
-
-import Patient from '../src/models/Patient'
+import mongoose, { Model, Schema } from 'mongoose'
 
 type OdontogramProfile = 'adult' | 'child'
 
@@ -11,6 +9,29 @@ type MigrationStats = {
   alreadyNormalized: number
   duplicatePlaceholderNationalIds: number
 }
+
+type PatientDoc = {
+  _id: mongoose.Types.ObjectId
+  birthDate?: Date | string
+  createdAt?: Date | string
+  odontogramProfile?: OdontogramProfile
+  nationalId?: string
+}
+
+const patientSchema = new Schema<PatientDoc>(
+  {
+    birthDate: { type: Date },
+    createdAt: { type: Date },
+    nationalId: { type: String, trim: true, unique: true, sparse: true },
+    odontogramProfile: { type: String, enum: ['adult', 'child'] },
+  },
+  {
+    collection: 'patients',
+    strict: false,
+  }
+)
+
+const Patient = (mongoose.models.Patient as Model<PatientDoc>) || mongoose.model<PatientDoc>('Patient', patientSchema)
 
 const args = new Set(process.argv.slice(2))
 const shouldApply = args.has('--apply')
